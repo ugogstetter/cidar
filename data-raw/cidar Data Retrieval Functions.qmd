@@ -1,0 +1,441 @@
+---
+title: "cidar Data Retrieval Functions"
+format: pdf
+editor: source
+---
+
+NOTE TO SELF: when the user inputs specific GEOIDs or states, I should prob select them from inside the data retrieval functions so the functions take less long to run
+
+```{r}
+library(tidyverse)
+
+census_api_key <- "34df405496a792f31bd4cf10741ff37e850c3ab0"
+
+bea_api_key <- "AF80D6BD-7CBC-4ABE-84A8-0AE6078B9C6A"
+```
+
+```{r}
+# possible vars values include unemployment, high-skill employment, median family income, poverty, and housing vacancy
+# seems like it always retrieves the ACS 5-year estimates for county and for CBSA?
+
+census_retrieval <- function(vars, yrs, geog) {
+  
+  library(tidycensus)
+  census_api_key(census_api_key)
+  
+  if (!identical(vars, c("poverty")) & !identical(vars, c("housing vacancy")) & !identical(vars, c("poverty", "housing vacancy")) & !identical(vars, c("housing vacancy", "poverty"))) {
+
+  variables <- c()
+  
+  if ("unemployment" %in% vars) {
+    
+    # retrieves percent of civilian labor force aged 16+ that is unemployed
+    variables <- c(variables, "DP03_0005P") }
+  
+  if ("high-skill employment" %in% vars) {
+    
+    # retrieves percent of civilian employed population aged 16+ in management, professional, and related occupations
+    variables <- c(variables, "DP03_0027P")}
+  
+  if ("median family income" %in% vars) {
+    
+    # retrieves median family income
+    variables <- c(variables, "DP03_0087E")}
+  
+  census_data <- get_acs(geography = geog, 
+              variables = variables, 
+              year = yrs[1]) |>
+    mutate(year = yrs[1])
+  
+  if (length(yrs) > 1) {
+    
+      for (x in yrs[-1]) {
+        
+        census_data_1 <- get_acs(geography = geog, variables = variables, year = x) |>
+          mutate(year = x)
+        
+        census_data <- rbind(census_data, census_data_1)
+    
+      }}
+  
+  census_data <- census_data |>
+          mutate(variable = case_when(variable == "DP03_0005P" ~ "unemployment",
+                                       variable == "DP03_0027P" ~ "high-skill employment",
+                                       variable == "DP03_0087" ~ "median family income"))
+  
+  }
+  
+  if ("poverty" %in% vars) {
+    
+    census_data_poverty <- get_acs(geography = geog, 
+              variables = c(below_100 = "B06012_002", at_above_150 = "B06012_004", total = "B06012_001"), year = yrs[1]) |>
+      mutate(year = yrs[1])
+    
+      if (length(yrs) > 1) {
+    
+      for (x in yrs[-1]) {
+        
+        census_data_poverty_1 <- get_acs(geography = geog, variables = c(below_100 = "B06012_002", at_above_150 = "B06012_004", total = "B06012_001"), year = x) |>
+          mutate(year = x)
+        
+        census_data_poverty <- rbind(census_data_poverty, census_data_poverty_1)
+    
+      }}
+
+# computes percent of population whose income in the past 12 months was below 100% and below 150% of the poverty level
+# check that I calculated the margin of error percentages correctly -> I might need to instead use the moe_ratio and similar functions from tidycensus
+census_data_poverty <- census_data_poverty |>
+  pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
+  mutate(below_150_percent_poverty_level.estimate = round(((estimate_total - estimate_at_above_150)/estimate_total)*100, 2)) |>
+  mutate(below_100_percent_poverty_level.estimate = round((estimate_below_100/estimate_total)*100, 2)) |>
+  mutate(below_150_percent_poverty_level.moe = round((moe_at_above_150/estimate_total)*100, 2)) |>
+  mutate(below_100_percent_poverty_level.moe = round((moe_below_100/estimate_total)*100, 2)) |>
+  select(c(GEOID, NAME, year,  below_150_percent_poverty_level.estimate, below_100_percent_poverty_level.estimate, below_150_percent_poverty_level.moe, below_100_percent_poverty_level.moe)) |>
+  pivot_longer(cols = below_150_percent_poverty_level.estimate:below_100_percent_poverty_level.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
+  pivot_wider(names_from = estimate_moe, values_from = percent)
+
+if (identical(vars, c("poverty"))) {census_data <- census_data_poverty} else {
+census_data <- rbind(census_data, census_data_poverty)}
+    
+  }
+  
+    if ("housing vacancy" %in% vars) {
+    
+    census_data_vacancy <- get_acs(geography = geog, variables = c(vacant = "B25002_003", total = "B25002_001"), year = yrs[1]) |>
+      mutate(year = yrs[1])
+    
+      if (length(yrs) > 1) {
+    
+      for (x in yrs[-1]) {
+        
+        census_data_vacancy_1 <- get_acs(geography = geog, variables = c(vacant = "B25002_003", total = "B25002_001"), year = x) |>
+          mutate(year = x)
+        
+        census_data_vacancy <- rbind(census_data_vacancy, census_data_vacancy_1)
+    
+      }}
+
+# computes percent of housing units vacant
+# prob make sure there isn't an easier way to retrieve this
+# check that I calculated the margin of error percentages correctly -> I might need to instead use the moe_ratio and similar functions from tidycensus
+census_data_vacancy <- census_data_vacancy |>
+  pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
+  mutate(housing_vacancy.estimate = round((estimate_vacant/estimate_total)*100, 2)) |>
+  mutate(housing_vacancy.moe = round((moe_vacant/estimate_total)*100, 2)) |>
+  select(c(GEOID, NAME, year, housing_vacancy.estimate, housing_vacancy.moe)) |>
+  pivot_longer(cols = housing_vacancy.estimate:housing_vacancy.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
+  pivot_wider(names_from = estimate_moe, values_from = percent)
+
+if (identical(vars, c("housing vacancy"))) {census_data <- census_data_vacancy} else {
+census_data <- rbind(census_data, census_data_vacancy)}
+    
+  }
+  
+  census_data <- census_data |>
+    select(!NAME)
+  
+  return(census_data)}
+```
+
+```{r}
+bea_retrieval <- function(yrs, geog) {
+  
+  library(bea.R)
+  
+  if (geog == "county") {
+
+    # U.S. county GDP over time
+    
+    userSpecList <- list('UserID' = bea_api_key,
+    'Method' = 'GetData',
+    'datasetname' = 'Regional',
+    'TableName' = 'CAGDP1',
+    'LineCode' = 1,
+    'GeoFips' = 'COUNTY',
+    'Year' = 'ALL')
+    
+    county_GDP <- beaGet(userSpecList, asTable = TRUE)|>
+      pivot_longer(cols = DataValue_2001:DataValue_2023, names_to = "year", values_to = "gdp") |>
+      mutate(year = as.numeric(substr(year, 11, 14))) |>
+      mutate(gdp = gdp*1000) |>
+      select(GeoFips, gdp, year)
+    # resulting gdp variable is in chained 2017 dollars
+    
+    
+    # U.S. county population over time
+    
+    userSpecList <- list('UserID' = bea_api_key,
+    'Method' = 'GetData',
+    'datasetname' = 'Regional',
+    'TableName' = 'CAINC1',
+    'LineCode' = 2,
+    'GeoFips' = 'COUNTY',
+    'Year' = '2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023')
+    
+    county_population <- beaGet(userSpecList, asTable = TRUE) |>
+      pivot_longer(cols = DataValue_2001:DataValue_2023, names_to = "year", values_to = "population") |>
+      mutate(year = as.numeric(substr(year, 11, 14))) |>
+      select(GeoFips, population, year, GeoName)
+    
+    
+    # U.S. county GDP per capita over time
+    
+    bea_data <- inner_join(county_GDP, county_population, by = c("GeoFips", "year")) |>
+      mutate(estimate = gdp/population) |>
+      mutate(moe = NA) |>
+      mutate(variable = "GDP per capita") |>
+      rename(GEOID = GeoFips) |>
+      select(c(GEOID, variable, estimate, moe, year)) |>
+      filter(year %in% yrs)}
+  
+  if (geog == "cbsa") {
+    
+    # U.S. MSA GDP over time
+    
+    userSpecList <- list('UserID' = bea_api_key,
+    'Method' = 'GetData',
+    'datasetname' = 'Regional',
+    'TableName' = 'CAGDP1',
+    'LineCode' = 1,
+    'GeoFips' = 'MSA',
+    'Year' = 'ALL')
+    
+    msa_GDP <- beaGet(userSpecList, asTable = TRUE) |>
+      pivot_longer(cols = DataValue_2001:DataValue_2023, names_to = "year", values_to = "gdp") |>
+      mutate(year = as.numeric(substr(year, 11, 14))) |>
+      mutate(gdp = gdp*1000) |>
+      select(GeoFips, gdp, year)
+    # resulting gdp variable is in chained 2017 dollars
+    
+    
+    # U.S. MSA population over time
+    
+    userSpecList <- list('UserID' = bea_api_key,
+    'Method' = 'GetData',
+    'datasetname' = 'Regional',
+    'TableName' = 'CAINC1',
+    'LineCode' = 2,
+    'GeoFips' = 'MSA',
+    'Year' = '2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023')
+    
+    msa_population <- beaGet(userSpecList, asTable = TRUE) |>
+      pivot_longer(cols = DataValue_2001:DataValue_2023, names_to = "year", values_to = "population") |>
+      mutate(year = as.numeric(substr(year, 11, 14))) |>
+      select(GeoFips, population, year, GeoName)
+    
+    
+    # U.S. MSA GDP per capita over time
+    
+    bea_data <- inner_join(msa_GDP, msa_population, by = c("GeoFips", "year")) |>
+      filter(GeoName != "United States (Metropolitan Portion)") |>
+          mutate(estimate = gdp/population) |>
+          mutate(moe = NA) |>
+          mutate(variable = "GDP per capita") |>
+          rename(GEOID = GeoFips) |>
+          select(c(GEOID, variable, estimate, moe, year)) |>
+          filter(year %in% yrs)}
+  
+  return(bea_data)}
+```
+
+```{r}
+# should I be concerned that some counties don't seem to have many days with AQI? (see column in original datasets)
+# the value of geog can be either "county" or "cbsa"
+
+aqi_retrieval <- function(yrs, geog) {
+  
+  if (geog == "county") {
+    
+    temp <- tempfile()
+  
+    download.file(paste0("https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_county_", as.character(yrs[1]), ".zip"), temp)
+    
+    temp2 <- tempfile()
+  
+    aqi_data <- read.csv(unzip(temp, exdir = temp2)) |>
+    select(c(State, County, Year, Median.AQI))
+  
+    unlink(temp)
+    
+    unlink(temp2)
+  
+    if (length(yrs) > 1) {
+    
+      for (x in yrs[-1]) {
+    
+      temp <- tempfile()
+  
+      download.file(paste0("https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_county_", as.character(x), ".zip"), temp)
+      
+      temp2 <- tempfile()
+  
+      aqi_data_1 <- read.csv(unzip(temp, exdir = temp2)) |>
+      select(c(State, County, Year, Median.AQI))
+  
+      unlink(temp)
+      
+      unlink(temp2)
+    
+      aqi_data <- rbind(aqi_data, aqi_data_1)
+    
+      }}
+    
+    aqi_data <- aqi_data |>
+      rename(year = Year, estimate = Median.AQI) |>
+      mutate(moe = NA) |>
+      mutate(variable = "median AQI") |>
+      mutate(county_state = paste0(County, ", ", State)) |>
+      select(!c(County, State))
+    
+    temp <- tempfile()
+  
+      download.file("https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip", temp)
+      
+      temp2 <- tempfile()
+  
+      # matches the GEOIDs in this spreadsheet, also from the EPA, to counties in the counties AQI dataset, matching on county and state name
+      aqs_monitors <- read.csv(unzip(temp, exdir = temp2)) |>
+  select(State.Code, County.Code, State.Name, County.Name) |>
+  distinct() |>
+  mutate(County.Code = sprintf("%03d", County.Code)) |>
+  mutate(GEOID = paste0(State.Code, County.Code)) |>
+  mutate(county_state = paste0(County.Name, ", ", State.Name)) |>
+  select(c(GEOID, county_state))
+  
+      unlink(temp)
+      
+      unlink(temp2)
+      
+      aqi_data <- inner_join(aqi_data, aqs_monitors, by = join_by(county_state)) |>
+        select(!county_state)
+    
+    } 
+  
+  if (geog == "cbsa") {
+        
+            temp <- tempfile()
+  
+    download.file(paste0("https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_cbsa_", as.character(yrs[1]), ".zip"), temp)
+    
+    temp2 <- tempfile()
+  
+    aqi_data <- read.csv(unzip(temp, exdir = temp2)) |>
+    select(c(CBSA, CBSA.Code, Year, Median.AQI))
+  
+    unlink(temp)
+    
+    unlink(temp2)
+  
+    if (length(yrs) > 1) {
+    
+      for (x in yrs[-1]) {
+    
+      temp <- tempfile()
+  
+      download.file(paste0("https://aqs.epa.gov/aqsweb/airdata/annual_aqi_by_cbsa_", as.character(x), ".zip"), temp)
+  
+      temp2 <- tempfile()
+      
+      aqi_data_1 <- read.csv(unzip(temp, exdir = temp2)) |>
+      select(c(CBSA, CBSA.Code, Year, Median.AQI))
+  
+      unlink(temp)
+      
+      unlink(temp2)
+    
+      aqi_data <- rbind(aqi_data, aqi_data_1)
+    
+      }}
+    
+    aqi_data <- aqi_data |>
+      rename(GEOID = CBSA.Code, year = Year, estimate = Median.AQI) |>
+      mutate(moe = NA) |>
+      mutate(variable = "median AQI")
+    }
+  
+  return(aqi_data)}
+```
+
+```{r}
+# possible vars values include unemployment, high-skill employment, median family income, poverty, housing vacancy, GDP per capita, and median AQI (can combine multiple of these into a vector)
+# the default value for yrs is all possible years, or can specify the years desired
+# possible geog values include county and cbsa (can only use ONE)
+# state can either be null or, for county but NOT cbsa, be a vector of state abbreviations to filter to
+# geoselect can either be null or be a vector of county or CBSA (depending on whether geog is county or cbsa) values to filter to
+
+retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL) {
+  
+  # creating an empty numeric vector for use in ensuring years included in a given dataset are provided
+  empty_vector <- as.numeric(c())
+
+  # creating an empty dataframe with column names for use when rbind-ing datasets together
+  empty_df <- data.frame(matrix(nrow = 0, ncol = 4))
+  colnames(empty_df) = c("GEOID", "variable", "estimate", "moe")
+  
+  
+  # filtering based on the availability of ACS data for counties and CBSAs (which seems to always be 5-year)
+  census_yrs <- yrs[yrs >= 2009 & yrs <= 2023]
+  
+  if (("unemployment" %in% vars | "high-skill employment" %in% vars | "median family income" %in% vars | "poverty" %in% vars | "housing vacancy" %in% vars) &  !identical(census_yrs, empty_vector)) {
+    
+    census_vars <- vars[vars %in% c("unemployment", "high-skill employment", "median family income", "poverty", "housing vacancy")]
+    
+    census_data <- census_retrieval(vars = census_vars, yrs = census_yrs, geog = geog)
+  } else {census_data <- empty_df}
+  
+  
+    bea_yrs <- yrs[yrs >= 2001 & yrs <= 2023]
+  
+  if ("GDP per capita" %in% vars & !identical(bea_yrs, empty_vector)) {
+    
+    bea_data <- bea_retrieval(yrs = bea_yrs, geog = geog)
+  } else {bea_data <- empty_df}
+  
+    
+    aqi_yrs <- yrs[yrs >= 1980 & yrs <= 2024]
+    
+  if ("median AQI" %in% vars & !identical(aqi_yrs, empty_vector)) {
+    
+    aqi_data <- aqi_retrieval(yrs = aqi_yrs, geog = geog)
+  } else {aqi_data <- empty_df}
+  
+  data_all <- rbind(census_data, bea_data, aqi_data)
+  
+  
+  # retrieving county/CBSA names to join with data
+  library(tidycensus)
+  census_api_key(census_api_key)
+  if (geog == "county") {
+  geog_county <- fips_codes |>
+    mutate(GEOID = paste0(state_code, county_code)) |>
+    mutate(county = paste0(county, ", ", state_name)) |>
+    rename(state_abbr = state) |>
+    select(c(GEOID, county, state_abbr))
+  
+  data_all <- inner_join(data_all, geog_county, by = join_by(GEOID))
+  
+  if (!is.null(state)) {
+    
+    data_all <- data_all |>
+      filter(state_abbr %in% state)
+  }}
+  
+  if (geog == "cbsa") {
+  geog_cbsa <- get_acs(geography = "cbsa", variables = "DP03_0005P", year = 2023) |>
+    select(c(GEOID, NAME)) |>
+    rename(cbsa = NAME) |>
+    distinct()
+  
+  data_all <- inner_join(data_all, geog_cbsa, by = join_by(GEOID))}
+  
+  if (!is.null(geoselect)) {
+    
+    data_all <- data_all |>
+      filter(GEOID %in% geoselect)
+  }
+  
+  return(data_all)
+}
+```
+
+
