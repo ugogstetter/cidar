@@ -160,7 +160,7 @@ census_retrieval <- function(vars, yrs, geog) {
       if ((length(yrs_early) == 0) & (length(yrs_late) > 0)) {census_data_age_ratio <- census_data_age_ratio_late}
       
       census_data_age_ratio <- census_data_age_ratio |>
-        dplyr::mutate(type = "ratio (of people age 65+ per 100 people age 18–64)")
+        dplyr::mutate(type = "ratio (of people age 65+ per 100 people age 18-64)")
     
       
     if (census_present == FALSE) {census_data <- census_data_age_ratio
