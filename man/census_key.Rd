@@ -10,5 +10,6 @@ census_key(key)
 \item{key}{Supply your Census Bureau API key.}
 }
 \description{
-If you haven't yet registered for a Census Bureau API key, follow the instructions at https://api.census.gov/data/key_signup.html.
+If you haven't yet registered for a Census Bureau API key,
+follow the instructions at https://api.census.gov/data/key_signup.html.
 }

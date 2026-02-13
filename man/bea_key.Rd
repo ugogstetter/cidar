@@ -10,5 +10,6 @@ bea_key(key)
 \item{key}{Supply your Bureau of Economic Analysis API key.}
 }
 \description{
-If you haven't yet registered for a Bureau of Economic Analysis API key, follow the instructions at http://www.bea.gov/API/signup/index.cfm.
+If you haven't yet registered for a Bureau of Economic Analysis
+API key, follow the instructions at http://www.bea.gov/API/signup/index.cfm.
 }

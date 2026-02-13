@@ -7,20 +7,47 @@
 retrieve_data(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL)
 }
 \arguments{
-\item{vars}{Supply a vector of variables to request. Available variables include: unemployment, high-skill employment, median family income, poverty, old-age dependency ratio, housing vacancy, GDP per capita, median AQI. Some variables cannot be retrieved without first registering for an API key for the corresponding data source and supplying the API key in R (see notes below).
+\item{vars}{Supply a vector of variables to request. Available variables
+include: \code{"unemployment"}, \code{"high-skill employment"},
+\code{"median family income"}, \code{"poverty"}, \code{"old-age dependency ratio"},
+\code{"housing vacancy"}, \code{"Gini index"}, \code{"median home value"},
+\code{"median gross rent"}, \code{"households without vehicle"},
+\code{"households with broadband"}, \code{"homeownership"}, \code{"single-parent families"},
+\code{"public transport commutes"}, \code{"mean commute time"},
+\code{"GDP per capita"}, \code{"median AQI"}, \code{"unhealthy air days"}. Some variables
+cannot be retrieved without first registering for an API key for the
+corresponding data source and supplying the API key in R (see notes below).
 \itemize{
-\item Variables requiring a U.S. Census Bureau API key: unemployment, high-skill employment, median family income, poverty, old-age dependency ratio, housing vacancy. To retrieve these variables, first establish a Census Bureau API key by following the instructions for \code{\link[=census_key]{census_key()}}.
-\item Variables requiring a U.S. Bureau of Economic Analysis API key: GDP per capita. To retrieve these variables, first establish a Bureau of Economic Analysis API key by following the instructions for \code{\link[=bea_key]{bea_key()}}.
+\item Variables requiring a U.S. Census Bureau API key: \code{"unemployment"},
+\code{"high-skill employment"}, \code{"median family income"}, \code{"poverty"},
+\code{"old-age dependency ratio"}, \code{"housing vacancy"}, \code{"Gini index"},
+\code{"median home value"}, \code{"median gross rent"}, \code{"households without vehicle"},
+\code{"households with broadband"}, \code{"homeownership"},
+\code{"single-parent families"}, \code{"public transport commutes"},
+\code{"mean commute time"}. To retrieve these variables, first establish a Census
+Bureau API key by following the instructions for \code{\link[=census_key]{census_key()}}.
+\item Variables requiring a U.S. Bureau of Economic Analysis API key:
+\code{"GDP per capita"}. To retrieve these variables, first establish a Bureau of
+Economic Analysis API key by following the instructions for \code{\link[=bea_key]{bea_key()}}.
 }}
 
-\item{yrs}{Supply a year or range of years. If no value is supplied, will default to the largest possible range of years across which data is available on at least one of the selected variables.}
+\item{yrs}{Supply a year or range of years. If no value is supplied, will
+default to the largest possible range of years across which data is available
+on at least one of the selected variables.}
 
-\item{geog}{Specify either "county" or "cbsa".}
+\item{geog}{Specify either \code{county} or \code{cbsa}.}
 
-\item{state}{Optionally (ONLY if geog is set to "county"), supply a vector of state abbreviations for filter to. By default, all possible values will be returned by the function.}
+\item{state}{Optionally (ONLY if \code{geog} is set to \code{county}), supply a vector
+of state abbreviations for filter to. By default, all possible values will
+be returned by the function.}
 
-\item{geoselect}{Optionally, supply a vector of county or CBSA (depending on whether geog is set to "county" or "cbsa") GEOIDs to filter to. By default, all possible values will be returned by the function.}
+\item{geoselect}{Optionally, supply a vector of county or CBSA (depending on
+whether \code{geog} is set to \code{county} or \code{cbsa}) GEOIDs to filter to. By
+default, all possible values will be returned by the function.}
 }
 \description{
-Retrieves data from sources such as the Census Bureau, Bureau of Economic Analysis, and Environmental Protection Agency. User specifies variables, timeframe, and geographic region of data to retrieve. Function will return a dataframe combining all variables requested.
+Retrieves data from sources such as the Census Bureau, Bureau of
+Economic Analysis, and Environmental Protection Agency. User specifies
+variables, timeframe, and geographic region of data to retrieve. Function
+will return a dataframe combining all variables requested.
 }
