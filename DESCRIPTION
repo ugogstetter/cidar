@@ -12,4 +12,7 @@ Imports:
     bea.R,
     dplyr,
     tidycensus,
-    tidyr
+    tidyr,
+    readxl,
+    traveltimeR,
+    sf

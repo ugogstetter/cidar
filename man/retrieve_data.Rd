@@ -25,25 +25,29 @@ corresponding data source and supplying the API key in R (see notes below).
 \code{"households with broadband"}, \code{"homeownership"},
 \code{"single-parent families"}, \code{"public transport commutes"},
 \code{"mean commute time"}. To retrieve these variables, first establish a Census
-Bureau API key by following the instructions for \code{\link[=census_key]{census_key()}}.
+Bureau API key by following the instructions for \code{\link[=census_key]{census_key()}}. Retrieval
+will be performed using the tidycensus package.
 \item Variables requiring a U.S. Bureau of Economic Analysis API key:
 \code{"GDP per capita"}. To retrieve these variables, first establish a Bureau of
 Economic Analysis API key by following the instructions for \code{\link[=bea_key]{bea_key()}}.
+Retrieval will be performed using the bea.R package.
 }}
 
 \item{yrs}{Supply a year or range of years. If no value is supplied, will
 default to the largest possible range of years across which data is available
 on at least one of the selected variables.}
 
-\item{geog}{Specify either \code{county} or \code{cbsa}.}
+\item{geog}{Specify either \code{"county"} or \code{"cbsa"}.}
 
-\item{state}{Optionally (ONLY if \code{geog} is set to \code{county}), supply a vector
-of state abbreviations for filter to. By default, all possible values will
+\item{state}{Optionally (ONLY if \code{geog} is set to \code{"county"}), supply a vector
+of state abbreviations to filter to. By default, all possible values will
 be returned by the function.}
 
 \item{geoselect}{Optionally, supply a vector of county or CBSA (depending on
-whether \code{geog} is set to \code{county} or \code{cbsa}) GEOIDs to filter to. By
-default, all possible values will be returned by the function.}
+whether \code{geog} is set to \code{"county"} or \code{"cbsa"}) GEOIDs to filter to. By
+default, all possible values will be returned by the function. To determine
+the corresponding GEOID for a particular county or CBSA, use
+\code{\link[=county_geoids]{county_geoids()}} or \code{\link[=cbsa_geoids]{cbsa_geoids()}}, respectively.}
 }
 \description{
 Retrieves data from sources such as the Census Bureau, Bureau of
