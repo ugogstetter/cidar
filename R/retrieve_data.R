@@ -730,31 +730,16 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
   
   
   # retrieving county/CBSA names to join with data
-  tidycensus::census_api_key(Sys.getenv("census_key_value"))
   if (geog == "county") {
-    geog_county <- tidycensus::fips_codes |>
-      dplyr::mutate(
-        GEOID = paste0(state_code, county_code),
-        county = paste0(county, ", ", state_name)
-        ) |>
-      dplyr::rename(state_abbr = state) |>
-      dplyr::select(c(GEOID, county, state_abbr))
+    geog_county <- county_geoids(state)
     
     data_all <- dplyr::inner_join(data_all, geog_county, by = dplyr::join_by(GEOID))
     
     data_all <- data_all[, c("GEOID", "county", "state_abbr", "year", "variable", "type", "estimate", "moe")]
-    
-    if (!is.null(state)) {
-      
-      data_all <- data_all |>
-        dplyr::filter(state_abbr %in% state)
-    }}
+    }
   
   if (geog == "cbsa") {
-    geog_cbsa <- tidycensus::get_acs(geography = "cbsa", variables = "DP03_0005P", year = 2023) |>
-      dplyr::select(c(GEOID, NAME)) |>
-      dplyr::rename(cbsa = NAME) |>
-      dplyr::distinct()
+    geog_cbsa <- cbsa_geoids()
     
     data_all <- dplyr::inner_join(data_all, geog_cbsa, by = dplyr::join_by(GEOID))
     
