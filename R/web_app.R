@@ -43,7 +43,7 @@ web_app <- function(response_question, sheet_id, sheet_name) {
           leaflet::addTiles(layerId = "map_click")
         
        } else {
-      data_collected <- data.frame(input$map_click$lat, input$map_click$lng, input$comment)
+      data_collected <- data.frame(input$map_click$lat, input$map_click$lng, input$comment, Sys.time())
       googlesheets4::sheet_append(ss = sheet_id, data = data_collected, sheet = sheet_name)
       shiny::h5("Your data has been submitted. Thank you! You will now see it on the map.")
       points <- googlesheets4::read_sheet(ss = sheet_id, sheet = sheet_name) |>
