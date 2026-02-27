@@ -14,7 +14,7 @@
 web_app <- function(response_question, sheet_id, sheet_name) {
 
   options(gargle_oauth_cache = ".secrets", email = Sys.getenv("google_sheets_email"))
-  googhesheets4::gs4_auth(email = Sys.getenv("google_sheets_email"))
+  googlesheets4::gs4_auth(email = Sys.getenv("google_sheets_email"))
   
   ui <- shiny::fluidPage(
     shiny::sidebarLayout(
@@ -57,7 +57,7 @@ web_app <- function(response_question, sheet_id, sheet_name) {
       map_output()
     })
     
-    observeEvent(input$map_click, {
+    shiny::observeEvent(input$map_click, {
       click <- input$map_click
       latitude <- click$lat
       longitude <- click$lng

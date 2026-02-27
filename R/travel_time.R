@@ -1,3 +1,5 @@
+globalVariables(c("STREET", "CITY", "STATE", "ZIP", "CNTY", "LAT", "LON", "school", "cbsa", "zip_code", "search_id"))
+
 #' Assesses travel times to various destination types
 #' @description Provides travel times by foot, bicycle, or car to destination 
 #' types, including schools, (will add more), in a specified area. Utilizes the
