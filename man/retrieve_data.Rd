@@ -14,7 +14,10 @@ include: \code{"unemployment"}, \code{"high-skill employment"},
 \code{"median gross rent"}, \code{"households without vehicle"},
 \code{"households with broadband"}, \code{"homeownership"}, \code{"single-parent families"},
 \code{"public transport commutes"}, \code{"mean commute time"},
-\code{"GDP per capita"}, \code{"median AQI"}, \code{"unhealthy air days"}. Some variables
+\code{"GDP per capita"}, \code{"median AQI"}, \code{"unhealthy air days"},
+\code{"violent crime"}, \code{"murder and nonnegligent manslaughter"}, \code{"rape"},
+\code{"robbery"}, \code{"aggravated assault"}, \code{"property crime"}, \code{"burglary"},
+\code{"larceny"}, \code{"motor vehicle theft"}. Some variables
 cannot be retrieved without first registering for an API key for the
 corresponding data source and supplying the API key in R (see notes below).
 \itemize{
@@ -26,7 +29,7 @@ corresponding data source and supplying the API key in R (see notes below).
 \code{"single-parent families"}, \code{"public transport commutes"},
 \code{"mean commute time"}. To retrieve these variables, first establish a Census
 Bureau API key by following the instructions for \code{\link[=census_key]{census_key()}}. Retrieval
-will be performed using the tidycensus package.
+will be performed using the \link[tidycensus:tidycensus-package]{tidycensus} package.
 \item Variables requiring a U.S. Bureau of Economic Analysis API key:
 \code{"GDP per capita"}. To retrieve these variables, first establish a Bureau of
 Economic Analysis API key by following the instructions for \code{\link[=bea_key]{bea_key()}}.

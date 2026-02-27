@@ -252,7 +252,7 @@ census_retrieval_cleaning <- function(vars, yrs, geog) {
       dplyr::mutate(
         below_150_percent_poverty_level.estimate = round(((estimate_poverty_total - estimate_at_above_150)/estimate_poverty_total)*100, 2),
         below_100_percent_poverty_level.estimate = round((estimate_below_100/estimate_poverty_total)*100, 2),
-        below_150_percent_poverty_level.moe = round((tidycensus::moe_prop(num = (estimate_poverty_total - estimate_at_above_150), denom = estimate_poverty_total, moe_num = tidycensus::moe_sum(moe = c(moe_poverty_total, moe_at_above_150), estimate = c(estimate_poverty_total, estimate_at_above_150)), moe_denom = moe_poverty_total))*100, 2),
+        below_150_percent_poverty_level.moe = round((tidycensus::moe_prop(num = (estimate_poverty_total - estimate_at_above_150), denom = estimate_poverty_total, moe_num = ifelse(sum(c(estimate_poverty_total, estimate_at_above_150) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_poverty_total, moe_at_above_150), estimate = c(estimate_poverty_total, estimate_at_above_150)), tidycensus::moe_sum(moe = c(moe_poverty_total, moe_at_above_150), estimate = NULL)), moe_denom = moe_poverty_total))*100, 2),
         below_100_percent_poverty_level.moe = round((tidycensus::moe_prop(num = estimate_below_100, denom = estimate_poverty_total, moe_num = moe_below_100, moe_denom = moe_poverty_total))*100, 2)
         ) |>
       dplyr::select(c(GEOID, NAME, year,  below_150_percent_poverty_level.estimate, below_100_percent_poverty_level.estimate, below_150_percent_poverty_level.moe, below_100_percent_poverty_level.moe)) |>
@@ -315,7 +315,7 @@ census_retrieval_cleaning <- function(vars, yrs, geog) {
     tidyr::pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
     dplyr::mutate(
       single_parent.estimate = round(((estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2)/(estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2))*100, 2),
-      single_parent.moe = round((tidycensus::moe_prop(num = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2), denom = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2), moe_num = tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2)), moe_denom = tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2))))*100, 2)
+      single_parent.moe = round((tidycensus::moe_prop(num = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2), denom = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2), moe_num = ifelse(sum(c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2)), tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = NULL)), moe_denom = ifelse(sum(c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2)), tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = NULL))))*100, 2)
     ) |>
     dplyr::select(c(GEOID, NAME, year,  single_parent.estimate, single_parent.moe)) |>
     tidyr::pivot_longer(cols = single_parent.estimate:single_parent.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
@@ -335,7 +335,7 @@ census_retrieval_cleaning <- function(vars, yrs, geog) {
       tidyr::pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
       dplyr::mutate(
         public_transport_commutes.estimate = round((estimate_transit/(estimate_drove_alone + estimate_carpooled + estimate_transit))*100, 2),
-        public_transport_commutes.moe = round((tidycensus::moe_prop(num = estimate_transit, denom = (estimate_drove_alone + estimate_carpooled + estimate_transit), moe_num = moe_transit, moe_denom = tidycensus::moe_sum(moe = c(moe_drove_alone, moe_carpooled, moe_transit), estimate = c(estimate_drove_alone, estimate_carpooled, estimate_transit))))*100, 2)
+        public_transport_commutes.moe = round((tidycensus::moe_prop(num = estimate_transit, denom = (estimate_drove_alone + estimate_carpooled + estimate_transit), moe_num = moe_transit, moe_denom = ifelse(sum(c(estimate_drove_alone, estimate_carpooled, estimate_transit) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_drove_alone, moe_carpooled, moe_transit), estimate = c(estimate_drove_alone, estimate_carpooled, estimate_transit)), tidycensus::moe_sum(moe = c(moe_drove_alone, moe_carpooled, moe_transit), estimate = NULL))))*100, 2)
         ) |>
       dplyr::select(c(GEOID, NAME, year, public_transport_commutes.estimate, public_transport_commutes.moe)) |>
       tidyr::pivot_longer(cols = public_transport_commutes.estimate:public_transport_commutes.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
@@ -589,7 +589,7 @@ aqi_retrieval <- function(vars, yrs, geog) {
     temp2 <- tempfile()
     
     aqi_data <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
-      dplyr::select(c(CBSA, CBSA.Code, Year, Median.AQI, Days.with.AQI, Unhealthy.Days))
+      dplyr::select(c(CBSA.Code, Year, Median.AQI, Days.with.AQI, Unhealthy.Days))
     
     unlink(temp)
     
@@ -606,7 +606,7 @@ aqi_retrieval <- function(vars, yrs, geog) {
         temp2 <- tempfile()
         
         aqi_data_1 <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
-          dplyr::select(c(CBSA, CBSA.Code, Year, Median.AQI, Days.with.AQI, Unhealthy.Days))
+          dplyr::select(c(CBSA.Code, Year, Median.AQI, Days.with.AQI, Unhealthy.Days))
         
         unlink(temp)
         
@@ -621,7 +621,8 @@ aqi_retrieval <- function(vars, yrs, geog) {
       aqi_data <- aqi_data |>
         dplyr::mutate(unhealthy_air_days = round((Unhealthy.Days/Days.with.AQI)*100, 2), moe = NA) |>
         dplyr::rename(median_aqi = Median.AQI, year = Year, GEOID = CBSA.Code) |>
-        tidyr::pivot_longer(cols = c(median_aqi, unhealthy_air_days), names_to = "variable", values_to = "estimate")
+        tidyr::pivot_longer(cols = c(median_aqi, unhealthy_air_days), names_to = "variable", values_to = "estimate") |>
+        dplyr::select(!c(Unhealthy.Days, Days.with.AQI))
       
       
     } else if (vars == "median AQI") {
@@ -639,14 +640,124 @@ aqi_retrieval <- function(vars, yrs, geog) {
         dplyr::mutate(moe = NA, variable = "unhealthy_air_days") |>
         dplyr::select(!c(Unhealthy.Days, Days.with.AQI, Median.AQI))
       
-    }
-  }
+    }}
   
   aqi_data <- aqi_data |>
     dplyr::mutate(type = dplyr::case_when(variable == "median_aqi" ~ "value (index ranging from 0, excellent, to 500, extremely hazardous)",
                                    variable == "unhealthy_air_days" ~ "percent (of days with data available)"))
   
   return(aqi_data)}
+
+
+
+crime_retrieval <- function(vars, yrs) {
+  
+  vars <- gsub(" ", "_", vars)
+  
+  crime_data <- data.frame(msa = character(), variable = character(), estimate = double(), year = double())
+  
+  if (length(yrs[yrs >= 1999 & yrs <= 2004]) > 0) {
+    
+    for (i in yrs[yrs >= 1999 & yrs <= 2004]) {
+      
+      temp <- tempfile(fileext = ".xls")
+      
+      utils::download.file(ifelse(i <= 2003, paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/table6_metro", substr(as.character(i), 3, 4), ".xls"), "https://www2.fbi.gov/ucr/cius_04/documents/04tbl06a.xls"), temp, mode = "wb")
+      
+      crime_data_1 <- readxl::read_xls(temp, skip = ifelse(i == 2001 | i == 2003, 4, 3), .name_repair = ~tolower(gsub("Larceny_theft", "larceny", gsub("_+", "_", gsub("Forcible_rape", "rape", gsub("\\s|-|/", "_", gsub("\\d", "", gsub("man.*slaughter", "manslaughter", gsub("non-negligent", "nonnegligent", .x)))))))))  |>
+        dplyr::select(c("metropolitan_statistical_area", "violent_crime", "property_crime", "murder_and_nonnegligent_manslaughter", "rape", "robbery", "aggravated_assault", "burglary", "larceny", "motor_vehicle_theft")) |>
+        dplyr::filter(grepl("M.S.A.", metropolitan_statistical_area) | metropolitan_statistical_area == "Rate per 100,000 inhabitants") |>
+        # preventing duplicate rate per 100,000 inhabitants values, since those are sometimes given for M.D.s as well as for M.S.A.s
+        dplyr::filter(dplyr::lag(metropolitan_statistical_area) != metropolitan_statistical_area | is.na(dplyr::lag(metropolitan_statistical_area)))
+      
+      unlink(temp)
+      
+      msas <- crime_data_1$metropolitan_statistical_area[rep(c(TRUE, FALSE), nrow(crime_data_1)/2)]
+      msas <- gsub("\\d", "", msas)
+      
+      crime_data_1 <- crime_data_1 |>
+        dplyr::filter(metropolitan_statistical_area == "Rate per 100,000 inhabitants") |>
+        dplyr::mutate(
+          msa = msas, 
+          dplyr::across(violent_crime:motor_vehicle_theft, 
+                        ~dplyr::case_when(. == "-" ~ NA, .default = .))
+          ) |>
+        dplyr::select(!metropolitan_statistical_area) |>
+        dplyr::mutate(dplyr::across(violent_crime:motor_vehicle_theft, as.double))|>
+        tidyr::pivot_longer(cols = violent_crime:motor_vehicle_theft, names_to = "variable", values_to = "estimate") |>
+        dplyr::mutate(estimate = round(estimate, 2), year = i)
+      
+      crime_data <- rbind(crime_data, crime_data_1)
+    }}
+  
+  
+  if (length(yrs[yrs >= 2005 & yrs <= 2019]) > 0) {
+    
+    for (i in yrs[yrs >= 2005 & yrs <= 2019]) {
+      
+      temp <- tempfile(fileext = ".xls")
+      
+      utils::download.file(ifelse(i == 2005, "https://www2.fbi.gov/ucr/05cius/data/documents/05tbl06.xls", 
+                                  ifelse(i >= 2006 & i <= 2009, paste0("https://www2.fbi.gov/ucr/cius", as.character(i), "/data/documents/", substr(as.character(i), 3, 4), "tbl06.xls"), 
+                                         ifelse(i == 2010 | i == 2011, paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/table-6/output.xls"),
+                                                ifelse(i == 2012 | i == 2013, paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/6tabledatadecpdf/table-6/output.xls"),
+                                                       ifelse(i == 2014, "https://ucr.fbi.gov/crime-in-the-u.s/2014/crime-in-the-u.s.-2014/tables/table-6/Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2014/output.xls",
+                                                              ifelse(i == 2015, "https://ucr.fbi.gov/crime-in-the-u.s/2015/crime-in-the-u.s.-2015/tables/table-6/table_6_crime_in_the_united_states_by_metropolitan_statistical_area_2015.xls/output.xls",
+                                                                     ifelse(i == 2016, "https://ucr.fbi.gov/crime-in-the-u.s/2016/crime-in-the-u.s.-2016/tables/table-4/table-4/output.xls",
+                                                                            ifelse(i == 2017 | i == 2019, paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/table-6/table-6/output.xls"),
+                                                                                   "https://ucr.fbi.gov/crime-in-the-u.s/2018/crime-in-the-u.s.-2018/tables/table-6/table-6.xls/output.xls")))))))), temp, mode = "wb")
+      
+      crime_data_2 <- readxl::read_xls(temp, skip = 3, .name_repair = ~tolower(gsub("Larceny_theft", "larceny", gsub("_+", "_", gsub("Forcible_rape", "rape", gsub("\\s|-|/", "_", gsub("\\d", "", gsub("man.*slaughter", "manslaughter", gsub("non-negligent", "nonnegligent", .x))))))))) |>
+        dplyr::select(c("metropolitan_statistical_area", "counties_principal_cities", "violent_crime", "property_crime", "murder_and_nonnegligent_manslaughter", "rape", "robbery", "aggravated_assault", "burglary", "larceny", "motor_vehicle_theft")) |>
+        dplyr::mutate(metropolitan_statistical_area = dplyr::case_when(counties_principal_cities == "Rate per 100,000 inhabitants" ~ "Rate per 100,000 inhabitants", 
+                                                                       .default = metropolitan_statistical_area)) |>
+        dplyr::filter(grepl("M.S.A.", metropolitan_statistical_area) | metropolitan_statistical_area == "Rate per 100,000 inhabitants") |>
+        # preventing duplicate rate per 100,000 inhabitants values, since those are sometimes given for M.D.s as well as for M.S.A.s
+        dplyr::filter(dplyr::lag(metropolitan_statistical_area) != metropolitan_statistical_area | is.na(dplyr::lag(metropolitan_statistical_area)))
+      
+      unlink(temp)
+      
+      msas <- crime_data_2$metropolitan_statistical_area[rep(c(TRUE, FALSE), nrow(crime_data_2)/2)]
+      msas <- gsub("\\d", "", msas)
+      
+      crime_data_2 <- crime_data_2 |>
+        dplyr::filter(metropolitan_statistical_area == "Rate per 100,000 inhabitants") |>
+        dplyr::mutate(
+          msa = msas,
+          dplyr::across(violent_crime:motor_vehicle_theft, 
+                        ~dplyr::case_when(. == "-" ~ NA, .default = .))
+          ) |>
+        dplyr::select(!c(metropolitan_statistical_area, counties_principal_cities)) |>
+        dplyr::mutate(dplyr::across(violent_crime:motor_vehicle_theft, as.double))|>
+        tidyr::pivot_longer(cols = violent_crime:motor_vehicle_theft, names_to = "variable", values_to = "estimate") |>
+        dplyr::mutate(estimate = round(estimate, 2), year = i)
+      
+      crime_data <- rbind(crime_data, crime_data_2)
+    }}
+  
+  if (length(yrs[yrs == 2020 | (yrs >= 2022 & yrs <= 2024)]) > 0) {
+    
+    for (i in yrs[yrs == 2020 | (yrs >= 2022 & yrs <= 2024)]) {
+      
+      crime_data_3 <- eval(parse(text = paste0("crime_by_msa_", as.character(i))))
+      
+      crime_data <- rbind(crime_data, crime_data_3)
+    }}
+  
+  crime_data <- crime_data[crime_data$variable %in% vars,]
+  
+  crime_data <- crime_data |>
+    dplyr::mutate(msa = substr(msa, 1, nchar(msa) - 7))
+  
+  geog_cbsa <- cbsa_geoids() |>
+    dplyr::filter(substr(cbsa, nchar(cbsa) - 9, nchar(cbsa)) == "Metro Area") |>
+    dplyr::mutate(msa = substr(cbsa, 1, nchar(cbsa) - 11))
+  
+  crime_data <- dplyr::inner_join(crime_data, geog_cbsa, by = dplyr::join_by(msa)) |>
+    dplyr::select(!c(msa, cbsa)) |>
+    dplyr::mutate(moe = NA, type = "rate (per 100,000 inhabitants)")
+  
+  return(crime_data)}
 
 
 #' Retrieves and combines data from various sources
@@ -661,7 +772,10 @@ aqi_retrieval <- function(vars, yrs, geog) {
 #' `"median gross rent"`, `"households without vehicle"`, 
 #' `"households with broadband"`, `"homeownership"`, `"single-parent families"`,
 #'  `"public transport commutes"`, `"mean commute time"`, 
-#'  `"GDP per capita"`, `"median AQI"`, `"unhealthy air days"`. Some variables 
+#'  `"GDP per capita"`, `"median AQI"`, `"unhealthy air days"`, 
+#'  `"violent crime"`, `"murder and nonnegligent manslaughter"`, `"rape"`, 
+#'  `"robbery"`, `"aggravated assault"`, `"property crime"`, `"burglary"`, 
+#'  `"larceny"`, `"motor vehicle theft"`. Some variables 
 #' cannot be retrieved without first registering for an API key for the 
 #' corresponding data source and supplying the API key in R (see notes below).
 #' * Variables requiring a U.S. Census Bureau API key: `"unemployment"`, 
@@ -672,7 +786,7 @@ aqi_retrieval <- function(vars, yrs, geog) {
 #'  `"single-parent families"`, `"public transport commutes"`, 
 #'  `"mean commute time"`. To retrieve these variables, first establish a Census
 #'   Bureau API key by following the instructions for [census_key()]. Retrieval
-#'    will be performed using the tidycensus package.
+#'    will be performed using the [tidycensus][tidycensus::tidycensus-package] package.
 #' * Variables requiring a U.S. Bureau of Economic Analysis API key: 
 #' `"GDP per capita"`. To retrieve these variables, first establish a Bureau of
 #' Economic Analysis API key by following the instructions for [bea_key()]. 
@@ -726,7 +840,17 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
     aqi_data <- aqi_retrieval(vars = aqi_vars, yrs = aqi_yrs, geog = geog)
   } else {aqi_data <- empty_df}
   
-  data_all <- rbind(census_data, bea_data, aqi_data)
+  
+  crime_yrs <- yrs[yrs >= 1999 & yrs <= 2024]
+  
+  if (("violent crime" %in% vars | "murder and nonnegligent manslaughter" %in% vars | "rape" %in% vars | "robbery" %in% vars | "aggravated assault" %in% vars | "property crime" %in% vars | "burglary" %in% vars | "larceny" %in% vars | "motor vehicle theft" %in% vars) & length(crime_yrs) != 0 & geog == "cbsa") {
+    
+    crime_vars <- vars[vars %in% c("violent crime", "murder and nonnegligent manslaughter", "rape", "robbery", "aggravated assault", "property crime", "burglary", "larceny", "motor vehicle theft")]
+    
+    crime_data <- crime_retrieval(vars = crime_vars, yrs = crime_yrs)
+  } else {crime_data <- empty_df}
+  
+  data_all <- rbind(census_data, bea_data, aqi_data, crime_data)
   
   
   # retrieving county/CBSA names to join with data
@@ -743,7 +867,7 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
     
     data_all <- dplyr::inner_join(data_all, geog_cbsa, by = dplyr::join_by(GEOID))
     
-    data_all <- data_all[, c("GEOID", "cbsa", "variable", "type", "estimate", "moe")]
+    data_all <- data_all[, c("GEOID", "cbsa", "year", "variable", "type", "estimate", "moe")]
     }
   
   if (!is.null(geoselect)) {
