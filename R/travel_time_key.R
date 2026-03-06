@@ -1,7 +1,8 @@
 #' Establishes a TravelTime API ID and key for [travel_time()]
 #' @description Saves your TravelTime API ID and key so you won't have to 
-#' reenter it, even between R sessions. If you haven't yet registered for the 
-#' TravelTime API, follow the instructions at https://account.traveltime.com.
+#' re-enter it, even between R sessions. If you haven't yet registered for the 
+#' TravelTime API, follow the instructions at 
+#' \url{https://account.traveltime.com}.
 #' @param id Supply your TravelTime application ID.
 #' @param key Supply your TravelTime application key.
 #' @export

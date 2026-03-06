@@ -4,15 +4,22 @@
 \alias{county_geoids}
 \title{Retrieves county GEOIDs for use in \code{\link[=retrieve_data]{retrieve_data()}} and \code{\link[=travel_time]{travel_time()}}}
 \usage{
-county_geoids(state = NULL)
+county_geoids(state = NULL, sf = FALSE)
 }
 \arguments{
 \item{state}{Optionally, specify a vector of state abbreviations to filter
-to. By default, counties in all U.S. states will be returned by the function.}
+to. By default, all Census-designated counties in U.S. states and territories
+will be returned by the function.}
+
+\item{sf}{If \code{FALSE} (default value), function returns a data frame without
+geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
+geospatial polygon geometry.}
 }
 \description{
-Returns a table of U.S. counties with their corresponding
-GEOIDs, for use in querying the \code{\link[=retrieve_data]{retrieve_data()}} and \code{\link[=travel_time]{travel_time()}}
-functions. If you have not already set a U.S. Census Bureau API key using
-\code{\link[=census_key]{census_key()}}, do so before running this function.
+Using the tigris
+\link[tigris:counties]{counties()} and \link[tigris:states]{states()}
+functions, returns a dataset of counties with their
+corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
+the year 2023, for use in querying the \code{\link[=retrieve_data]{retrieve_data()}} and \code{\link[=travel_time]{travel_time()}}
+functions.
 }

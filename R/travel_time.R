@@ -3,9 +3,11 @@ globalVariables(c("STREET", "CITY", "STATE", "ZIP", "CNTY", "LAT", "LON", "schoo
 #' Assesses travel times to various destination types
 #' @description Provides travel times by foot, bicycle, or car to destination 
 #' types, including schools, (will add more), in a specified area. Utilizes the
-#'  TravelTime API, called through the traveltimeR package. Requires your 
-#'  TravelTime application ID and application key to already be saved, which can
-#'   be done using [travel_time_key()].
+#'  TravelTime API, called through the [make_search()][traveltimeR::make_search]
+#'   and [time_map_fast()][traveltimeR::time_map_fast] functions from the 
+#'   traveltimeR package. Requires your TravelTime application ID and 
+#'   application key to already be saved, which can be done using 
+#'   [travel_time_key()].
 #' @param destination Destination type to which to calculate travel time. 
 #' Available destination types include: `"schools"`, `"public schools"`, and 
 #' `"private schools"`.

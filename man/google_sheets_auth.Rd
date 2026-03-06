@@ -14,6 +14,8 @@ google_sheets_auth(email)
 In order to collect and display data from app viewers in a
 Shiny app created using \code{\link[=web_app]{web_app()}}, this function must first be executed so
 that data can be written to and read from Google Sheets. This requires
-a Google account. This function only needs to be run once, as your account
-information will then be saved across R sessions.
+a Google account. This function only needs to be run once; this function
+will call googlesheets4's \link[googlesheets4:gs4_auth]{gs4_auth()} function to
+prompt you to log into your Google account, and then your account
+information will be saved across R sessions.
 }

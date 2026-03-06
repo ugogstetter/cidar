@@ -4,57 +4,59 @@
 \alias{retrieve_data}
 \title{Retrieves and combines data from various sources}
 \usage{
-retrieve_data(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL)
+retrieve_data(
+  vars,
+  yrs = 1980:2024,
+  geog,
+  state = NULL,
+  geoselect = NULL,
+  vars_info = TRUE,
+  sf = FALSE
+)
 }
 \arguments{
-\item{vars}{Supply a vector of variables to request. Available variables
-include: \code{"unemployment"}, \code{"high-skill employment"},
-\code{"median family income"}, \code{"poverty"}, \code{"old-age dependency ratio"},
-\code{"housing vacancy"}, \code{"Gini index"}, \code{"median home value"},
-\code{"median gross rent"}, \code{"households without vehicle"},
-\code{"households with broadband"}, \code{"homeownership"}, \code{"single-parent families"},
-\code{"public transport commutes"}, \code{"mean commute time"},
-\code{"GDP per capita"}, \code{"median AQI"}, \code{"unhealthy air days"},
-\code{"violent crime"}, \code{"murder and nonnegligent manslaughter"}, \code{"rape"},
-\code{"robbery"}, \code{"aggravated assault"}, \code{"property crime"}, \code{"burglary"},
-\code{"larceny"}, \code{"motor vehicle theft"}. Some variables
-cannot be retrieved without first registering for an API key for the
-corresponding data source and supplying the API key in R (see notes below).
-\itemize{
-\item Variables requiring a U.S. Census Bureau API key: \code{"unemployment"},
-\code{"high-skill employment"}, \code{"median family income"}, \code{"poverty"},
-\code{"old-age dependency ratio"}, \code{"housing vacancy"}, \code{"Gini index"},
-\code{"median home value"}, \code{"median gross rent"}, \code{"households without vehicle"},
-\code{"households with broadband"}, \code{"homeownership"},
-\code{"single-parent families"}, \code{"public transport commutes"},
-\code{"mean commute time"}. To retrieve these variables, first establish a Census
-Bureau API key by following the instructions for \code{\link[=census_key]{census_key()}}. Retrieval
-will be performed using the \link[tidycensus:tidycensus-package]{tidycensus} package.
-\item Variables requiring a U.S. Bureau of Economic Analysis API key:
-\code{"GDP per capita"}. To retrieve these variables, first establish a Bureau of
-Economic Analysis API key by following the instructions for \code{\link[=bea_key]{bea_key()}}.
-Retrieval will be performed using the bea.R package.
-}}
+\item{vars}{Before supplying this argument, ensure you have read the
+\code{\link[=retrieve_data_vars]{retrieve_data_vars()}} function description, and have run that function to
+return the data frame of retrievable variables. The \code{vars} argument of this
+\code{\link[=retrieve_data]{retrieve_data()}} function can be supplied in one of three ways: as a vector
+of all variables you wish to retrieve, as a vector of variable categories
+you wish to retrieve all variables from (variable categories are given in
+the \code{\link[=retrieve_data_vars]{retrieve_data_vars()}} data frame), or as a version of the
+\code{\link[=retrieve_data_vars]{retrieve_data_vars()}} data frame filtered to only the rows corresponding to
+variables you wish to retrieve.}
 
 \item{yrs}{Supply a year or range of years. If no value is supplied, will
 default to the largest possible range of years across which data is available
-on at least one of the selected variables.}
+on at least one of the selected variables. The years for which data is
+available for each variable are included in the \code{\link[=retrieve_data_vars]{retrieve_data_vars()}}
+dataset.}
 
-\item{geog}{Specify either \code{"county"} or \code{"cbsa"}.}
+\item{geog}{Specify \code{"county"}, \code{"cbsa"} (core based statistical
+area), or \code{"place"} (cities/towns/villages/census-designated places). The
+geographic area types for which data is available for each variable are
+included in the \code{\link[=retrieve_data_vars]{retrieve_data_vars()}} data frame.}
 
-\item{state}{Optionally (ONLY if \code{geog} is set to \code{"county"}), supply a vector
-of state abbreviations to filter to. By default, all possible values will
-be returned by the function.}
+\item{state}{Optionally (ONLY if \code{geog} is set to \code{"county"} or \code{"place"}),
+supply a vector of state abbreviations to filter to. By default, all possible
+values will be returned by the function.}
 
-\item{geoselect}{Optionally, supply a vector of county or CBSA (depending on
-whether \code{geog} is set to \code{"county"} or \code{"cbsa"}) GEOIDs to filter to. By
-default, all possible values will be returned by the function. To determine
-the corresponding GEOID for a particular county or CBSA, use
-\code{\link[=county_geoids]{county_geoids()}} or \code{\link[=cbsa_geoids]{cbsa_geoids()}}, respectively.}
+\item{geoselect}{Optionally, supply a vector of county, CBSA, or place
+(depending on whether \code{geog} is set to \code{"county"}, \code{"cbsa"}, or \code{"place"})
+GEOIDs to filter to. By default, all possible values will be returned by the
+function. To determine the corresponding GEOID for a particular county, CBSA,
+or place, use \code{\link[=county_geoids]{county_geoids()}}, \code{\link[=cbsa_geoids]{cbsa_geoids()}}, pr \code{\link[=place_geoids]{place_geoids()}},
+respectively.
+@param vars_info Specify whether to append columns containing
+category, source, and type information for each variable in this function's
+output data frame. Default value is \code{TRUE}. The appended information will
+be the same as that contained in the \code{\link[=retrieve_data_vars]{retrieve_data_vars()}} data frame.
+@param sf If \code{FALSE} (default value), function returns a data frame without
+geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
+geospatial polygon geometry.}
 }
 \description{
 Retrieves data from sources such as the Census Bureau, Bureau of
 Economic Analysis, and Environmental Protection Agency. User specifies
 variables, timeframe, and geographic region of data to retrieve. Function
-will return a dataframe combining all variables requested.
+will return a data frame combining all variables requested.
 }

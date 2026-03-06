@@ -17,7 +17,7 @@ for (i in c(2020, 2022:2024)) {
     dplyr::select(!c(metropolitan_statistical_area, counties_principal_cities)) |>
     dplyr::mutate(dplyr::across(violent_crime:motor_vehicle_theft, as.double))|>
     tidyr::pivot_longer(cols = violent_crime:motor_vehicle_theft, names_to = "variable", values_to = "estimate") |>
-    dplyr::mutate(estimate = round(estimate, 2), year = i)
+    dplyr::mutate(estimate = round(estimate, 2), variable = gsub("_", " ", variable))
   
   assign(paste0("crime_by_msa_", as.character(i)), crime_dataset)
   

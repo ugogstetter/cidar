@@ -29,7 +29,9 @@ respectively.}
 \description{
 Provides travel times by foot, bicycle, or car to destination
 types, including schools, (will add more), in a specified area. Utilizes the
-TravelTime API, called through the traveltimeR package. Requires your
-TravelTime application ID and application key to already be saved, which can
-be done using \code{\link[=travel_time_key]{travel_time_key()}}.
+TravelTime API, called through the \link[traveltimeR:make_search]{make_search()}
+and \link[traveltimeR:time_map_fast]{time_map_fast()} functions from the
+traveltimeR package. Requires your TravelTime application ID and
+application key to already be saved, which can be done using
+\code{\link[=travel_time_key]{travel_time_key()}}.
 }

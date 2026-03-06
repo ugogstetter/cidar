@@ -45,7 +45,7 @@ census_retrieval_vars <- function(vars, yrs, geog) {
     
     if ("old-age dependency ratio" %in% vars) {
       
-      variables <- c(variables, age_ratio = "S0101_C01_035")}
+      variables <- c(variables, old_age_dependency_ratio = "S0101_C01_035")}
     
     if ("housing vacancy" %in% vars) {
       
@@ -53,15 +53,15 @@ census_retrieval_vars <- function(vars, yrs, geog) {
     
     if ("Gini index" %in% vars) {
       
-      variables <- c(variables, gini = "B19083_001")}
+      variables <- c(variables, Gini_index = "B19083_001")}
     
     if ("households without vehicle" %in% vars) {
       
-      variables <- c(variables, without_vehicle = "DP04_0058P")}
+      variables <- c(variables, households_without_vehicle = "DP04_0058P")}
     
     if ("households with broadband" %in% vars) {
       
-      variables <- c(variables, with_broadband = "DP02_0154P")}
+      variables <- c(variables, households_with_broadband = "DP02_0154P")}
     
     if ("homeownership" %in% vars) {
       
@@ -95,7 +95,7 @@ census_retrieval_vars <- function(vars, yrs, geog) {
       
       if ("households with broadband" %in% vars) {
         
-        variables["with_broadband"] <- "DP02_0153P"}
+        variables["households_with_broadband"] <- "DP02_0153P"}
       
       census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = 2019) |>
         dplyr::mutate(year = 2019)
@@ -108,7 +108,7 @@ census_retrieval_vars <- function(vars, yrs, geog) {
       
       if ("households with broadband" %in% vars) {
         
-        variables["with_broadband"] <- "DP02_0152P"}
+        variables["households_with_broadband"] <- "DP02_0152P"}
       
       
       for (x in yrs[yrs >= 2017 & yrs <= 2018]) {
@@ -125,12 +125,12 @@ census_retrieval_vars <- function(vars, yrs, geog) {
       
       if ("households with broadband" %in% vars) {
         
-        variables["with_broadband"] <- "DP02_0152P"}
+        variables["households_with_broadband"] <- "DP02_0152P"}
       
       
       if ("old-age dependency ratio" %in% vars) {
         
-        variables["age_ratio"] <- "S0101_C01_033"}
+        variables["old_age_dependency_ratio"] <- "S0101_C01_033"}
       
       
       for (x in yrs[yrs >= 2015 & yrs <= 2016]) {
@@ -147,17 +147,17 @@ census_retrieval_vars <- function(vars, yrs, geog) {
       
       if ("households with broadband" %in% vars) {
         
-        variables["with_broadband"] <- "DP02_0152P"}
+        variables["households_with_broadband"] <- "DP02_0152P"}
       
       
       if ("old-age dependency ratio" %in% vars) {
         
-        variables["age_ratio"] <- "S0101_C01_033"}
+        variables["old_age_dependency_ratio"] <- "S0101_C01_033"}
       
       
       if ("households without vehicle" %in% vars) {
         
-        variables["without_vehicle"] <- "DP04_0057P"}
+        variables["households_without_vehicle"] <- "DP04_0057P"}
       
       
       for (x in yrs[yrs >= 2013 & yrs <= 2014]) {
@@ -174,17 +174,17 @@ census_retrieval_vars <- function(vars, yrs, geog) {
       
       if ("households with broadband" %in% vars) {
         
-        variables <- variables[!variables == variables["with_broadband"]]}
+        variables <- variables[!variables == variables["households_with_broadband"]]}
       
       
       if ("old-age dependency ratio" %in% vars) {
         
-        variables["age_ratio"] <- "S0101_C01_033"}
+        variables["old_age_dependency_ratio"] <- "S0101_C01_033"}
       
       
       if ("households without vehicle" %in% vars) {
         
-        variables["without_vehicle"] <- "DP04_0057P"}
+        variables["households_without_vehicle"] <- "DP04_0057P"}
       
       
       for (x in yrs[yrs >= 2010 & yrs <= 2012]) {
@@ -196,8 +196,8 @@ census_retrieval_vars <- function(vars, yrs, geog) {
         
       }
       
-      # if with_broadband was taken out but not added back in, it will make the 2009 code section below act weird
-      variables["with_broadband"] <- "placeholder"
+      # if households_with_broadband was taken out but not added back in, it will make the 2009 code section below act weird
+      variables["households_with_broadband"] <- "placeholder"
       
       }
     
@@ -205,22 +205,22 @@ census_retrieval_vars <- function(vars, yrs, geog) {
       
       if ("households with broadband" %in% vars) {
         
-        variables <- variables[!variables == variables["with_broadband"]]}
+        variables <- variables[!variables == variables["households_with_broadband"]]}
       
       
       if ("old-age dependency ratio" %in% vars) {
         
-        variables <- variables[!variables == variables["age_ratio"]]}
+        variables <- variables[!variables == variables["old_age_dependency_ratio"]]}
       
       
       if ("households without vehicle" %in% vars) {
         
-        variables["without_vehicle"] <- "DP04_0057P"}
+        variables["households_without_vehicle"] <- "DP04_0057P"}
       
       
       if ("Gini index" %in% vars) {
         
-        variables <- variables[!variables == variables["gini"]]}
+        variables <- variables[!variables == variables["Gini_index"]]}
       
       
       for (x in yrs[yrs == 2009]) {
@@ -255,7 +255,7 @@ census_retrieval_cleaning <- function(vars, yrs, geog) {
         below_150_percent_poverty_level.moe = round((tidycensus::moe_prop(num = (estimate_poverty_total - estimate_at_above_150), denom = estimate_poverty_total, moe_num = ifelse(sum(c(estimate_poverty_total, estimate_at_above_150) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_poverty_total, moe_at_above_150), estimate = c(estimate_poverty_total, estimate_at_above_150)), tidycensus::moe_sum(moe = c(moe_poverty_total, moe_at_above_150), estimate = NULL)), moe_denom = moe_poverty_total))*100, 2),
         below_100_percent_poverty_level.moe = round((tidycensus::moe_prop(num = estimate_below_100, denom = estimate_poverty_total, moe_num = moe_below_100, moe_denom = moe_poverty_total))*100, 2)
         ) |>
-      dplyr::select(c(GEOID, NAME, year,  below_150_percent_poverty_level.estimate, below_100_percent_poverty_level.estimate, below_150_percent_poverty_level.moe, below_100_percent_poverty_level.moe)) |>
+      dplyr::select(c(GEOID, NAME, year, below_150_percent_poverty_level.estimate, below_100_percent_poverty_level.estimate, below_150_percent_poverty_level.moe, below_100_percent_poverty_level.moe)) |>
       tidyr::pivot_longer(cols = below_150_percent_poverty_level.estimate:below_100_percent_poverty_level.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
       tidyr::pivot_wider(names_from = estimate_moe, values_from = percent)
     
@@ -314,11 +314,11 @@ census_retrieval_cleaning <- function(vars, yrs, geog) {
   census_data_single_parent <- census_data_single_parent |>
     tidyr::pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
     dplyr::mutate(
-      single_parent.estimate = round(((estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2)/(estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2))*100, 2),
-      single_parent.moe = round((tidycensus::moe_prop(num = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2), denom = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2), moe_num = ifelse(sum(c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2)), tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = NULL)), moe_denom = ifelse(sum(c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2)), tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = NULL))))*100, 2)
+      single_parent_families.estimate = round(((estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2)/(estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2))*100, 2),
+      single_parent_families.moe = round((tidycensus::moe_prop(num = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2), denom = (estimate_male_1 + estimate_female_1 + estimate_male_2 + estimate_female_2 + estimate_married_1 + estimate_married_2), moe_num = ifelse(sum(c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2)), tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2), estimate = NULL)), moe_denom = ifelse(sum(c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2) == 0, na.rm = TRUE) > 1, tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = c(estimate_male_1, estimate_female_1, estimate_male_2, estimate_female_2, estimate_married_1, estimate_married_2)), tidycensus::moe_sum(moe = c(moe_male_1, moe_female_1, moe_male_2, moe_female_2, moe_married_1, moe_married_2), estimate = NULL))))*100, 2)
     ) |>
-    dplyr::select(c(GEOID, NAME, year,  single_parent.estimate, single_parent.moe)) |>
-    tidyr::pivot_longer(cols = single_parent.estimate:single_parent.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
+    dplyr::select(c(GEOID, NAME, year, single_parent_families.estimate, single_parent_families.moe)) |>
+    tidyr::pivot_longer(cols = single_parent_families.estimate:single_parent_families.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
     tidyr::pivot_wider(names_from = estimate_moe, values_from = percent)
   
   census_data <- rbind(single_parent_split$`FALSE`, census_data_single_parent)
@@ -343,29 +343,10 @@ census_retrieval_cleaning <- function(vars, yrs, geog) {
     
     census_data <- rbind(public_transport_commutes_split$`FALSE`, census_data_public_transport_commutes)
   }
-    
-  
-    census_data <- census_data |>
-      dplyr::mutate(type = dplyr::case_when(variable == "unemployment" ~ "percent (of civilian labor force age 16+)",
-                                            variable == "high_skill_employment" ~ "percent (of civilian employed population 16+)",
-                                            variable == "median_family_income" ~ "value (dollars)",
-                                            variable == "median_home_value" ~ "value (dollars)",
-                                            variable == "mean_commute_time" ~ "value (minutes)",
-                                            variable == "median_gross_rent" ~ "value (dollars)",
-                                            variable == "below_150_percent_poverty_level" ~ "percent (of population)",
-                                            variable == "below_100_percent_poverty_level" ~ "percent (of population)",
-                                            variable == "age_ratio" ~ "ratio (of people age 65+ per 100 people age 18-64)",
-                                            variable == "housing_vacancy" ~ "percent (of housing units)",
-                                            variable == "gini" ~ "summary measure (from 0, perfect income equality, to 1, perfect income inequality)",
-                                            variable == "without_vehicle" ~ "percent (of households)",
-                                            variable == "with_broadband" ~ "percent (of households)",
-                                            variable == "homeowners" ~ "percent (of population)",
-                                            variable == "single_parent" ~ "percent (of families with children under 18)",
-                                            variable == "public_transport_commutes" ~ "percent (of motorized commutes to work)"
-                                            ))
   
   census_data <- census_data |>
-    dplyr::select(!NAME)
+    dplyr::select(!NAME) |>
+    dplyr::mutate(variable = gsub("single parent", "single-parent", gsub("old age", "old-age", gsub("high skill", "high-skill", gsub("_", " ", variable)))))
   
   return(census_data)
 }
@@ -417,12 +398,11 @@ bea_retrieval <- function(yrs, geog) {
       dplyr::mutate(estimate = gdp/population) |>
       dplyr::mutate(
         moe = NA,
-        variable = "gdp_per_capita"
+        variable = "GDP per capita"
         ) |>
       dplyr::rename(GEOID = GeoFips) |>
       dplyr::select(c(GEOID, variable, estimate, moe, year)) |>
-      dplyr::filter(year %in% yrs) |>
-      dplyr::mutate(type = "ratio (per capita)")}
+      dplyr::filter(year %in% yrs)}
   
   if (geog == "cbsa") {
     
@@ -469,12 +449,11 @@ bea_retrieval <- function(yrs, geog) {
       dplyr::mutate(
         estimate = gdp/population,
         moe = NA,
-        variable = "gdp_per_capita"
+        variable = "GDP per capita"
         ) |>
       dplyr::rename(GEOID = GeoFips) |>
       dplyr::select(c(GEOID, variable, estimate, moe, year)) |>
-      dplyr::filter(year %in% yrs) |>
-      dplyr::mutate(type = "ratio (per capita)")}
+      dplyr::filter(year %in% yrs)}
   
   return(bea_data)}
 
@@ -530,7 +509,9 @@ aqi_retrieval <- function(vars, yrs, geog) {
           ) |>
         dplyr::select(!c(County, State, Unhealthy.Days, Days.with.AQI)) |>
         dplyr::rename(median_aqi = Median.AQI, year = Year) |>
-        tidyr::pivot_longer(cols = c(median_aqi, unhealthy_air_days), names_to = "variable", values_to = "estimate")
+        tidyr::pivot_longer(cols = c(median_aqi, unhealthy_air_days), names_to = "variable", values_to = "estimate") |>
+        dplyr::mutate(variable = dplyr::case_when(variable == "median_aqi" ~ "median AQI",
+                                           variable == "unhealthy_air_days" ~ "unhealthy air days"))
         
       
     } else if (vars == "median AQI") {
@@ -539,7 +520,7 @@ aqi_retrieval <- function(vars, yrs, geog) {
       dplyr::rename(year = Year, estimate = Median.AQI) |>
       dplyr::mutate(
         moe = NA, 
-        variable = "median_aqi", 
+        variable = "median AQI", 
         county_state = paste0(County, ", ", State)
         ) |>
       dplyr::select(!c(County, State, Unhealthy.Days, Days.with.AQI))
@@ -549,7 +530,7 @@ aqi_retrieval <- function(vars, yrs, geog) {
       aqi_data <- aqi_data |>
         dplyr::mutate(unhealthy_air_days = round((Unhealthy.Days/Days.with.AQI)*100, 2)) |>
         dplyr::rename(year = Year, estimate = unhealthy_air_days) |>
-        dplyr::mutate(moe = NA, variable = "unhealthy_air_days", county_state = paste0(County, ", ", State)) |>
+        dplyr::mutate(moe = NA, variable = "unhealthy air days", county_state = paste0(County, ", ", State)) |>
         dplyr::select(!c(County, State, Unhealthy.Days, Days.with.AQI, Median.AQI))
       
     }
@@ -622,14 +603,16 @@ aqi_retrieval <- function(vars, yrs, geog) {
         dplyr::mutate(unhealthy_air_days = round((Unhealthy.Days/Days.with.AQI)*100, 2), moe = NA) |>
         dplyr::rename(median_aqi = Median.AQI, year = Year, GEOID = CBSA.Code) |>
         tidyr::pivot_longer(cols = c(median_aqi, unhealthy_air_days), names_to = "variable", values_to = "estimate") |>
-        dplyr::select(!c(Unhealthy.Days, Days.with.AQI))
+        dplyr::select(!c(Unhealthy.Days, Days.with.AQI)) |>
+        dplyr::mutate(variable = dplyr::case_when(variable == "median_aqi" ~ "median AQI",
+                                           variable == "unhealthy_air_days" ~ "unhealthy air days"))
       
       
     } else if (vars == "median AQI") {
       
       aqi_data <- aqi_data |>
         dplyr::rename(year = Year, estimate = Median.AQI, GEOID = CBSA.Code) |>
-        dplyr::mutate(moe = NA, variable = "median_aqi") |>
+        dplyr::mutate(moe = NA, variable = "median AQI") |>
         dplyr::select(!c(Unhealthy.Days, Days.with.AQI))
       
     } else {
@@ -637,22 +620,16 @@ aqi_retrieval <- function(vars, yrs, geog) {
       aqi_data <- aqi_data |>
         dplyr::mutate(unhealthy_air_days = round((Unhealthy.Days/Days.with.AQI)*100, 2)) |>
         dplyr::rename(year = Year, estimate = unhealthy_air_days, GEOID = CBSA.Code) |>
-        dplyr::mutate(moe = NA, variable = "unhealthy_air_days") |>
+        dplyr::mutate(moe = NA, variable = "unhealthy air days") |>
         dplyr::select(!c(Unhealthy.Days, Days.with.AQI, Median.AQI))
       
     }}
-  
-  aqi_data <- aqi_data |>
-    dplyr::mutate(type = dplyr::case_when(variable == "median_aqi" ~ "value (index ranging from 0, excellent, to 500, extremely hazardous)",
-                                   variable == "unhealthy_air_days" ~ "percent (of days with data available)"))
   
   return(aqi_data)}
 
 
 
 crime_retrieval <- function(vars, yrs) {
-  
-  vars <- gsub(" ", "_", vars)
   
   crime_data <- data.frame(msa = character(), variable = character(), estimate = double(), year = double())
   
@@ -685,7 +662,7 @@ crime_retrieval <- function(vars, yrs) {
         dplyr::select(!metropolitan_statistical_area) |>
         dplyr::mutate(dplyr::across(violent_crime:motor_vehicle_theft, as.double))|>
         tidyr::pivot_longer(cols = violent_crime:motor_vehicle_theft, names_to = "variable", values_to = "estimate") |>
-        dplyr::mutate(estimate = round(estimate, 2), year = i)
+        dplyr::mutate(estimate = round(estimate, 2), year = i, variable = gsub("_", " ", variable))
       
       crime_data <- rbind(crime_data, crime_data_1)
     }}
@@ -730,7 +707,7 @@ crime_retrieval <- function(vars, yrs) {
         dplyr::select(!c(metropolitan_statistical_area, counties_principal_cities)) |>
         dplyr::mutate(dplyr::across(violent_crime:motor_vehicle_theft, as.double))|>
         tidyr::pivot_longer(cols = violent_crime:motor_vehicle_theft, names_to = "variable", values_to = "estimate") |>
-        dplyr::mutate(estimate = round(estimate, 2), year = i)
+        dplyr::mutate(estimate = round(estimate, 2), year = i, variable = gsub("_", " ", variable))
       
       crime_data <- rbind(crime_data, crime_data_2)
     }}
@@ -739,7 +716,8 @@ crime_retrieval <- function(vars, yrs) {
     
     for (i in yrs[yrs == 2020 | (yrs >= 2022 & yrs <= 2024)]) {
       
-      crime_data_3 <- eval(parse(text = paste0("crime_by_msa_", as.character(i))))
+      crime_data_3 <- eval(parse(text = paste0("crime_by_msa_", as.character(i)))) |>
+        dplyr::mutate(year = i)
       
       crime_data <- rbind(crime_data, crime_data_3)
     }}
@@ -751,11 +729,10 @@ crime_retrieval <- function(vars, yrs) {
   
   geog_cbsa <- cbsa_geoids() |>
     dplyr::filter(substr(cbsa, nchar(cbsa) - 9, nchar(cbsa)) == "Metro Area") |>
-    dplyr::mutate(msa = substr(cbsa, 1, nchar(cbsa) - 11))
+    dplyr::mutate(msa = substr(cbsa, 1, nchar(cbsa) - 11), moe = NA)
   
   crime_data <- dplyr::inner_join(crime_data, geog_cbsa, by = dplyr::join_by(msa)) |>
-    dplyr::select(!c(msa, cbsa)) |>
-    dplyr::mutate(moe = NA, type = "rate (per 100,000 inhabitants)")
+    dplyr::select(!c(msa, cbsa))
   
   return(crime_data)}
 
@@ -764,52 +741,56 @@ crime_retrieval <- function(vars, yrs) {
 #' @description Retrieves data from sources such as the Census Bureau, Bureau of
 #' Economic Analysis, and Environmental Protection Agency. User specifies 
 #' variables, timeframe, and geographic region of data to retrieve. Function 
-#' will return a dataframe combining all variables requested.
-#' @param vars Supply a vector of variables to request. Available variables 
-#' include: `"unemployment"`, `"high-skill employment"`, 
-#' `"median family income"`, `"poverty"`, `"old-age dependency ratio"`, 
-#' `"housing vacancy"`, `"Gini index"`, `"median home value"`, 
-#' `"median gross rent"`, `"households without vehicle"`, 
-#' `"households with broadband"`, `"homeownership"`, `"single-parent families"`,
-#'  `"public transport commutes"`, `"mean commute time"`, 
-#'  `"GDP per capita"`, `"median AQI"`, `"unhealthy air days"`, 
-#'  `"violent crime"`, `"murder and nonnegligent manslaughter"`, `"rape"`, 
-#'  `"robbery"`, `"aggravated assault"`, `"property crime"`, `"burglary"`, 
-#'  `"larceny"`, `"motor vehicle theft"`. Some variables 
-#' cannot be retrieved without first registering for an API key for the 
-#' corresponding data source and supplying the API key in R (see notes below).
-#' * Variables requiring a U.S. Census Bureau API key: `"unemployment"`, 
-#' `"high-skill employment"`, `"median family income"`, `"poverty"`, 
-#' `"old-age dependency ratio"`, `"housing vacancy"`, `"Gini index"`, 
-#' `"median home value"`, `"median gross rent"`, `"households without vehicle"`,
-#'  `"households with broadband"`, `"homeownership"`, 
-#'  `"single-parent families"`, `"public transport commutes"`, 
-#'  `"mean commute time"`. To retrieve these variables, first establish a Census
-#'   Bureau API key by following the instructions for [census_key()]. Retrieval
-#'    will be performed using the [tidycensus][tidycensus::tidycensus-package] package.
-#' * Variables requiring a U.S. Bureau of Economic Analysis API key: 
-#' `"GDP per capita"`. To retrieve these variables, first establish a Bureau of
-#' Economic Analysis API key by following the instructions for [bea_key()]. 
-#' Retrieval will be performed using the bea.R package.
+#' will return a data frame combining all variables requested.
+#' @param vars Before supplying this argument, ensure you have read the 
+#' [retrieve_data_vars()] function description, and have run that function to 
+#' return the data frame of retrievable variables. The `vars` argument of this
+#' [retrieve_data()] function can be supplied in one of three ways: as a vector
+#'  of all variables you wish to retrieve, as a vector of variable categories 
+#'  you wish to retrieve all variables from (variable categories are given in 
+#'  the [retrieve_data_vars()] data frame), or as a version of the 
+#'  [retrieve_data_vars()] data frame filtered to only the rows corresponding to 
+#'  variables you wish to retrieve.
 #' @param yrs Supply a year or range of years. If no value is supplied, will 
 #' default to the largest possible range of years across which data is available
-#'  on at least one of the selected variables.
-#' @param geog Specify either `"county"` or `"cbsa"`.
-#' @param state Optionally (ONLY if `geog` is set to `"county"`), supply a vector
-#'  of state abbreviations to filter to. By default, all possible values will
-#'   be returned by the function.
-#' @param geoselect Optionally, supply a vector of county or CBSA (depending on
-#'  whether `geog` is set to `"county"` or `"cbsa"`) GEOIDs to filter to. By
-#'  default, all possible values will be returned by the function. To determine
-#'  the corresponding GEOID for a particular county or CBSA, use 
-#'  [county_geoids()] or [cbsa_geoids()], respectively.
+#'  on at least one of the selected variables. The years for which data is 
+#'  available for each variable are included in the [retrieve_data_vars()] 
+#'  dataset.
+#' @param geog Specify `"county"`, `"cbsa"` (core based statistical 
+#' area), or `"place"` (cities/towns/villages/census-designated places). The 
+#' geographic area types for which data is available for each variable are 
+#' included in the [retrieve_data_vars()] data frame.
+#' @param state Optionally (ONLY if `geog` is set to `"county"` or `"place"`), 
+#' supply a vector of state abbreviations to filter to. By default, all possible
+#'  values will be returned by the function.
+#' @param geoselect Optionally, supply a vector of county, CBSA, or place 
+#' (depending on whether `geog` is set to `"county"`, `"cbsa"`, or `"place"`) 
+#' GEOIDs to filter to. By default, all possible values will be returned by the 
+#' function. To determine the corresponding GEOID for a particular county, CBSA,
+#'  or place, use [county_geoids()], [cbsa_geoids()], pr [place_geoids()], 
+#'  respectively.
+#'  @param vars_info Specify whether to append columns containing 
+#'  category, source, and type information for each variable in this function's
+#'   output data frame. Default value is `TRUE`. The appended information will 
+#'   be the same as that contained in the [retrieve_data_vars()] data frame.
+#'  @param sf If `FALSE` (default value), function returns a data frame without 
+#'  geospatial polygon geometry. If `TRUE`, function returns a shapefile with 
+#'  geospatial polygon geometry.
 #' @export
 
-retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL) {
+retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL, vars_info = TRUE, sf = FALSE) {
+  
+  # determining which argument type user supplied to vars and proceeding accordingly
+  if (is.data.frame(vars)) {vars <- vars$variable}
+  if ("economy" %in% vars | "housing & family" %in% vars | "transportation & walkability" %in% vars | "health" %in% vars | "education" %in% vars | "crime" %in% vars | "community spaces" %in% vars | "sustainability" %in% vars | "governance" %in% vars | "demographics" %in% vars) {
+    vars_df <- retrieve_data_vars() |>
+      dplyr::filter(category %in% vars)
+    vars <- vars_df$variable
+  }
   
   # creating an empty dataframe with column names for use when rbind-ing datasets together
-  empty_df <- data.frame(matrix(nrow = 0, ncol = 6))
-  colnames(empty_df) = c("GEOID", "variable", "estimate", "moe", "year", "type")
+  empty_df <- data.frame(matrix(nrow = 0, ncol = 5))
+  colnames(empty_df) = c("GEOID", "variable", "estimate", "moe", "year")
   
   
   # filtering based on the availability of ACS data for counties and CBSAs (which seems to always be 5-year)
@@ -825,7 +806,7 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
   
   bea_yrs <- yrs[yrs >= 2001 & yrs <= 2023]
   
-  if ("GDP per capita" %in% vars & length(bea_yrs) != 0) {
+  if ("GDP per capita" %in% vars & length(bea_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
     
     bea_data <- bea_retrieval(yrs = bea_yrs, geog = geog)
   } else {bea_data <- empty_df}
@@ -833,7 +814,7 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
   
   aqi_yrs <- yrs[yrs >= 1980 & yrs <= 2024]
   
-  if (("median AQI" %in% vars | "unhealthy air days" %in% vars) & length(aqi_yrs) != 0) {
+  if (("median AQI" %in% vars | "unhealthy air days" %in% vars) & length(aqi_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
     
     aqi_vars <- vars[vars %in% c("median AQI", "unhealthy air days")]
     
@@ -853,22 +834,30 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
   data_all <- rbind(census_data, bea_data, aqi_data, crime_data)
   
   
-  # retrieving county/CBSA names to join with data
+  # retrieving county/CBSA/place names to join with data
   if (geog == "county") {
-    geog_county <- county_geoids(state)
+    geog_county <- county_geoids(state = state, sf = sf)
     
-    data_all <- dplyr::inner_join(data_all, geog_county, by = dplyr::join_by(GEOID))
+    data_all <- dplyr::inner_join(geog_county, data_all, by = dplyr::join_by(GEOID))
     
-    data_all <- data_all[, c("GEOID", "county", "state_abbr", "year", "variable", "type", "estimate", "moe")]
+    data_all <- data_all[, c("GEOID", "county", "state_abbr", "year", "variable", "estimate", "moe")]
     }
   
   if (geog == "cbsa") {
-    geog_cbsa <- cbsa_geoids()
+    geog_cbsa <- cbsa_geoids(sf = sf)
     
-    data_all <- dplyr::inner_join(data_all, geog_cbsa, by = dplyr::join_by(GEOID))
+    data_all <- dplyr::inner_join(geog_cbsa, data_all, by = dplyr::join_by(GEOID))
     
-    data_all <- data_all[, c("GEOID", "cbsa", "year", "variable", "type", "estimate", "moe")]
-    }
+    data_all <- data_all[, c("GEOID", "cbsa", "year", "variable", "estimate", "moe")]
+  }
+  
+  if (geog == "place") {
+    geog_place <- place_geoids(state = state, sf = sf)
+    
+    data_all <- dplyr::inner_join(geog_place, data_all, by = dplyr::join_by(GEOID))
+    
+    data_all <- data_all[, c("GEOID", "place", "year", "variable", "estimate", "moe")]
+  }
   
   if (!is.null(geoselect)) {
     
@@ -876,7 +865,29 @@ retrieve_data <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect =
       dplyr::filter(GEOID %in% geoselect)
   }
   
+  if (vars_info == TRUE) {
+    
+    vars_info_df <- retrieve_data_vars() |>
+      dplyr::select(c(variable, category, source, type))
+      
+    poverty_subset <- subset(vars_info_df, variable == "poverty")
+      
+    poverty_subset_2 <- poverty_subset
+      
+    poverty_subset$variable = "below 150 percent poverty level"
+      
+    poverty_subset_2$variable = "below 100 percent poverty level"
+      
+    vars_info_df <- vars_info_df |>
+      dplyr::filter(variable != "poverty")
+      
+    vars_info_df <- rbind(vars_info_df, poverty_subset, poverty_subset_2)
+
+    data_all <- dplyr::inner_join(data_all, vars_info_df)
+  }
+  
   data_all <- data_all |>
+    dplyr::filter(!is.na(estimate)) |>
     dplyr::arrange(GEOID, year)
   
   return(data_all)

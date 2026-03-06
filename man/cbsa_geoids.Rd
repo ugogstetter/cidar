@@ -4,11 +4,18 @@
 \alias{cbsa_geoids}
 \title{Retrieves CBSA GEOIDs for use in \code{\link[=retrieve_data]{retrieve_data()}} and \code{\link[=travel_time]{travel_time()}}}
 \usage{
-cbsa_geoids()
+cbsa_geoids(sf = FALSE)
+}
+\arguments{
+\item{sf}{If \code{FALSE} (default value), function returns a data frame without
+geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
+geospatial polygon geometry.}
 }
 \description{
-Returns a table of U.S. CBSAs (Core Based Statistical Areas)
-with their corresponding GEOIDs, for use in querying the \code{\link[=retrieve_data]{retrieve_data()}}
-and \code{\link[=travel_time]{travel_time()}} functions. If you have not already set a U.S. Census
-Bureau API key using \code{\link[=census_key]{census_key()}}, do so before running this function.
+Using the tigris
+\link[tigris:core_based_statistical_areas]{core_based_statistical_areas()}
+function, returns a dataset of CBSAs (Core Based Statistical
+Areas) with their corresponding GEOIDs, as designated by the U.S.
+Census Bureau for the year 2023, for use in querying the \code{\link[=retrieve_data]{retrieve_data()}}
+and \code{\link[=travel_time]{travel_time()}} functions.
 }

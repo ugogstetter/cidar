@@ -3,8 +3,10 @@
 #' @description In order to collect and display data from app viewers in a 
 #' Shiny app created using [web_app()], this function must first be executed so 
 #' that data can be written to and read from Google Sheets. This requires 
-#' a Google account. This function only needs to be run once, as your account
-#' information will then be saved across R sessions.
+#' a Google account. This function only needs to be run once; this function 
+#' will call googlesheets4's [gs4_auth()][googlesheets4::gs4_auth] function to 
+#' prompt you to log into your Google account, and then your account 
+#' information will be saved across R sessions.
 #' @param email Supply the email address associated with your Google account.
 #' @export
 

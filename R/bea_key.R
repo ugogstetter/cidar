@@ -2,7 +2,7 @@
 #' @description Saves your Bureau of Economic Analysis API key so you won't have
 #'  to reenter it, even between R sessions. If you haven't yet registered for a
 #'   Bureau of Economic Analysis API key, follow the instructions at
-#'    http://www.bea.gov/API/signup/index.cfm.
+#'    \url{http://www.bea.gov/API/signup/index.cfm}.
 #' @param key Supply your Bureau of Economic Analysis API key.
 #' @export
 

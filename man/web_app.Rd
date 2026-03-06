@@ -4,7 +4,7 @@
 \alias{web_app}
 \title{Creates Shiny app to assist in sharing and collecting community-focused data}
 \usage{
-web_app(response_question, sheet_id, sheet_name)
+web_app(response_question, sheet_id, sheet_name, shapefile)
 }
 \arguments{
 \item{response_question}{Prompt for web app viewers on the type of data you
@@ -13,12 +13,22 @@ are looking for from them}
 \item{sheet_id}{ID of the Google Sheet to use (WILL ADD FURTHER INSTRUCTIONS)}
 
 \item{sheet_name}{Name of the sheet to use within Google Sheets document}
+
+\item{shapefile}{Shapefile of data to display on map. Shapefile must contain
+a \code{"year"} variable (the web app will include a selector slider for
+years), a \code{"variable"} variable (the web app will include a page displaying
+data on each variable), and an \code{"estimate"} variable (for the value or
+estimate associated with each value in the \code{"variable"} column). The
+shapefile's geometry must be polygons. The \code{"year"} variable values must all
+be the same number of years apart.}
 }
 \description{
-Creates web app using the R Shiny package, with options for
-visualizing your existing data and analysis for community sharing, as well
-as for visualizing and collecting data from app viewers (e.g. community
-members). If you have not yet done so, you must run \code{\link[=google_sheets_auth]{google_sheets_auth()}},
-following the input instructions, before being able to visualize and collect
-data from viewers through this function.
+Creates web app using the \link[shiny:shiny-package]{shiny} package,
+with options for visualizing your existing data and analysis for community
+sharing, as well as for visualizing and collecting data from app viewers
+(e.g. community members). If you have not yet done so, you must run
+\code{\link[=google_sheets_auth]{google_sheets_auth()}}, following the input instructions, before being able
+to visualize and collect data from viewers through this function, which
+will draw from the \link[googlesheets4:googlesheets4-package]{googlesheets4}
+package functionality to do so.
 }

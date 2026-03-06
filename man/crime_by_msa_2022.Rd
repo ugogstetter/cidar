@@ -5,12 +5,11 @@
 \alias{crime_by_msa_2022}
 \title{Crimes by Metropolitan Statistical Area in the United States in 2022}
 \format{
-A data frame with 2826 rows and 4 variables:
+A data frame with 2826 rows and 3 variables:
 \describe{
 \item{msa}{metropolitan statistical area}
 \item{variable}{crime type}
-\item{estimate}{crime rate}
-\item{year}{year (always 2022)}
+\item{estimate}{crime rate per 100,000 inhabitants}
 ...
 }
 }
@@ -21,8 +20,12 @@ A data frame with 2826 rows and 4 variables:
 crime_by_msa_2022
 }
 \description{
-A dataset with the rates at which various crime types occurred in metropolitan
-statistical areas (MSAs) across the United States in 2022. Modified from the
-given URL.
+A dataset with the rates at which various crime types occurred in
+metropolitan statistical areas (MSAs) across the United States in 2022.
+Modified from the U.S. Federal Bureau of Investigation's Crime in the United
+States Annual Reports - 2022 CIUS Estimations, found at the given source
+URL. Be careful in comparing estimates across years; see
+\url{https://ucr.fbi.gov/ucr-statistics-their-proper-use} for additional
+guidance on data use.
 }
 \keyword{datasets}
