@@ -1,3 +1,5 @@
+globalVariables(c("STATEFP", "STUSPS", "NAMELSAD"))
+
 #' Retrieves place GEOIDs for use in [retrieve_data()]
 #' @description Using the tigris 
 #' [places()][tigris::places] and [states()][tigris::states]

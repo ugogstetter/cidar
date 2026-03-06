@@ -45,12 +45,14 @@ values will be returned by the function.}
 GEOIDs to filter to. By default, all possible values will be returned by the
 function. To determine the corresponding GEOID for a particular county, CBSA,
 or place, use \code{\link[=county_geoids]{county_geoids()}}, \code{\link[=cbsa_geoids]{cbsa_geoids()}}, pr \code{\link[=place_geoids]{place_geoids()}},
-respectively.
-@param vars_info Specify whether to append columns containing
+respectively.}
+
+\item{vars_info}{Specify whether to append columns containing
 category, source, and type information for each variable in this function's
 output data frame. Default value is \code{TRUE}. The appended information will
-be the same as that contained in the \code{\link[=retrieve_data_vars]{retrieve_data_vars()}} data frame.
-@param sf If \code{FALSE} (default value), function returns a data frame without
+be the same as that contained in the \code{\link[=retrieve_data_vars]{retrieve_data_vars()}} data frame.}
+
+\item{sf}{If \code{FALSE} (default value), function returns a data frame without
 geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
 geospatial polygon geometry.}
 }

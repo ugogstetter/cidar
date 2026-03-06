@@ -1,3 +1,5 @@
+globalVariables(c("NAMELSAD"))
+
 #' Retrieves CBSA GEOIDs for use in [retrieve_data()] and [travel_time()]
 #' @description Using the tigris 
 #' [core_based_statistical_areas()][tigris::core_based_statistical_areas] 

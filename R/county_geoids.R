@@ -1,3 +1,5 @@
+globalVariables(c("STATEFP", "NAMELSAD", "STUSPS"))
+
 #' Retrieves county GEOIDs for use in [retrieve_data()] and [travel_time()]
 #' @description Using the tigris 
 #' [counties()][tigris::counties] and [states()][tigris::states]

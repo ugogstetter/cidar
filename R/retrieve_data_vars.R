@@ -1,3 +1,5 @@
+globalVariables(c("category"))
+
 #' Returns table of variables retrievable through [retrieve_data()]
 #' @description Returns a table with all variables retrievable through the 
 #' [retrieve_data()] function. Variables are sorted 
