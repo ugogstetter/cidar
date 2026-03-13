@@ -2,7 +2,7 @@
 % Please edit documentation in R/census_key.R
 \name{census_key}
 \alias{census_key}
-\title{Establishes a U.S. Census Bureau API key for \code{\link[=retrieve_data]{retrieve_data()}}}
+\title{Establishes a U.S. Census Bureau API key for \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
 census_key(key)
 }

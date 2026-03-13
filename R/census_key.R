@@ -1,6 +1,6 @@
-#' Establishes a U.S. Census Bureau API key for [retrieve_data()]
-#' @description Saves your Census Bureau API key so you won't have to reenter 
-#' it, even between R sessions. If you haven't yet registered for a Census 
+#' Establishes a U.S. Census Bureau API key for [retrieve_aggregated()]
+#' @description Saves your Census Bureau API key so you won't have to reenter
+#' it, even between R sessions. If you haven't yet registered for a Census
 #' Bureau API key, follow the instructions at
 #'  \url{https://api.census.gov/data/key_signup.html}.
 #' @param key Supply your Census Bureau API key.
@@ -23,5 +23,5 @@ census_key <- function(key) {
   }
   if (replaced == FALSE) {
     write(paste0("census_key_value=\"", key, "\""), renv, sep = "\n", append = TRUE)
-    }
+  }
 }

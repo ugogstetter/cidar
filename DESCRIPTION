@@ -17,8 +17,8 @@ Imports:
     readxl,
     traveltimeR,
     sf,
-    readxl,
     googlesheets4,
     shiny,
     leaflet,
-    tigris
+    tigris,
+    arcgislayers

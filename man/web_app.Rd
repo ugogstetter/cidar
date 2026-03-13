@@ -4,7 +4,13 @@
 \alias{web_app}
 \title{Creates Shiny app to assist in sharing and collecting community-focused data}
 \usage{
-web_app(response_question, sheet_id, sheet_name, shapefile)
+web_app(
+  response_question,
+  sheet_id,
+  sheet_name,
+  shapefile_vars,
+  shapefile_features
+)
 }
 \arguments{
 \item{response_question}{Prompt for web app viewers on the type of data you
@@ -14,13 +20,26 @@ are looking for from them}
 
 \item{sheet_name}{Name of the sheet to use within Google Sheets document}
 
-\item{shapefile}{Shapefile of data to display on map. Shapefile must contain
+\item{shapefile_vars}{Shapefile of data, specifically with numeric variables
+that can be color-coded, to display on map alongside a slider to select a variable
+to display. Shapefile must contain
 a \code{"year"} variable (the web app will include a selector slider for
 years), a \code{"variable"} variable (the web app will include a page displaying
-data on each variable), and an \code{"estimate"} variable (for the value or
+data on each variable, e.g. unemployment, median air quality), and an
+\code{"estimate"} variable (for the value or
 estimate associated with each value in the \code{"variable"} column). The
 shapefile's geometry must be polygons. The \code{"year"} variable values must all
 be the same number of years apart.}
+
+\item{shapefile_features}{Shapefile of points and/or polygons, without a corresponding
+numeric variable. All points and polygons in this
+shapefile will display simultaneously by default. Shapefile must contain
+a \code{"features"} variable (for the name of the feature category, e.g. park, school),
+a \code{"name"} variable (for the name of each individual feature, e.g. Central Park),
+and a \code{"type"} variable (delineating different feature types within each feature
+category, e.g. private school, public school). All observations corresponding
+to a given value of the \code{"features"} variable must be either points or
+polygons (i.e. no mixing of points and polygons within a feature category).}
 }
 \description{
 Creates web app using the \link[shiny:shiny-package]{shiny} package,

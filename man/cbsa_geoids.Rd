@@ -2,7 +2,7 @@
 % Please edit documentation in R/cbsa_geoids.R
 \name{cbsa_geoids}
 \alias{cbsa_geoids}
-\title{Retrieves CBSA GEOIDs for use in \code{\link[=retrieve_data]{retrieve_data()}} and \code{\link[=travel_time]{travel_time()}}}
+\title{Retrieves CBSA GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} and \code{\link[=travel_time]{travel_time()}}}
 \usage{
 cbsa_geoids(sf = FALSE)
 }
@@ -16,6 +16,6 @@ Using the tigris
 \link[tigris:core_based_statistical_areas]{core_based_statistical_areas()}
 function, returns a dataset of CBSAs (Core Based Statistical
 Areas) with their corresponding GEOIDs, as designated by the U.S.
-Census Bureau for the year 2023, for use in querying the \code{\link[=retrieve_data]{retrieve_data()}}
+Census Bureau for the year 2023, for use in querying the \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}
 and \code{\link[=travel_time]{travel_time()}} functions.
 }

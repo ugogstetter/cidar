@@ -1,4 +1,4 @@
-#' Establishes a U.S. Bureau of Economic Analysis API key for [retrieve_data()]
+#' Establishes a U.S. Bureau of Economic Analysis API key for [retrieve_aggregated()]
 #' @description Saves your Bureau of Economic Analysis API key so you won't have
 #'  to reenter it, even between R sessions. If you haven't yet registered for a
 #'   Bureau of Economic Analysis API key, follow the instructions at

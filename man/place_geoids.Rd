@@ -2,7 +2,7 @@
 % Please edit documentation in R/place_geoids.R
 \name{place_geoids}
 \alias{place_geoids}
-\title{Retrieves place GEOIDs for use in \code{\link[=retrieve_data]{retrieve_data()}}}
+\title{Retrieves place GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
 place_geoids(state = NULL, sf = FALSE)
 }
@@ -20,5 +20,5 @@ Using the tigris
 \link[tigris:places]{places()} and \link[tigris:states]{states()}
 functions, returns a dataset of places with their
 corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
-the year 2023, for use in querying the \code{\link[=retrieve_data]{retrieve_data()}} function.
+the year 2023, for use in querying the \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function.
 }

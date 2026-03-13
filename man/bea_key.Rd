@@ -2,7 +2,7 @@
 % Please edit documentation in R/bea_key.R
 \name{bea_key}
 \alias{bea_key}
-\title{Establishes a U.S. Bureau of Economic Analysis API key for \code{\link[=retrieve_data]{retrieve_data()}}}
+\title{Establishes a U.S. Bureau of Economic Analysis API key for \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
 bea_key(key)
 }
