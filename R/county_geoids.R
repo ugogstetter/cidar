@@ -29,7 +29,7 @@ county_geoids <- function(state = NULL, sf = FALSE) {
   geog_state <- sf::st_drop_geometry(geog_state)
 
   geog_county <- dplyr::inner_join(geog_county, geog_state, by = dplyr::join_by(STATEFP)) |>
-    dplyr::mutate(county = paste0(NAMELSAD, ", ", NAME)) |>
+    dplyr::mutate(name = paste0(NAMELSAD, ", ", NAME)) |>
     dplyr::rename(state_abbr = STUSPS) |>
     dplyr::select(!c(NAMELSAD, NAME, STATEFP)) |>
     dplyr::arrange(GEOID)

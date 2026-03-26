@@ -15,7 +15,6 @@ Imports:
     tidycensus,
     tidyr,
     readxl,
-    traveltimeR,
     sf,
     googlesheets4,
     shiny,

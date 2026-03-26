@@ -4,8 +4,8 @@
 #' metropolitan statistical areas (MSAs) across the United States in 2020.
 #' Modified from the U.S. Federal Bureau of Investigation's Crime in the United
 #'  States Annual Reports - 2020 CIUS Estimations, found at the given source
-#'  URL. Be careful in comparing estimates across years; see
-#' \url{https://ucr.fbi.gov/ucr-statistics-their-proper-use} for additional
+#'  URL. Be careful in comparing estimates across years; see the FBI Universal 
+#'  Crime Reporting document [here](https://ucr.fbi.gov/ucr-statistics-their-proper-use) for additional
 #' guidance on data use.
 #'
 #' @format A data frame with 2655 rows and 3 variables:
@@ -15,7 +15,7 @@
 #'   \item{estimate}{crime rate per 100,000 inhabitants}
 #'   ...
 #' }
-#' @source \url{https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads}
+#' @source [FBI Crime Data Explorer Documents & Downloads](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads)
 "crime_by_msa_2020"
 
 
@@ -25,8 +25,8 @@
 #' metropolitan statistical areas (MSAs) across the United States in 2022.
 #' Modified from the U.S. Federal Bureau of Investigation's Crime in the United
 #'  States Annual Reports - 2022 CIUS Estimations, found at the given source
-#'  URL. Be careful in comparing estimates across years; see
-#' \url{https://ucr.fbi.gov/ucr-statistics-their-proper-use} for additional
+#'  URL. Be careful in comparing estimates across years; see the FBI Universal 
+#'  Crime Reporting document [here](https://ucr.fbi.gov/ucr-statistics-their-proper-use) for additional
 #' guidance on data use.
 #'
 #' @format A data frame with 2826 rows and 3 variables:
@@ -36,7 +36,7 @@
 #'   \item{estimate}{crime rate per 100,000 inhabitants}
 #'   ...
 #' }
-#' @source \url{https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads}
+#' @source [FBI Crime Data Explorer Documents & Downloads](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads)
 "crime_by_msa_2022"
 
 
@@ -46,8 +46,8 @@
 #' metropolitan statistical areas (MSAs) across the United States in 2023.
 #' Modified from the U.S. Federal Bureau of Investigation's Crime in the United
 #'  States Annual Reports - 2023 CIUS Estimations, found at the given source
-#'  URL. Be careful in comparing estimates across years; see
-#' \url{https://ucr.fbi.gov/ucr-statistics-their-proper-use} for additional
+#'  URL. Be careful in comparing estimates across years; see the FBI Universal 
+#'  Crime Reporting document [here](https://ucr.fbi.gov/ucr-statistics-their-proper-use) for additional
 #' guidance on data use.
 #'
 #' @format A data frame with 2988 rows and 3 variables:
@@ -57,7 +57,7 @@
 #'   \item{estimate}{crime rate per 100,000 inhabitants}
 #'   ...
 #' }
-#' @source \url{https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads}
+#' @source [FBI Crime Data Explorer Documents & Downloads](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads)
 "crime_by_msa_2023"
 
 #' Crimes by Metropolitan Statistical Area in the United States in 2024
@@ -66,8 +66,8 @@
 #' metropolitan statistical areas (MSAs) across the United States in 2024.
 #' Modified from the U.S. Federal Bureau of Investigation's Crime in the United
 #'  States Annual Reports - 2024 CIUS Estimations, found at the given source
-#'  URL. Be careful in comparing estimates across years; see
-#' \url{https://ucr.fbi.gov/ucr-statistics-their-proper-use} for additional
+#'  URL. Be careful in comparing estimates across years; see the FBI Universal 
+#'  Crime Reporting document [here](https://ucr.fbi.gov/ucr-statistics-their-proper-use) for additional
 #' guidance on data use.
 #'
 #' @format A data frame with 3087 rows and 3 variables:
@@ -77,5 +77,5 @@
 #'   \item{estimate}{crime rate per 100,000 inhabitants}
 #'   ...
 #' }
-#' @source \url{https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads}
+#' @source [FBI Crime Data Explorer Documents & Downloads](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/downloads)
 "crime_by_msa_2024"

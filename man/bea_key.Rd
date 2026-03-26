@@ -12,6 +12,6 @@ bea_key(key)
 \description{
 Saves your Bureau of Economic Analysis API key so you won't have
 to reenter it, even between R sessions. If you haven't yet registered for a
-Bureau of Economic Analysis API key, follow the instructions at
-\url{http://www.bea.gov/API/signup/index.cfm}.
+Bureau of Economic Analysis API key, follow the instructions on the bea.gov
+webpage \href{http://www.bea.gov/API/signup/index.cfm}{here}.
 }

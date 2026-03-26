@@ -5,31 +5,37 @@
 \title{Creates Shiny app to assist in sharing and collecting community-focused data}
 \usage{
 web_app(
-  response_question,
-  sheet_id,
-  sheet_name,
+  project_name,
+  title,
+  response_questions,
   shapefile_vars,
   shapefile_features
 )
 }
 \arguments{
-\item{response_question}{Prompt for web app viewers on the type of data you
-are looking for from them}
+\item{project_name}{Name of project you are running this function for. Will
+use the same Google Sheets document as any other time you call this function.
+The first time you specify a certain project name, this function will
+create a corresponding Google Sheets document.}
 
-\item{sheet_id}{ID of the Google Sheet to use (WILL ADD FURTHER INSTRUCTIONS)}
+\item{title}{Title to display at the top of the web app.}
 
-\item{sheet_name}{Name of the sheet to use within Google Sheets document}
+\item{response_questions}{Vector of prompts for web app viewers on the type
+of data you are looking for from them. Each prompt will appear as a different
+question, with data to be included on a different sheet in the Google Sheets
+document.}
 
 \item{shapefile_vars}{Shapefile of data, specifically with numeric variables
 that can be color-coded, to display on map alongside a slider to select a variable
 to display. Shapefile must contain
 a \code{"year"} variable (the web app will include a selector slider for
-years), a \code{"variable"} variable (the web app will include a page displaying
-data on each variable, e.g. unemployment, median air quality), and an
+years), a \code{"variable"} variable (the web app will include a dropdown for
+viewers to select a variable for display, e.g. unemployment, median air quality), an
 \code{"estimate"} variable (for the value or
-estimate associated with each value in the \code{"variable"} column). The
-shapefile's geometry must be polygons. The \code{"year"} variable values must all
-be the same number of years apart.}
+estimate associated with each value in the \code{"variable"} column), and a \code{"name"} variable containing
+the names of the geographic areas (e.g. Orange County), which will be
+displayed alongside estimates upon mouse-over of the polygons. The
+shapefile's geometry must be polygons.}
 
 \item{shapefile_features}{Shapefile of points and/or polygons, without a corresponding
 numeric variable. All points and polygons in this
@@ -49,5 +55,5 @@ sharing, as well as for visualizing and collecting data from app viewers
 \code{\link[=google_sheets_auth]{google_sheets_auth()}}, following the input instructions, before being able
 to visualize and collect data from viewers through this function, which
 will draw from the \link[googlesheets4:googlesheets4-package]{googlesheets4}
-package functionality to do so.
+package functionality to do so.'
 }

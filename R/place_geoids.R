@@ -49,7 +49,7 @@ place_geoids <- function(state = NULL, sf = FALSE) {
   }
 
   geog_place <- dplyr::inner_join(geog_place, geog_state, by = dplyr::join_by(STATEFP)) |>
-    dplyr::mutate(place = paste0(NAMELSAD, ", ", NAME)) |>
+    dplyr::mutate(name = paste0(NAMELSAD, ", ", NAME)) |>
     dplyr::rename(state_abbr = STUSPS) |>
     dplyr::select(!c(NAMELSAD, NAME, STATEFP)) |>
     dplyr::arrange(GEOID)

@@ -1,8 +1,8 @@
 #' Establishes a U.S. Bureau of Economic Analysis API key for [retrieve_aggregated()]
 #' @description Saves your Bureau of Economic Analysis API key so you won't have
 #'  to reenter it, even between R sessions. If you haven't yet registered for a
-#'   Bureau of Economic Analysis API key, follow the instructions at
-#'    \url{http://www.bea.gov/API/signup/index.cfm}.
+#'   Bureau of Economic Analysis API key, follow the instructions on the bea.gov
+#'    webpage [here](http://www.bea.gov/API/signup/index.cfm).
 #' @param key Supply your Bureau of Economic Analysis API key.
 #' @export
 

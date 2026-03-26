@@ -25,8 +25,8 @@ categorized is available at (add link to data documentation w/ explanation?).
 \details{
 Details on included datasets:
 \itemize{
-\item Census Bureau API - American Community Survey 5-year estimates: These estimates should only be compared with each other across non-overlapping 5-year periods. See \url{https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html} for more guidance on data use.
-\item U.S. Environmental Protection Agency: See \url{https://aqs.epa.gov/aqsweb/airdata/download_files.html} for more information on data files.
-\item U.S. Federal Bureau of Investigation - Crime in the United States estimations: Be careful in comparing estimates across years; see \url{https://ucr.fbi.gov/ucr-statistics-their-proper-use} for additional guidance on data use. Note that the definition of rape was changed between 2012 and 2013, see \url{https://ucr.fbi.gov/crime-in-the-u.s/2013/crime-in-the-u.s.-2013/rape-addendum/rape_addendum_final} for more details.
+\item Census Bureau API - American Community Survey 5-year estimates: These estimates should only be compared with each other across non-overlapping 5-year periods. See the Census Bureau webpage \href{https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html}{here} for more guidance on data use.
+\item U.S. Environmental Protection Agency: See the EPA Air Data pre-generated data files \href{https://aqs.epa.gov/aqsweb/airdata/download_files.html}{here} for more information on data files.
+\item U.S. Federal Bureau of Investigation - Crime in the United States estimations: Be careful in comparing estimates across years; see the FBI Universal Crime Reporting document \href{https://ucr.fbi.gov/ucr-statistics-their-proper-use}{here} for additional guidance on data use. Note that the definition of rape was changed between 2012 and 2013, see the Crime in the United States 2013 rape addendum \href{https://ucr.fbi.gov/crime-in-the-u.s/2013/crime-in-the-u.s.-2013/rape-addendum/rape_addendum_final}{here} for more details.
 }
 }

@@ -15,7 +15,7 @@ globalVariables(c("NAMELSAD"))
 cbsa_geoids <- function(sf = FALSE) {
   geog_cbsa <- tigris::core_based_statistical_areas(year = 2023) |>
     dplyr::select(c(GEOID, NAMELSAD)) |>
-    dplyr::rename(cbsa = NAMELSAD) |>
+    dplyr::rename(name = NAMELSAD) |>
     dplyr::arrange(GEOID)
 
   if (sf == FALSE) {

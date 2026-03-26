@@ -14,6 +14,6 @@ travel_time_key(id, key)
 \description{
 Saves your TravelTime API ID and key so you won't have to
 re-enter it, even between R sessions. If you haven't yet registered for the
-TravelTime API, follow the instructions at
-\url{https://account.traveltime.com}.
+TravelTime API, follow the instructions on the TravelTime webpage
+\href{https://account.traveltime.com}{here}.
 }

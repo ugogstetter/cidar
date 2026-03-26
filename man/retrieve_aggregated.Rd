@@ -40,14 +40,20 @@ retrieve_aggregated(
 \item{vars}{Before supplying this argument, ensure you have read the
 \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} function description, and have run that function to
 return the data frame of retrievable variables. The \code{vars} argument of this
-\code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function can be supplied in one of three ways: as a vector
-of all variables you wish to retrieve, as a vector of variable categories
-you wish to retrieve all variables from (variable categories are given in
-the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} data frame), or as a version of the
-\code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} data frame filtered to only the rows corresponding to
-variables you wish to retrieve.}
+\code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function can be supplied in one of two ways:
+\itemize{
+\item As a vector of all variables you wish to retrieve. To retrieve all
+variables within one or more categories as given in the
+\code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} data frame, set \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}'s \code{vars}
+argument equal to a call to the \code{\link[=with_categories]{with_categories()}} function, which will
+return a vector of the desired variables.
+\item As a data frame, specifically a version of the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}}
+data frame filtered to only the rows corresponding to variables you wish to
+retrieve.
+}}
 
-\item{yrs}{Supply a year or range of years. If no value is supplied, will
+\item{yrs}{Supply a vector (in numeric format) of one or more years to filter
+to. If no value is supplied, will
 default to the largest possible range of years across which data is available
 on at least one of the selected variables. The years for which data is
 available for each variable are included in the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}}
@@ -62,7 +68,7 @@ included in the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars(
 supply a vector of state abbreviations to filter to. By default, all possible
 values will be returned by the function.}
 
-\item{geoselect}{Optionally, supply a vector of county, CBSA, or place
+\item{geoselect}{Optionally, supply a vector (in character format) of county, CBSA, or place
 (depending on whether \code{geog} is set to \code{"county"}, \code{"cbsa"}, or \code{"place"})
 GEOIDs to filter to. By default, all possible values will be returned by the
 function. To determine the corresponding GEOID for a particular county, CBSA,
