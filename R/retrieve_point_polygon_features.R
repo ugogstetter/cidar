@@ -1,3 +1,5 @@
+globalVariables(c("geometry_type", "features"))
+
 #' Returns table of geospatial feature sets retrievable through [retrieve_point_polygon()]
 #' @description Returns a table with all point and polygon feature sets 
 #' retrievable through the [retrieve_point_polygon()] function. For each set of 

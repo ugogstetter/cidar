@@ -1,12 +1,11 @@
 globalVariables(c("STATEFP", "NAMELSAD", "STUSPS"))
 
-#' Retrieves county GEOIDs for use in [retrieve_aggregated()] and [travel_time()]
+#' Retrieves county GEOIDs for use in [retrieve_aggregated()]
 #' @description Using the tigris
 #' [counties()][tigris::counties] and [states()][tigris::states]
 #' functions, returns a dataset of counties with their
 #' corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
-#'  the year 2023, for use in querying the [retrieve_aggregated()] and [travel_time()]
-#'   functions.
+#'  the year 2023, for use in querying the [retrieve_aggregated()] function.
 #' @param state Optionally, specify a vector of state abbreviations to filter
 #' to. By default, all Census-designated counties in U.S. states and territories
 #'  will be returned by the function.

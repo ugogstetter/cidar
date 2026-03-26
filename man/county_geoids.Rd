@@ -2,7 +2,7 @@
 % Please edit documentation in R/county_geoids.R
 \name{county_geoids}
 \alias{county_geoids}
-\title{Retrieves county GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} and \code{\link[=travel_time]{travel_time()}}}
+\title{Retrieves county GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
 county_geoids(state = NULL, sf = FALSE)
 }
@@ -20,6 +20,5 @@ Using the tigris
 \link[tigris:counties]{counties()} and \link[tigris:states]{states()}
 functions, returns a dataset of counties with their
 corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
-the year 2023, for use in querying the \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} and \code{\link[=travel_time]{travel_time()}}
-functions.
+the year 2023, for use in querying the \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function.
 }

@@ -98,7 +98,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
   
   server <- function(input, output) {
     
-    output$question_text <- renderText({
+    output$question_text <- shiny::renderText({
       
       if (input$submit_button == 0) {"Click button below to provide your own data/comments to add to the map"} 
       
@@ -108,7 +108,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
       
     })
     
-    output$submit_text <- renderText({
+    output$submit_text <- shiny::renderText({
       
       if (input$submit_button == 0) {"Click to begin"} 
       
@@ -118,21 +118,21 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
       
     })
     
-    filtered_features <- reactive({shapefile_features[shapefile_features$features %in% input$features_input,]}) |>
+    filtered_features <- shiny::reactive({shapefile_features[shapefile_features$features %in% input$features_input,]}) |>
       # binding the event makes the features and their legend reload every time the vars or features are changed, so that the features will stay on top of the vars on the map and so the features legend won't go above the vars legend
-      bindEvent(input$year_input, input$variable_input, input$features_input)
+      shiny::bindEvent(input$year_input, input$variable_input, input$features_input)
     
     features_pal <- leaflet::colorFactor(palette = "RdGy", domain = shapefile_features$features)
     
-    vars_none <- reactive({ifelse(input$variable_input == "none", TRUE, FALSE)})
+    vars_none <- shiny::reactive({ifelse(input$variable_input == "none", TRUE, FALSE)})
     
-    filtered_vars_pal <- reactive({shapefile_vars$estimate[shapefile_vars$variable == input$variable_input]})
+    filtered_vars_pal <- shiny::reactive({shapefile_vars$estimate[shapefile_vars$variable == input$variable_input]})
     
-    vars_pal <- reactive({leaflet::colorNumeric(palette = "BuPu", domain = filtered_vars_pal())})
+    vars_pal <- shiny::reactive({leaflet::colorNumeric(palette = "BuPu", domain = filtered_vars_pal())})
     
-    filtered_vars <- reactive({shapefile_vars[shapefile_vars$year == input$year_input, ][shapefile_vars$variable[shapefile_vars$year == input$year_input] == input$variable_input, ]})
+    filtered_vars <- shiny::reactive({shapefile_vars[shapefile_vars$year == input$year_input, ][shapefile_vars$variable[shapefile_vars$year == input$year_input] == input$variable_input, ]})
     
-    collected_points <- reactive({
+    collected_points <- shiny::reactive({
       points_df <- data.frame(latitude = numeric(), longitude = numeric(), comment = character(), timestamp = as.POSIXct(character()), sheet = character())
       for (i in 1:num_questions) {
         points_df_1 <- googlesheets4::read_sheet(ss = sheet_id, sheet = paste0("q", as.character(i))) |>
@@ -150,7 +150,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
       collected_points_initial <- rbind(collected_points_initial, collected_points_initial_1)
     }
     
-    input_comment <- reactive({input$comment})
+    input_comment <- shiny::reactive({input$comment})
     
     map_click_true <- FALSE
     
@@ -166,24 +166,24 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
         )
     })
     
-    observe({updateTextInput(inputId = "comment", value = "")}) |>
-      bindEvent(input$submit_button)
+    shiny::observe({shiny::updateTextInput(inputId = "comment", value = "")}) |>
+      shiny::bindEvent(input$submit_button)
     
-    observe({
+    shiny::observe({
       
       if (input$submit_button > 0 & (map_click_true == FALSE | input_comment() == "")) {
         
-        updateActionButton(inputId = "submit_button", disabled = TRUE)
+        shiny::updateActionButton(inputId = "submit_button", disabled = TRUE)
         
       }
       
       if (input$submit_button > 0 & (map_click_true == TRUE | input_comment() != "")) {
         
-        updateActionButton(inputId = "submit_button", disabled = FALSE)
+        shiny::updateActionButton(inputId = "submit_button", disabled = FALSE)
       }
     })
     
-    observe({
+    shiny::observe({
       
       if (input$submit_button > 1) {
         
@@ -200,12 +200,12 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
         leaflet::leafletProxy("map") |>
           leaflet::addTiles(layerId = "map_click", group = "point selection")
       }
-      }, priority = 1) |> bindEvent(input$submit_button, ignoreNULL = TRUE)
+      }, priority = 1) |> shiny::bindEvent(input$submit_button, ignoreNULL = TRUE)
     
-    observe({
+    shiny::observe({
         
         if (input$points_input != "none") {
-          observe({
+          shiny::observe({
             
             if (input$points_input != "none") {
               
@@ -221,31 +221,31 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
               
               if (nrow(selected_sheet) > 0) {
                 
-                output$community_data_output <- renderText({""})
+                output$community_data_output <- shiny::renderText({""})
               
               leaflet::leafletProxy("map") |>
                 leaflet::clearGroup(group = c("collected points")) |>
                 leaflet::addMarkers(data = selected_sheet, lat = ~latitude, lng = ~longitude, label = ~comment, group = "collected points")
             } else {
               
-              output$community_data_output <- renderText({"No data available yet for this selection."})
+              output$community_data_output <- shiny::renderText({"No data available yet for this selection."})
               
               leaflet::leafletProxy("map") |>
                 leaflet::clearGroup(group = c("collected points"))
               
             }}}, priority = 0) |>
-            bindEvent(input$submit_button, ignoreNULL = FALSE)
+            shiny::bindEvent(input$submit_button, ignoreNULL = FALSE)
           
         } else {
           
-          output$community_data_output <- renderText({""})
+          output$community_data_output <- shiny::renderText({""})
           
           leaflet::leafletProxy("map") |>
             leaflet::clearGroup(group = c("collected points"))
         }
     })
     
-    observe({
+    shiny::observe({
       
       pal <- vars_pal()
       
@@ -262,7 +262,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
       }
     })
     
-    observe({
+    shiny::observe({
       
       for (x in unique(shapefile_features$features)) {
         
@@ -292,7 +292,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
         leaflet::addLegend(pal = features_pal, values = ~ filtered_features()$features, title = "feature", layerId = "features legend")
     })
     
-    observe({
+    shiny::observe({
       if (input$submit_button > 0 & input$submit_button <= num_questions) {
       click <- input$map_click
       latitude <- click$lat

@@ -1,3 +1,5 @@
+globalVariables(c("FEATTYPE", "name", "stop_name", "stop_type_text", "STREET", "CITY", "STATE", "ZIP", "STABR", "CENTRACT", "LIBNAME", "ADDRESS", "address", "geometry"))
+
 #' Retrieves shapefile of point or polygon features from chosen source
 #' @description Retrieves shapefile of point or polygon features of user-specified data category,
 #'  from data sources such as ArcGIS Online and the Institute of Museum and Library Services.
