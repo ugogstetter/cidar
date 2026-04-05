@@ -20,3 +20,9 @@ API key before attempting to retrieve the variable for the first time
 using \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}}. Once set, the API key will be saved across R
 sessions.
 }
+\details{
+Further notes on some data sources:
+\itemize{
+\item IRS Business Master File Data Catalog - National Center for Charitable Statistics, Urban Institute: The inconsistent quality of addresses provided for geocoding in this dataset means that some geocodes are incorrect or imprecise. In \code{cidar}'s version of the dataset, geocodes likely to be imprecise or inaccurate are removed; however, this means that not all nonprofits located in a given area will appear in the shapefile data. The values from this feature set's \code{type} variable correspond to the National Taxonomy of Exempt Entities Level 1 Industry Group code categories, as outlined on \href{https://nccs.urban.org/nccs/widgets/ntee_tables/ntee_descriptions.html}{this} Urban Institute webpage.
+}
+}

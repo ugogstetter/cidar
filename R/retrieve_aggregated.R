@@ -80,7 +80,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
   if (length(yrs[yrs >= 2020]) > 0) {
     for (x in yrs[yrs >= 2020]) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
+        geoselect
+      } else {
+        NULL
+      }) |>
         dplyr::mutate(year = x)
 
       census_data <- rbind(census_data, census_data_1)
@@ -93,7 +97,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["households_with_broadband"] <- "DP02_0153P"
     }
 
-    census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = 2019, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+    census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = 2019, state = state, county = if (geog == "county") {
+      geoselect
+    } else {
+      NULL
+    }) |>
       dplyr::mutate(year = 2019)
 
     census_data <- rbind(census_data, census_data_1)
@@ -107,7 +115,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
     for (x in yrs[yrs >= 2017 & yrs <= 2018]) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
+        geoselect
+      } else {
+        NULL
+      }) |>
         dplyr::mutate(year = x)
 
       census_data <- rbind(census_data, census_data_1)
@@ -127,7 +139,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
     for (x in yrs[yrs >= 2015 & yrs <= 2016]) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
+        geoselect
+      } else {
+        NULL
+      }) |>
         dplyr::mutate(year = x)
 
       census_data <- rbind(census_data, census_data_1)
@@ -152,7 +168,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
     for (x in yrs[yrs >= 2013 & yrs <= 2014]) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
+        geoselect
+      } else {
+        NULL
+      }) |>
         dplyr::mutate(year = x)
 
       census_data <- rbind(census_data, census_data_1)
@@ -177,7 +197,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
     for (x in yrs[yrs >= 2010 & yrs <= 2012]) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
+        geoselect
+      } else {
+        NULL
+      }) |>
         dplyr::mutate(year = x)
 
       census_data <- rbind(census_data, census_data_1)
@@ -209,7 +233,11 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
     for (x in yrs[yrs == 2009]) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {geoselect} else {NULL}) |>
+      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
+        geoselect
+      } else {
+        NULL
+      }) |>
         dplyr::mutate(year = x)
 
       census_data <- rbind(census_data, census_data_1)
@@ -220,10 +248,9 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 }
 
 census_retrieval_cleaning <- function(vars, yrs, geog, state, geoselect) {
-  
   census_data <- census_retrieval_vars(vars, yrs, geog, state, geoselect)
 
-  
+
   if ("poverty" %in% vars) {
     poverty_split <- split(census_data, census_data$variable == "below_100" | census_data$variable == "at_above_150" | census_data$variable == "poverty_total")
 
@@ -333,11 +360,15 @@ census_retrieval_cleaning <- function(vars, yrs, geog, state, geoselect) {
 bea_retrieval <- function(yrs, geog, geoselect) {
   if (geog == "county") {
     # U.S. county GDP over time
-    
-    if (is.null(geoselect)) {bea_fips <- "COUNTY"} else {bea_fips <- paste(geoselect, collapse = ",")}
-    
+
+    if (is.null(geoselect)) {
+      bea_fips <- "COUNTY"
+    } else {
+      bea_fips <- paste(geoselect, collapse = ",")
+    }
+
     bea_year <- paste(as.character(yrs), collapse = ",")
-    
+
     userSpecList <- list(
       "UserID" = Sys.getenv("bea_key_value"),
       "Method" = "GetData",
@@ -347,7 +378,7 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       "GeoFips" = bea_fips,
       "Year" = bea_year
     )
-    
+
     county_GDP <- bea.R::beaGet(userSpecList, asTable = TRUE) |>
       tidyr::pivot_longer(cols = paste0("DataValue_", as.character(min(yrs))):paste0("DataValue_", as.character(max(yrs))), names_to = "year", values_to = "gdp") |>
       dplyr::mutate(
@@ -391,10 +422,14 @@ bea_retrieval <- function(yrs, geog, geoselect) {
   if (geog == "cbsa") {
     # U.S. MSA GDP over time
 
-    if (is.null(geoselect)) {bea_fips <- "MSA"} else {bea_fips <- paste(geoselect, collapse = ",")}
-    
+    if (is.null(geoselect)) {
+      bea_fips <- "MSA"
+    } else {
+      bea_fips <- paste(geoselect, collapse = ",")
+    }
+
     bea_year <- paste(as.character(yrs), collapse = ",")
-    
+
     userSpecList <- list(
       "UserID" = Sys.getenv("bea_key_value"),
       "Method" = "GetData",
@@ -453,7 +488,7 @@ bea_retrieval <- function(yrs, geog, geoselect) {
 # should I be concerned that some counties don't seem to have many days with AQI? (see column in original datasets)
 # the value of geog can be either "county" or "cbsa"
 
-aqi_retrieval <- function(vars, yrs, geog) {
+aqi_retrieval <- function(vars, yrs, geog, state) {
   if (geog == "county") {
     temp <- tempfile()
 
@@ -518,28 +553,12 @@ aqi_retrieval <- function(vars, yrs, geog) {
         dplyr::select(!c(County, State, Unhealthy.Days, Days.with.AQI, Median.AQI))
     }
 
-    temp <- tempfile()
+    # matches GEOIDS to counties in the counties AQI dataset, matching on county and state name
+    aqi_counties <- county_geoids(state = state, namelsad = FALSE) |>
+      dplyr::select(GEOID, name) |>
+      dplyr::rename(county_state = name)
 
-    utils::download.file("https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip", temp)
-
-    temp2 <- tempfile()
-
-    # matches the GEOIDs in this spreadsheet, also from the EPA, to counties in the counties AQI dataset, matching on county and state name
-    aqs_monitors <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
-      dplyr::select(State.Code, County.Code, State.Name, County.Name) |>
-      dplyr::distinct() |>
-      dplyr::mutate(
-        County.Code = sprintf("%03d", County.Code),
-        GEOID = paste0(State.Code, County.Code),
-        county_state = paste0(County.Name, ", ", State.Name)
-      ) |>
-      dplyr::select(c(GEOID, county_state))
-
-    unlink(temp)
-
-    unlink(temp2)
-
-    aqi_data <- dplyr::inner_join(aqi_data, aqs_monitors, by = dplyr::join_by(county_state)) |>
+    aqi_data <- dplyr::inner_join(aqi_data, aqi_counties, by = dplyr::join_by(county_state)) |>
       dplyr::select(!county_state)
   }
 
@@ -731,13 +750,13 @@ crime_retrieval <- function(vars, yrs) {
 #' [retrieve_aggregated_vars()] function description, and have run that function to
 #' return the data frame of retrievable variables. The `vars` argument of this
 #' [retrieve_aggregated()] function can be supplied in one of two ways:
-#' * As a vector of all variables you wish to retrieve. To retrieve all 
-#' variables within one or more categories as given in the 
+#' * As a vector of all variables you wish to retrieve. To retrieve all
+#' variables within one or more categories as given in the
 #' [retrieve_aggregated_vars()] data frame, set [retrieve_aggregated()]'s `vars`
-#'  argument equal to a call to the [with_categories()] function, which will 
+#'  argument equal to a call to the [categories_vars()] function, which will
 #'  return a vector of the desired variables.
 #' * As a data frame, specifically a version of the [retrieve_aggregated_vars()]
-#'  data frame filtered to only the rows corresponding to variables you wish to 
+#'  data frame filtered to only the rows corresponding to variables you wish to
 #'  retrieve.
 #' @param yrs Supply a vector (in numeric format) of one or more years to filter
 #'  to. If no value is supplied, will
@@ -782,7 +801,6 @@ retrieve_aggregated.data.frame <- function(vars, yrs = 1980:2024, geog, state = 
 #' @rdname retrieve_aggregated
 #' @export
 retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL, vars_info = TRUE, sf = FALSE) {
-
   # creating an empty dataframe with column names for use when rbind-ing datasets together
   empty_df <- data.frame(matrix(nrow = 0, ncol = 5))
   colnames(empty_df) <- c("GEOID", "variable", "estimate", "moe", "year")
@@ -814,7 +832,7 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if (("median AQI" %in% vars | "unhealthy air days" %in% vars) & length(aqi_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
     aqi_vars <- vars[vars %in% c("median AQI", "unhealthy air days")]
 
-    aqi_data <- aqi_retrieval(vars = aqi_vars, yrs = aqi_yrs, geog = geog)
+    aqi_data <- aqi_retrieval(vars = aqi_vars, yrs = aqi_yrs, geog = geog, state = state)
   } else {
     aqi_data <- empty_df
   }
@@ -880,12 +898,12 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
 
     vars_info_df <- rbind(vars_info_df, poverty_subset, poverty_subset_2)
 
-    data_all <- dplyr::inner_join(data_all, vars_info_df)
+    data_all <- dplyr::inner_join(data_all, vars_info_df, by = dplyr::join_by(variable))
   }
 
   data_all <- data_all |>
     dplyr::filter(!is.na(estimate)) |>
-    dplyr::arrange(GEOID, year)
+    dplyr::arrange(GEOID, year, category, variable, name)
 
   return(data_all)
 }

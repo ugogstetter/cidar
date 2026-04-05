@@ -20,4 +20,5 @@ Imports:
     shiny,
     leaflet,
     tigris,
-    arcgislayers
+    arcgislayers,
+    leaflet.extras2

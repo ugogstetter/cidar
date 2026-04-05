@@ -4,12 +4,18 @@
 \alias{cbsa_geoids}
 \title{Retrieves CBSA GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
-cbsa_geoids(sf = FALSE)
+cbsa_geoids(sf = FALSE, namelsad = TRUE)
 }
 \arguments{
 \item{sf}{If \code{FALSE} (default value), function returns a data frame without
 geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
-geospatial polygon geometry.}
+geospatial polygon geometry.
+@param namelsad If \code{TRUE} (default value), the returned dataset's \code{name}
+variable will use a longer version of CBSA names (e.g.
+\code{"Arkadelphia, AR Micro Area"}) including each CBSA's LSAD (legal/
+statistical area description). If \code{FALSE}, the returned dataset's \code{name}
+variable will use a shorter version of CBSA names (e.g.
+\code{"Arkadelphia, AR"}) excluding each CBSA's LSAD.}
 }
 \description{
 Using the tigris

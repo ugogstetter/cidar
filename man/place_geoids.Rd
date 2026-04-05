@@ -4,7 +4,7 @@
 \alias{place_geoids}
 \title{Retrieves place GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
-place_geoids(state = NULL, sf = FALSE)
+place_geoids(state = NULL, sf = FALSE, namelsad = TRUE)
 }
 \arguments{
 \item{state}{Optionally, specify a vector of state abbreviations to filter
@@ -13,7 +13,13 @@ places) in U.S. states and territories will be returned by the function.}
 
 \item{sf}{If \code{FALSE} (default value), function returns a data frame without
 geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
-geospatial polygon geometry.}
+geospatial polygon geometry.
+@param namelsad If \code{TRUE} (default value), the returned dataset's \code{name}
+variable will use a longer version of place names (e.g.
+\code{"Hurtsboro town, Alabama"}) including each place's LSAD (legal/statistical
+area description). If \code{FALSE}, the returned dataset's \code{name}
+variable will use a shorter version of place names (e.g.
+\code{"Hurtsboro, Alabama"}) excluding each place's LSAD.}
 }
 \description{
 Using the tigris

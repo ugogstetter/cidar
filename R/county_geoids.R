@@ -6,20 +6,39 @@ globalVariables(c("STATEFP", "NAMELSAD", "STUSPS"))
 #' functions, returns a dataset of counties with their
 #' corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
 #'  the year 2023, for use in querying the [retrieve_aggregated()] function.
-#' @param state Optionally, specify a vector of state abbreviations to filter
+#' @param state Optionally, specify a vector of two-letter state abbreviations to filter
 #' to. By default, all Census-designated counties in U.S. states and territories
 #'  will be returned by the function.
 #' @param sf If `FALSE` (default value), function returns a data frame without
 #'  geospatial polygon geometry. If `TRUE`, function returns a shapefile with
 #'  geospatial polygon geometry.
+#'  @param namelsad If `TRUE` (default value), the returned dataset's `name`
+#'  variable will use a longer version of county names (e.g.
+#'  `"Autauga County, Alabama"`) including each county's LSAD (legal/
+#'  statistical area description). If `FALSE`, the returned dataset's `name`
+#'  variable will use a shorter version of county names (e.g.
+#'  `"Autauga, Alabama"`) excluding each county's LSAD.
 #' @export
 
-county_geoids <- function(state = NULL, sf = FALSE) {
-  geog_county <- tigris::counties(year = 2023, state = state) |>
-    dplyr::select(c(STATEFP, GEOID, NAMELSAD))
+county_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
+  if (namelsad == TRUE) {
+    geog_county <- tigris::counties(year = 2023, state = state) |>
+      dplyr::select(c(STATEFP, GEOID, NAMELSAD)) |>
+      dplyr::rename(county = NAMELSAD)
+  }
+
+  if (namelsad == FALSE) {
+    geog_county <- tigris::counties(year = 2023, state = state) |>
+      dplyr::select(c(STATEFP, GEOID, NAME)) |>
+      dplyr::rename(county = NAME)
+  }
 
   if (sf == FALSE) {
     geog_county <- sf::st_drop_geometry(geog_county)
+  }
+
+  if (sf == TRUE) {
+    geog_county <- sf::st_transform(geog_county, crs = 4326)
   }
 
   geog_state <- tigris::states(year = 2023) |>
@@ -28,9 +47,9 @@ county_geoids <- function(state = NULL, sf = FALSE) {
   geog_state <- sf::st_drop_geometry(geog_state)
 
   geog_county <- dplyr::inner_join(geog_county, geog_state, by = dplyr::join_by(STATEFP)) |>
-    dplyr::mutate(name = paste0(NAMELSAD, ", ", NAME)) |>
+    dplyr::mutate(name = paste0(county, ", ", NAME)) |>
     dplyr::rename(state_abbr = STUSPS) |>
-    dplyr::select(!c(NAMELSAD, NAME, STATEFP)) |>
+    dplyr::select(!c(county, NAME, STATEFP)) |>
     dplyr::arrange(GEOID)
 
   return(geog_county)

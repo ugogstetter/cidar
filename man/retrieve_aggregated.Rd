@@ -45,7 +45,7 @@ return the data frame of retrievable variables. The \code{vars} argument of this
 \item As a vector of all variables you wish to retrieve. To retrieve all
 variables within one or more categories as given in the
 \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} data frame, set \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}'s \code{vars}
-argument equal to a call to the \code{\link[=with_categories]{with_categories()}} function, which will
+argument equal to a call to the \code{\link[=categories_vars]{categories_vars()}} function, which will
 return a vector of the desired variables.
 \item As a data frame, specifically a version of the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}}
 data frame filtered to only the rows corresponding to variables you wish to

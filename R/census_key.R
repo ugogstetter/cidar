@@ -1,7 +1,7 @@
 #' Establishes a U.S. Census Bureau API key for [retrieve_aggregated()]
 #' @description Saves your Census Bureau API key so you won't have to reenter
 #' it, even between R sessions. If you haven't yet registered for a Census
-#' Bureau API key, follow the instructions on the Census API webpage 
+#' Bureau API key, follow the instructions on the Census API webpage
 #' [here](https://api.census.gov/data/key_signup.html).
 #' @param key Supply your Census Bureau API key.
 #' @export

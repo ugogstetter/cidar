@@ -23,7 +23,7 @@ the data source. More information on how the variables were selected and
 categorized is available at (add link to data documentation w/ explanation?).
 }
 \details{
-Details on included datasets:
+Further notes on some data sources:
 \itemize{
 \item Census Bureau API - American Community Survey 5-year estimates: These estimates should only be compared with each other across non-overlapping 5-year periods. See the Census Bureau webpage \href{https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html}{here} for more guidance on data use.
 \item U.S. Environmental Protection Agency: See the EPA Air Data pre-generated data files \href{https://aqs.epa.gov/aqsweb/airdata/download_files.html}{here} for more information on data files.
