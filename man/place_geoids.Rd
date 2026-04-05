@@ -7,7 +7,7 @@
 place_geoids(state = NULL, sf = FALSE, namelsad = TRUE)
 }
 \arguments{
-\item{state}{Optionally, specify a vector of state abbreviations to filter
+\item{state}{Optionally, specify a vector of two-letter state abbreviations to filter
 to. By default, all Census places (cities/towns/villages/census-designated
 places) in U.S. states and territories will be returned by the function.}
 

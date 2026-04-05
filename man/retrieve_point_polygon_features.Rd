@@ -11,9 +11,8 @@ Returns a table with all point and polygon feature sets
 retrievable through the \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}} function. For each set of
 features, the table lists the geometry type (point or polygon), whether
 an API key is required for data retrieval, what the data source is, what
-subtypes the feature set is categorized into ("types"), what year the feature set is
-from (this will either be the most recent year available, or say that the
-dataset is updated regularly), and what geography types
+subtypes the feature set is categorized into ("types"), what years the feature
+set covers (\code{NA} means the feature set is updated regularly), and what geography types
 the feature set can be filtered by. If an API key is required
 to retrieve a certain variable, run the indicated function for setting the
 API key before attempting to retrieve the variable for the first time

@@ -6,6 +6,7 @@
 \usage{
 retrieve_point_polygon(
   features,
+  yrs = 1975:2024,
   geog = NULL,
   geoselect = NULL,
   dataset_info = TRUE
@@ -16,6 +17,11 @@ retrieve_point_polygon(
 ensure you have read the \code{\link[=retrieve_point_polygon_features]{retrieve_point_polygon_features()}} function description, and have run that function to
 return the data frame of retrievable features.}
 
+\item{yrs}{(edit/clarify this) If yrs is numeric vector, retrieve all
+specified features for all years in the specified vector. If yrs is NULL,
+retrieve all most recent years of selected features. If yrs is not provided,
+retrieve all available years for all features with specific years associated.}
+
 \item{geog}{Optionally, specify a geographic area to filter to. Can be
 \code{"state"}, \code{"county"}, \code{"cbsa"} (core based statistical
 area), \code{"place"}, or \code{"zip code"}. If no value is provided, a nationwide
@@ -24,8 +30,8 @@ determine whether a particular feature set is able to be filtered to a particula
 geographic area, and only specify a geographic area that all selected feature
 sets can be filtered to.}
 
-\item{geoselect}{If a value is supplied for \code{geog}, supply a vector (in character format) of state abbreviations, county,
-CBSA, or place GEOIDS, or zip codes (depending on whether \code{geog} is set to \code{"state"},
+\item{geoselect}{If a value is supplied for \code{geog}, supply a vector (in character format) of two-letter state abbreviations; county,
+CBSA, or place GEOIDS; or zip codes (depending on whether \code{geog} is set to \code{"state"},
 \code{"county"}, \code{"cbsa"} or \code{"place"}, or \code{"zip code"}) to filter to. By default, all possible
 values will be returned by the
 function. To determine the corresponding GEOID for a particular county, CBSA,
@@ -34,7 +40,7 @@ respectively. Note that for polygon features, all features intersecting the
 specified geographic area will be returned, not just those fully inside of it.}
 
 \item{dataset_info}{Specify whether to append columns containing
-source and year information for the dataset in this function's
+source information for the dataset in this function's
 output. Default value is \code{TRUE}. The appended information will
 be the same as that contained in the \code{\link[=retrieve_point_polygon_features]{retrieve_point_polygon_features()}} data frame.}
 }
