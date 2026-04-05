@@ -10,7 +10,7 @@ globalVariables(c("NAMELSAD"))
 #' @param sf If `FALSE` (default value), function returns a data frame without
 #'  geospatial polygon geometry. If `TRUE`, function returns a shapefile with
 #'  geospatial polygon geometry.
-#'  @param namelsad If `TRUE` (default value), the returned dataset's `name`
+#' @param namelsad If `TRUE` (default value), the returned dataset's `name`
 #'  variable will use a longer version of CBSA names (e.g.
 #'  `"Arkadelphia, AR Micro Area"`) including each CBSA's LSAD (legal/
 #'  statistical area description). If `FALSE`, the returned dataset's `name`

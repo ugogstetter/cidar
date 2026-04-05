@@ -6,7 +6,7 @@
 \usage{
 retrieve_point_polygon(
   features,
-  yrs = 1975:2024,
+  yrs = 1999:2024,
   geog = NULL,
   geoselect = NULL,
   dataset_info = TRUE

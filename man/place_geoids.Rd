@@ -13,8 +13,9 @@ places) in U.S. states and territories will be returned by the function.}
 
 \item{sf}{If \code{FALSE} (default value), function returns a data frame without
 geospatial polygon geometry. If \code{TRUE}, function returns a shapefile with
-geospatial polygon geometry.
-@param namelsad If \code{TRUE} (default value), the returned dataset's \code{name}
+geospatial polygon geometry.}
+
+\item{namelsad}{If \code{TRUE} (default value), the returned dataset's \code{name}
 variable will use a longer version of place names (e.g.
 \code{"Hurtsboro town, Alabama"}) including each place's LSAD (legal/statistical
 area description). If \code{FALSE}, the returned dataset's \code{name}

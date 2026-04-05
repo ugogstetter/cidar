@@ -1,4 +1,4 @@
-globalVariables(c("STATEFP", "STUSPS", "NAMELSAD"))
+globalVariables(c("STATEFP", "STUSPS", "NAMELSAD", "place"))
 
 #' Retrieves place GEOIDs for use in [retrieve_aggregated()]
 #' @description Using the tigris
@@ -12,7 +12,7 @@ globalVariables(c("STATEFP", "STUSPS", "NAMELSAD"))
 #' @param sf If `FALSE` (default value), function returns a data frame without
 #'  geospatial polygon geometry. If `TRUE`, function returns a shapefile with
 #'  geospatial polygon geometry.
-#'  @param namelsad If `TRUE` (default value), the returned dataset's `name`
+#' @param namelsad If `TRUE` (default value), the returned dataset's `name`
 #'  variable will use a longer version of place names (e.g.
 #'  `"Hurtsboro town, Alabama"`) including each place's LSAD (legal/statistical
 #'  area description). If `FALSE`, the returned dataset's `name`

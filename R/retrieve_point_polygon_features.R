@@ -25,7 +25,7 @@ retrieve_point_polygon_features <- function() {
     api_key_required = c(rep("no", 6)),
     source = c("TomTom, ArcGIS Data and Maps - ArcGIS Online", "National Transportation Atlas Database, Bureau of Transportation Statistics, U.S. Department of Transportation - ArcGIS Online", "National Center for Education Statistics - ArcGIS Online", "Institute of Museum and Library Services", "IRS Business Master File Data Catalog - National Center for Charitable Statistics, Urban Institute", "Fatality Analysis Reporting System, National Highway Traffic Safety Administration"),
     types = c("local park; national park or forest; regional park; state park or forest; county park", "bus; tram, streetcar, light rail; rail; ferry; subway, metro; trolleybus; funicular; aerial lift, suspended cable car; cable tram; monorail", "public; private", "central library; branch library; bookmobile(s); books-by-mail only", "arts, culture, and humanities; education; environment and animals; health; human services; international, foreign affairs; mutual/membership benefit; public, societal benefit; religion related; university; hospital; unknown", "front-to-rear collision; front-to-front collision; rear-to-rear collision; collision at angle; sideswipe; other/unknown"),
-    yrs_available = c(rep(NA, 2), "2015-2024", "2008-2023", "1989-2023", "1975-2023"),
+    yrs_available = c(rep(NA, 2), "2015-2024", "2008-2023", "1989-2023", "1999-2024"),
     geogs_available = c(rep("state, county, cbsa, place", 2), rep("state, county, cbsa, place, zip code", 2), rep("state, county, cbsa, place", 2))
   ) |>
     dplyr::arrange(geometry_type, features)

@@ -12,7 +12,7 @@ globalVariables(c("STATEFP", "NAMELSAD", "STUSPS"))
 #' @param sf If `FALSE` (default value), function returns a data frame without
 #'  geospatial polygon geometry. If `TRUE`, function returns a shapefile with
 #'  geospatial polygon geometry.
-#'  @param namelsad If `TRUE` (default value), the returned dataset's `name`
+#' @param namelsad If `TRUE` (default value), the returned dataset's `name`
 #'  variable will use a longer version of county names (e.g.
 #'  `"Autauga County, Alabama"`) including each county's LSAD (legal/
 #'  statistical area description). If `FALSE`, the returned dataset's `name`

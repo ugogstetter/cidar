@@ -1,4 +1,4 @@
-globalVariables(c("FEATTYPE", "name", "stop_name", "stop_type_text", "STREET", "CITY", "STATE", "ZIP", "STABR", "CENTRACT", "LIBNAME", "ADDRESS", "address", "geometry"))
+globalVariables(c("FEATTYPE", "name", "stop_name", "stop_type_text", "STREET", "CITY", "STATE", "ZIP", "STABR", "CENTRACT", "LIBNAME", "ADDRESS", "address", "geometry", "LSTREE", "LCITY", "LSTATE", "LZIP", "PINST", "PL_ADD", "PL_CIT", "PL_STABB", "PL_ZIP", "FIPSST", "FIPSCO", "INCITSST", "INCITSCO", "FIPSST", "FIPSPLAC", "ORG_ADDR_MATCH", "GEOCODER_SCORE", "F990_ORG_ADDR_ZIP", "CENSUS_COUNTY_NAME", "CENSUS_STATE_NAME", "CENSUS_STATE_ABBR", "CENSUS_CBSA_FIPS", "ORG_ADDR_MATCH", "NTEEV2", "ORG_NAME_CURRENT", "LATITUDE", "LONGITUDE", "nonprofits_geoselect", "ORG_ADDR_FULL", "NCCS_LEVEL_3", "ORG_YEAR_FIRST", "ORG_YEAR_LAST", "COUNTY", "YEAR", "LONGITUD", "MAN_COLL"))
 
 #' Retrieves shapefile of point or polygon features from chosen source
 #' @description Retrieves shapefile of point or polygon features of user-specified data category,
@@ -31,7 +31,7 @@ globalVariables(c("FEATTYPE", "name", "stop_name", "stop_type_text", "STREET", "
 #'   be the same as that contained in the [retrieve_point_polygon_features()] data frame.
 #' @export
 
-retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geoselect = NULL, dataset_info = TRUE) {
+retrieve_point_polygon <- function(features, yrs = 1999:2024, geog = NULL, geoselect = NULL, dataset_info = TRUE) {
   # defining function to add leading zeroes and convert numeric values to character as needed. x is the value, digits is the desired number of digits
   leading_zeroes <- function(x, digits) {
     x <- as.character(x)
@@ -156,8 +156,15 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
           if ((type == "public" & year == 2015) | (type == "private" & year %in% 2015:2016)) {
             value <- "CBSA15"
           }
-
-          return(paste0(value, " IN ('", paste(geoselect, collapse = "', '"), "')"))
+          
+          if (type == "private" & year %in% 2015:2016) {
+            
+            return(paste0(value, " IN (", paste(geoselect, collapse = ", "), ")"))
+          
+            } else {
+            
+            return(paste0(value, " IN ('", paste(geoselect, collapse = "', '"), "')"))
+        }
         }
       }
 
@@ -205,24 +212,29 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
       } else {
         NULL
       }) |>
-        dplyr::mutate(name = NAME, type = "public", address = ifelse(i > 2015, paste0(STREET, ", ", CITY, ", ", STATE, " ", ZIP), paste0(LSTREE, ", ", LCITY, ", ", LSTATE, " ", LZIP)))
-
+        dplyr::mutate(name = NAME, type = "public", address = ifelse(i > 2015, paste0(STREET, ", ", CITY, ", ", STATE, " ", ZIP), paste0(LSTREE, ", ", LCITY, ", ", LSTATE, " ", LZIP)), features = "schools", year = i) |>
+        dplyr::select(c(features, year, name, type, address, geometry))
+      
+      # I have to transform CRS before merging the datasets because not all the datasets have the same CRS, but if I transform a 4326 dataset with this, it'll still have the same geometry
+      public_schools <- sf::st_transform(public_schools, crs = 4326)
+      
+      
       private_schools <- arcgislayers::arc_select(arcgislayers::arc_open(ifelse(i > 2016, paste0("https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_GEOCODE_PRIVATESCH_", ifelse(i %% 2 == 0, paste0(substr(as.character(i - 1), 3, 4), substr(as.character(i), 3, 4)), paste0(substr(as.character(i), 3, 4), substr(as.character(i + 1), 3, 4))), "/MapServer/0"), "https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_GEOCODE_PRIVATESCH_15_16/MapServer/0")), fields = if (i > 2016) {
         c("NAME", "STREET", "CITY", "STATE", "ZIP")
       } else {
         c("PINST", "PL_ADD", "PL_CIT", "PL_STABB", "PL_ZIP")
       }, where = if (!(is.null(geog))) {
-        ifelse(geog == "county", paste0("CONCAT(STFIP, CNTY) IN ('", paste(geoselect, collapse = "', '"), "')"), where_clause(i, "public"))
+        ifelse(geog == "county", paste0("CONCAT(STFIP, CNTY) IN ('", paste(geoselect, collapse = "', '"), "')"), where_clause(i, "private"))
       } else {
         NULL
       }) |>
-        dplyr::mutate(name = ifelse(i > 2016, NAME, PINST), type = "private", address = ifelse(i > 2016, paste0(STREET, ", ", CITY, ", ", STATE, " ", ZIP), paste0(PL_ADD, ", ", PL_CIT, ", ", PL_STABB, " ", PL_ZIP)))
-
-      schools_1 <- rbind(public_schools, private_schools) |>
-        dplyr::mutate(features = "schools", year = i) |>
+        dplyr::mutate(name = ifelse(i > 2016, NAME, PINST), type = "private", address = ifelse(i > 2016, paste0(STREET, ", ", CITY, ", ", STATE, " ", ZIP), paste0(PL_ADD, ", ", PL_CIT, ", ", PL_STABB, " ", PL_ZIP)), features = "schools", year = i) |>
         dplyr::select(c(features, year, name, type, address, geometry))
-
-      schools_1 <- sf::st_transform(schools_1, crs = 4326)
+      
+      private_schools <- sf::st_transform(private_schools, crs = 4326)
+      
+      
+      schools_1 <- rbind(public_schools, private_schools)
 
       schools <- rbind(schools, schools_1)
     }
@@ -445,7 +457,7 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
     nonprofits_all <- data.frame(ORG_ADDR_MATCH = character(), NTEEV2 = character(), ORG_NAME_CURRENT = character(), LATITUDE = numeric(), LONGITUDE = numeric(), nonprofits_geoselect = character(), ORG_ADDR_FULL = character(), NCCS_LEVEL_3 = character(), ORG_YEAR_FIRST = numeric(), ORG_YEAR_LAST = numeric())
 
     for (i in states) {
-      nonprofits_1 <- read.csv(paste0("https://nccsdata.s3.amazonaws.com/harmonized/bmf/unified/", i, "_BMF_V1.1.csv")) |>
+      nonprofits_1 <- utils::read.csv(paste0("https://nccsdata.s3.amazonaws.com/harmonized/bmf/unified/", i, "_BMF_V1.1.csv")) |>
         dplyr::filter( # removing rows with geocoded addresses that appear to start with zip codes
           (!((!grepl("\\D", substr(ORG_ADDR_MATCH, 1, 5))) & (((substr(ORG_ADDR_MATCH, 6, 6) == "-") & (!grepl("\\D", substr(ORG_ADDR_MATCH, 7, 10))) & substr(ORG_ADDR_MATCH, 11, 11) == ",") | (substr(ORG_ADDR_MATCH, 6, 6) == ",")))) &
             # removing rows with geocoded addresses of a match score less than 90 (from my observation, 90 appears to be the approximate threshold for reasonably reliable geocoding)
@@ -541,7 +553,7 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
   if (is.null(yrs)) {
     crashes_yrs <- 2023
   } else {
-    crashes_yrs <- yrs[yrs %in% 1975:2023]
+    crashes_yrs <- yrs[yrs %in% 1999:2024]
   }
 
   if ("fatal crashes" %in% features & length(crashes_yrs) != 0) {
@@ -554,7 +566,20 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
 
       temp2 <- tempfile()
 
-      crashes1 <- utils::read.csv(utils::unzip(temp, files = paste0("FARS", as.character(i), "NationalCSV/accident.csv"), exdir = temp2)) |>
+      crashes1 <- utils::read.csv(utils::unzip(temp, files = ifelse(i < 2006, "ACCIDENT.CSV", 
+                                                                    ifelse(i %in% 2006:2011, paste0("FARS", as.character(i), "NationalCSV/ACCIDENT.CSV"),
+                                                                           ifelse(i %in% 2012:2014, paste0("FARS", as.character(i), "NationalCSV/ACCIDENT.csv"),
+                                                                                  ifelse(i %in% c(2015, 2020:2024), paste0("FARS", as.character(i), "NationalCSV/accident.csv"),
+                                                                                         ifelse(i %in% c(2016:2017, 2019), "accident.CSV",
+                                                                                                "accident.csv"))))), exdir = temp2))
+      
+      if (i %in% 2001:2007) {
+        
+        crashes1 <- crashes1 |>
+          dplyr::rename(LATITUDE = latitude, LONGITUD = longitud)
+      }
+      
+      crashes1 <- crashes1 |>
         dplyr::select(c(STATE, COUNTY, YEAR, LATITUDE, LONGITUD, MAN_COLL))
 
       unlink(temp)
@@ -563,6 +588,25 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
 
       crashes <- rbind(crashes, crashes1)
     }
+    
+    
+    crashes <- crashes |>
+      dplyr::filter((!is.na(LATITUDE)) & (!is.na(LONGITUD)))
+    
+    
+    # creating and vectorizing function to make each longitude and latitude value with just one number in it be equal to just that number
+    unique_crashes <- function(x) {unique(strsplit(x, "")[[1]])}
+    unique_crashes <- Vectorize(unique_crashes)
+    
+    # removing not reported/not available/unknown latitudes and longitudes
+    
+    crashes_test <- crashes |>
+      dplyr::mutate(LATITUDE = unique_crashes(gsub("\\.", "", gsub("0", "", as.character(LATITUDE)))), LONGITUD = unique_crashes(gsub("\\.", "", gsub("0", "", as.character(LONGITUD)))), row = row.names(crashes)) |>
+      dplyr::filter((!(LATITUDE %in% c("7", "8", "9"))) & (!(LONGITUD %in% c("7", "8", "9"))))
+    
+    crashes <- crashes |>
+      dplyr::filter(row.names(crashes) %in% crashes_test$row)
+    
 
     # I really tried to figure out what CRS this data is in and couldn't figure it out for certain, but another crash data document from NTHSA said it uses WGS84 (4326), and it sounds like the two main coordinate systems have a difference of only like 1-3 meters anyway. also, the documentation for this specific dataset discusses the coordinates being GPS, which it seems like is more aligned with WGS84
     crashes <- sf::st_as_sf(crashes, coords = c("LONGITUD", "LATITUDE"), crs = 4326)
@@ -613,14 +657,14 @@ retrieve_point_polygon <- function(features, yrs = 1975:2024, geog = NULL, geose
           dplyr::filter(row.names(crashes) %in% rownames(crashes_intersect))
       }
     }
-
+    
     crashes <- crashes |>
       dplyr::mutate(
         type = dplyr::case_when(MAN_COLL == 1 ~ "front-to-rear collision",
           MAN_COLL == 2 ~ "front-to-front collision",
-          ((YEAR %in% 1975:2001 & MAN_COLL == 3) | (YEAR >= 2002 & MAN_COLL == 10)) ~ "rear-to-rear collision",
-          ((YEAR %in% 1975:2001 & MAN_COLL == 4) | (YEAR %in% 2002:2009 & MAN_COLL %in% 3:6) | (YEAR >= 2010 & MAN_COLL == 6)) ~ "collision at angle",
-          ((YEAR %in% 1975:1977 & MAN_COLL == 7) | (YEAR %in% 1978:2001 & MAN_COLL %in% 5:6) | (YEAR >= 2002 & MAN_COLL %in% 7:8)) ~ "sideswipe",
+          ((YEAR %in% 1999:2001 & MAN_COLL == 3) | (YEAR >= 2002 & MAN_COLL == 10)) ~ "rear-to-rear collision",
+          ((YEAR %in% 1999:2001 & MAN_COLL == 4) | (YEAR %in% 2002:2009 & MAN_COLL %in% 3:6) | (YEAR >= 2010 & MAN_COLL == 6)) ~ "collision at angle",
+          ((YEAR %in% 1999:2001 & MAN_COLL %in% 5:6) | (YEAR >= 2002 & MAN_COLL %in% 7:8)) ~ "sideswipe",
           .default = "other/unknown"
         ),
         name = NA, features = "fatal crashes", year = YEAR, address = NA
