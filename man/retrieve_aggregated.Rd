@@ -52,23 +52,26 @@ data frame filtered to only the rows corresponding to variables you wish to
 retrieve.
 }}
 
-\item{yrs}{Supply a vector (in numeric format) of one or more years to filter
-to. If no value is supplied, will
-default to the largest possible range of years across which data is available
-on at least one of the selected variables. The years for which data is
-available for each variable are included in the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}}
-dataset.}
+\item{yrs}{If yrs is a numeric vector, this function will retrieve all
+specified varaibles for all years in the specified vector. If yrs is \code{NULL},
+this function will retrieve all most recent years of selected variables If yrs is not provided,
+retrieve all available years for all variables associated with specific years.
+The years for which data is available for each variable are included in the
+\code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} dataset. Please note that if \code{yrs} is
+equal to \code{NA} in that dataset, the variable can only be retrieved in
+this \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function when \code{yrs} is set to \code{NULL}.}
 
 \item{geog}{Specify \code{"county"}, \code{"cbsa"} (core based statistical
 area), or \code{"place"} (cities/towns/villages/census-designated places). The
 geographic area types for which data is available for each variable are
 included in the \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} data frame.}
 
-\item{state}{Optionally (ONLY if \code{geog} is set to \code{"county"} or \code{"place"}),
+\item{state}{Optionally (ONLY if \code{geog} is set to \code{"county"} or \code{"place"},
+and \code{geoselect} is \code{NULL}),
 supply a vector of state abbreviations to filter to. By default, all possible
 values will be returned by the function.}
 
-\item{geoselect}{Optionally, supply a vector (in character format) of county, CBSA, or place
+\item{geoselect}{Optionally (ONLY if \code{state} is \code{NULL}), supply a vector (in character format) of county, CBSA, or place
 (depending on whether \code{geog} is set to \code{"county"}, \code{"cbsa"}, or \code{"place"})
 GEOIDs to filter to. By default, all possible values will be returned by the
 function. To determine the corresponding GEOID for a particular county, CBSA,

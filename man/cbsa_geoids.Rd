@@ -4,7 +4,7 @@
 \alias{cbsa_geoids}
 \title{Retrieves CBSA GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
-cbsa_geoids(sf = FALSE, namelsad = TRUE)
+cbsa_geoids(sf = FALSE, namelsad = TRUE, land_area = FALSE)
 }
 \arguments{
 \item{sf}{If \code{FALSE} (default value), function returns a data frame without
@@ -17,6 +17,10 @@ variable will use a longer version of CBSA names (e.g.
 statistical area description). If \code{FALSE}, the returned dataset's \code{name}
 variable will use a shorter version of CBSA names (e.g.
 \code{"Arkadelphia, AR"}) excluding each CBSA's LSAD.}
+
+\item{land_area}{If \code{FALSE} (default value), the returned dataset does not
+include a land area variable. If \code{TRUE}, the returned dataset provides land
+areas in square miles.}
 }
 \description{
 Using the tigris

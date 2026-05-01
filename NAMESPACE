@@ -2,6 +2,8 @@
 
 S3method(retrieve_aggregated,character)
 S3method(retrieve_aggregated,data.frame)
+S3method(retrieve_point_polygon,character)
+S3method(retrieve_point_polygon,list)
 export(bea_key)
 export(categories_vars)
 export(cbsa_geoids)

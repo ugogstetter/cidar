@@ -18,9 +18,12 @@ globalVariables(c("STATEFP", "STUSPS", "NAMELSAD", "place"))
 #'  area description). If `FALSE`, the returned dataset's `name`
 #'  variable will use a shorter version of place names (e.g.
 #'  `"Hurtsboro, Alabama"`) excluding each place's LSAD.
+#' @param land_area If `FALSE` (default value), the returned dataset does not 
+#'  include a land area variable. If `TRUE`, the returned dataset provides land 
+#'  areas in square miles.
 #' @export
 
-place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
+place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE, land_area = FALSE) {
   geog_state <- tigris::states(year = 2023) |>
     dplyr::select(c(STATEFP, NAME, STUSPS))
 
@@ -29,13 +32,13 @@ place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
   if (sf == FALSE) {
     if (namelsad == TRUE) {
       geog_place <- tigris::places(year = 2023, state = state, cb = TRUE) |>
-        dplyr::select(c(STATEFP, GEOID, NAMELSAD)) |>
+        dplyr::select(c(STATEFP, GEOID, NAMELSAD, ALAND)) |>
         dplyr::rename(place = NAMELSAD)
     }
 
     if (namelsad == FALSE) {
       geog_place <- tigris::places(year = 2023, state = state, cb = TRUE) |>
-        dplyr::select(c(STATEFP, GEOID, NAME)) |>
+        dplyr::select(c(STATEFP, GEOID, NAME, ALAND)) |>
         dplyr::rename(place = NAME)
     }
 
@@ -53,12 +56,12 @@ place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
     }
 
     # I checked and all the states/territories that would be returned do have the same CRS
-    geog_place <- sf::st_sf(GEOID = character(), STATEFP = character(), NAMELSAD = character(), geometry = list(), crs = "NAD83")
+    geog_place <- sf::st_sf(GEOID = character(), STATEFP = character(), NAMELSAD = character(), ALAND = numeric(), geometry = list(), crs = "NAD83")
 
     if (namelsad == TRUE) {
       for (i in state_sf) {
         geog_place_1 <- tigris::places(year = 2023, state = i) |>
-          dplyr::select(c(STATEFP, GEOID, NAMELSAD)) |>
+          dplyr::select(c(STATEFP, GEOID, NAMELSAD, ALAND)) |>
           dplyr::rename(place = NAMELSAD)
 
         geog_place <- rbind(geog_place, geog_place_1)
@@ -68,7 +71,7 @@ place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
     if (namelsad == FALSE) {
       for (i in state_sf) {
         geog_place_1 <- tigris::places(year = 2023, state = i) |>
-          dplyr::select(c(STATEFP, GEOID, NAME)) |>
+          dplyr::select(c(STATEFP, GEOID, NAME, ALAND)) |>
           dplyr::rename(place = NAME)
 
         geog_place <- rbind(geog_place, geog_place_1)
@@ -83,6 +86,15 @@ place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
     dplyr::rename(state_abbr = STUSPS) |>
     dplyr::select(!c(place, NAME, STATEFP)) |>
     dplyr::arrange(GEOID)
+  
+  if (land_area == FALSE) {
+    geog_place <- geog_place |>
+      dplyr::select(!ALAND)
+  } else {
+    geog_place <- geog_place |>
+      dplyr::mutate(land_sq_mi = ALAND*0.0000003861) |>
+      dplyr::select(!ALAND)
+  }
 
   return(geog_place)
 }

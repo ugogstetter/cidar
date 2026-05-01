@@ -22,3 +22,6 @@ Imports:
     tigris,
     arcgislayers,
     leaflet.extras2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

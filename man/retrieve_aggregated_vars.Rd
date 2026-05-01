@@ -14,7 +14,8 @@ walkability, health, education, crime, community spaces, sustainability,
 governance, and demographics. For each variable, the table lists its
 corresponding category as well as other information on the given variable
 including whether an API key is required for retrieval, data source, data
-type, and available years and geographic scales. If an API key is required
+type, and available years (\code{yrs_available} is \code{NA} when the source data is updated regularly and thus, in
+\code{\link[=retrieve_aggregated]{retrieve_aggregated()}}, the variable can only be retrieved when \code{yrs} is set to \code{NULL}) and geographic scales. If an API key is required
 to retrieve a certain variable, run the indicated function for setting the
 API key before attempting to retrieve the variable for the first time
 using \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}. Once set, the API key will be saved across R
@@ -23,10 +24,13 @@ the data source. More information on how the variables were selected and
 categorized is available at (add link to data documentation w/ explanation?).
 }
 \details{
-Further notes on some data sources:
+Data source links and further notes:
 \itemize{
-\item Census Bureau API - American Community Survey 5-year estimates: These estimates should only be compared with each other across non-overlapping 5-year periods. See the Census Bureau webpage \href{https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html}{here} for more guidance on data use.
+\item Census Bureau API - American Community Survey 5-year estimates: This API data is accessed through the \href{https://cran.r-project.org/web/packages/tidycensus/index.html}{tidycensus package}. The American Community Survey estimates should only be compared with each other across non-overlapping 5-year periods. See the Census Bureau webpage \href{https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html}{here} for more guidance on data use.
+\item National Transportation Atlas Database, Bureau of Transportation Statistics, U.S. Department of Transportation - ArcGIS Online: The \verb{transit stops} dataset is pulled from \href{https://www.arcgis.com/home/item.html?id=6be77dd1081a43c0865282cad76718ab}{National Transit Map Stops}. Number of transit stops per square mile of land area is calculated using Census Tiger/Line Shapefile land area information retrieved via the \href{https://cran.r-project.org/web/packages/tigris/index.html}{tigris package} and converted to square miles.
+\item U.S. Bureau of Economic Analysis API: This API data is accessed through the \href{https://cran.r-project.org/web/packages/bea.R/index.html}{bea.R package}.
 \item U.S. Environmental Protection Agency: See the EPA Air Data pre-generated data files \href{https://aqs.epa.gov/aqsweb/airdata/download_files.html}{here} for more information on data files.
-\item U.S. Federal Bureau of Investigation - Crime in the United States estimations: Be careful in comparing estimates across years; see the FBI Universal Crime Reporting document \href{https://ucr.fbi.gov/ucr-statistics-their-proper-use}{here} for additional guidance on data use. Note that the definition of rape was changed between 2012 and 2013, see the Crime in the United States 2013 rape addendum \href{https://ucr.fbi.gov/crime-in-the-u.s/2013/crime-in-the-u.s.-2013/rape-addendum/rape_addendum_final}{here} for more details.
+\item U.S. Federal Bureau of Investigation - Crime in the United States estimations: See \link{crime_by_msa_2020}, \link{crime_by_msa_2022}, \link{crime_by_msa_2023}, and \link{crime_by_msa_2024} for documentation on the crime data used for 2020-2023. For previous years, crime data is pulled from \href{https://ucr.fbi.gov/crime-in-the-u.s}{Crime in the U.S.} Metropolitan Statistical Area-level data files. Be careful in comparing estimates across years; see the FBI Universal Crime Reporting document \href{https://ucr.fbi.gov/ucr-statistics-their-proper-use}{here} for additional guidance on data use. Note that the definition of rape was changed between 2012 and 2013, see the Crime in the United States 2013 rape addendum \href{https://ucr.fbi.gov/crime-in-the-u.s/2013/crime-in-the-u.s.-2013/rape-addendum/rape_addendum_final}{here} for more details.
+\item National Center for Education Statistics - ArcGIS Online: This data is aggregated from the National Center for Education Statistics (NCES)' Public School Locations and Private School Locations feature sets. For all years between 2015 and 2024, there exists a Public School Locations dataset spanning that year and the one following it (e.g. 2015-2016, 2016-2017, etc). For every odd-numbered year between 2015 and 2023, there exists a Private School Locations dataset spanning that year and the one following it (e.g. 2015-2016, 2017-2018, etc). Requesting \code{schools} data via \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} will return data from the Public School Locations beginning with the given year, and from the Private School Locations dataset including that year in its timeframe. More information about the NCES school point data is available \href{https://nces.ed.gov/programs/edge/Geographic/SchoolLocations}{here}.
 }
 }

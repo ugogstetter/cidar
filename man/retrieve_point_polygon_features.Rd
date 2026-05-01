@@ -12,7 +12,8 @@ retrievable through the \code{\link[=retrieve_point_polygon]{retrieve_point_poly
 features, the table lists the geometry type (point or polygon), whether
 an API key is required for data retrieval, what the data source is, what
 subtypes the feature set is categorized into ("types"), what years the feature
-set covers (\code{NA} means the feature set is updated regularly), and what geography types
+set covers (\code{NA} means the feature set is updated regularly and thus, in
+\code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}}, can only be retrieved when \code{yrs} is set to \code{NULL}), and what geography types
 the feature set can be filtered by. If an API key is required
 to retrieve a certain variable, run the indicated function for setting the
 API key before attempting to retrieve the variable for the first time
@@ -20,8 +21,13 @@ using \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}}. Once set,
 sessions.
 }
 \details{
-Further notes on some data sources:
+Data source links and further notes:
 \itemize{
-\item IRS Business Master File Data Catalog - National Center for Charitable Statistics, Urban Institute: The inconsistent quality of addresses provided for geocoding in this dataset means that some geocodes are incorrect or imprecise. In \code{cidar}'s version of the dataset, geocodes likely to be imprecise or inaccurate are removed; however, this means that not all nonprofits located in a given area will appear in the shapefile data. The values from this feature set's \code{type} variable correspond to the National Taxonomy of Exempt Entities Level 1 Industry Group code categories, as outlined on \href{https://nccs.urban.org/nccs/widgets/ntee_tables/ntee_descriptions.html}{this} Urban Institute webpage.
+\item TomTom, ArcGIS Data and Maps - ArcGIS Online: The \code{parks} features are pulled from \href{https://www.maps.arcgis.com/home/item.html?id=e49e181ac82c46edac3ae601ebb3ef2d}{USA Parks}.
+\item National Transportation Atlas Database, Bureau of Transportation Statistics, U.S. Department of Transportation - ArcGIS Online: The \verb{transit stops} features are pulled from \href{https://www.arcgis.com/home/item.html?id=6be77dd1081a43c0865282cad76718ab}{National Transit Map Stops}.
+\item National Center for Education Statistics - ArcGIS Online: The \code{schools} features are pulled from the National Center for Education Statistics (NCES)' Public School Locations and Private School Locations datasets. For all years between 2015 and 2024, there exists a Public School Locations dataset spanning that year and the one following it (e.g. 2015-2016, 2016-2017, etc). For every odd-numbered year between 2015 and 2023, there exists a Private School Locations dataset spanning that year and the one following it (e.g. 2015-2016, 2017-2018, etc). Requesting \code{schools} data via \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}} will return data from the Public School Locations beginning with the given year, and from the Private School Locations dataset including that year in its timeframe. More information about the NCES school point data is available \href{https://nces.ed.gov/programs/edge/Geographic/SchoolLocations}{here}.
+\item Institute of Museum and Library Services: The \code{libraries} features are pulled from the \href{https://www.imls.gov/research-evaluation/surveys/public-libraries-survey-pls}{Public Libraries Survey data files}.
+\item IRS Business Master File Data Catalog - National Center for Charitable Statistics, Urban Institute: The \code{nonprofits} features are pulled from the \href{https://nccs.urban.org/nccs/catalogs/catalog-bmf.html}{United BMF data files}. The inconsistent quality of addresses provided for geocoding in this dataset means that some geocodes are incorrect or imprecise. In \code{cidar}'s version of the dataset, geocodes likely to be imprecise or inaccurate are removed; however, this means that not all nonprofits located in a given area will appear in the shapefile data. The values from this feature set's \code{type} variable correspond to the National Taxonomy of Exempt Entities Level 1 Industry Group code categories, as outlined on \href{https://nccs.urban.org/nccs/widgets/ntee_tables/ntee_descriptions.html}{this} Urban Institute webpage.
+\item Fatality Analysis Reporting System, National Highway Traffic Safety Administration: The \code{crashes} features are pulled from the \href{https://www.nhtsa.gov/file-downloads?p=nhtsa/downloads/FARS/}{National Highway Traffic Safety Administration Fatality Analysis Reporting System data files}. In \code{cidar}'s version of the dataset, some crashes had to be removed due to having missing or unknown coordinates, and thus being impossible to convert into shapefile format.
 }
 }

@@ -18,19 +18,31 @@ globalVariables(c("STATEFP", "NAMELSAD", "STUSPS"))
 #'  statistical area description). If `FALSE`, the returned dataset's `name`
 #'  variable will use a shorter version of county names (e.g.
 #'  `"Autauga, Alabama"`) excluding each county's LSAD.
+#' @param land_area If `FALSE` (default value), the returned dataset does not 
+#'  include a land area variable. If `TRUE`, the returned dataset provides land 
+#'  areas in square miles.
 #' @export
 
-county_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE) {
+county_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE, land_area = FALSE) {
   if (namelsad == TRUE) {
     geog_county <- tigris::counties(year = 2023, state = state) |>
-      dplyr::select(c(STATEFP, GEOID, NAMELSAD)) |>
+      dplyr::select(c(STATEFP, GEOID, NAMELSAD, ALAND)) |>
       dplyr::rename(county = NAMELSAD)
   }
 
   if (namelsad == FALSE) {
     geog_county <- tigris::counties(year = 2023, state = state) |>
-      dplyr::select(c(STATEFP, GEOID, NAME)) |>
+      dplyr::select(c(STATEFP, GEOID, NAME, ALAND)) |>
       dplyr::rename(county = NAME)
+  }
+  
+  if (land_area == FALSE) {
+    geog_county <- geog_county |>
+      dplyr::select(!ALAND)
+  } else {
+    geog_county <- geog_county |>
+      dplyr::mutate(land_sq_mi = ALAND*0.0000003861) |>
+      dplyr::select(!ALAND)
   }
 
   if (sf == FALSE) {

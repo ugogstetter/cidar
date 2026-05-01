@@ -4,7 +4,7 @@
 \alias{place_geoids}
 \title{Retrieves place GEOIDs for use in \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}}
 \usage{
-place_geoids(state = NULL, sf = FALSE, namelsad = TRUE)
+place_geoids(state = NULL, sf = FALSE, namelsad = TRUE, land_area = FALSE)
 }
 \arguments{
 \item{state}{Optionally, specify a vector of two-letter state abbreviations to filter
@@ -21,6 +21,10 @@ variable will use a longer version of place names (e.g.
 area description). If \code{FALSE}, the returned dataset's \code{name}
 variable will use a shorter version of place names (e.g.
 \code{"Hurtsboro, Alabama"}) excluding each place's LSAD.}
+
+\item{land_area}{If \code{FALSE} (default value), the returned dataset does not
+include a land area variable. If \code{TRUE}, the returned dataset provides land
+areas in square miles.}
 }
 \description{
 Using the tigris

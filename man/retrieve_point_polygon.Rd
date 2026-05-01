@@ -2,6 +2,8 @@
 % Please edit documentation in R/retrieve_point_polygon.R
 \name{retrieve_point_polygon}
 \alias{retrieve_point_polygon}
+\alias{retrieve_point_polygon.character}
+\alias{retrieve_point_polygon.list}
 \title{Retrieves shapefile of point or polygon features from chosen source}
 \usage{
 retrieve_point_polygon(
@@ -11,16 +13,43 @@ retrieve_point_polygon(
   geoselect = NULL,
   dataset_info = TRUE
 )
+
+\method{retrieve_point_polygon}{character}(
+  features,
+  yrs = 1999:2024,
+  geog = NULL,
+  geoselect = NULL,
+  dataset_info = TRUE
+)
+
+\method{retrieve_point_polygon}{list}(
+  features,
+  yrs = 1999:2024,
+  geog = NULL,
+  geoselect = NULL,
+  dataset_info = TRUE
+)
 }
 \arguments{
-\item{features}{Specify a vector of feature sets to retrieve. Before supplying this argument,
+\item{features}{Before supplying this argument,
 ensure you have read the \code{\link[=retrieve_point_polygon_features]{retrieve_point_polygon_features()}} function description, and have run that function to
-return the data frame of retrievable features.}
+return the data frame of retrievable features and their types. The \code{features}
+argument for this \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}} function can be supplied in one of two ways:
+\itemize{
+\item Specify an atomic vector of feature sets to retrieve.
+\item Specify a list of named vectors, where vector names are feature sets and
+vector values are the types to include within each feature set. Set a vector
+equal to \code{NULL} to include all possible types within the given feature set.
+}}
 
-\item{yrs}{(edit/clarify this) If yrs is numeric vector, retrieve all
-specified features for all years in the specified vector. If yrs is NULL,
-retrieve all most recent years of selected features. If yrs is not provided,
-retrieve all available years for all features with specific years associated.}
+\item{yrs}{If yrs is a numeric vector, this function will retrieve all
+specified features for all years in the specified vector. If yrs is \code{NULL},
+this function will retrieve all most recent years of selected features. If yrs is not provided,
+retrieve all available years for all features associated with specific years.
+The years for which data is available for each feature set are included in the
+\code{\link[=retrieve_point_polygon_features]{retrieve_point_polygon_features()}} dataset. Please note that if \code{yrs} is
+equal to \code{NA} in that dataset, the feature set can only be retrieved in
+this \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}} function when \code{yrs} is set to \code{NULL}.}
 
 \item{geog}{Optionally, specify a geographic area to filter to. Can be
 \code{"state"}, \code{"county"}, \code{"cbsa"} (core based statistical
