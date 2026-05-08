@@ -18,15 +18,15 @@
 #'   document.
 #' @param shapefile_vars Shapefile of data, specifically with numeric variables
 #' that can be color-coded, to display on map alongside a slider to select a variable
-#'  to display. Shapefile must contain
-#'  a `"year"` variable (the web app will include a selector slider for
-#'  years), a `"variable"` variable (the web app will include a dropdown for
+#'  to display. Shapefile must contain a `"variable"` variable (the web app will include a dropdown for
 #'  viewers to select a variable for display, e.g. unemployment, median air quality), an
 #'  `"estimate"` variable (for the value or
 #'  estimate associated with each value in the `"variable"` column), and a `"name"` variable containing
 #'    the names of the geographic areas (e.g. Orange County), which will be
 #'    displayed alongside estimates upon mouse-over of the polygons. The
-#'  shapefile's geometry must be polygons.
+#'  shapefile's geometry must be polygons. If the shapefile contains a `"year"` 
+#'  variable, the web app will include a slider for switching between different
+#'   years of data.
 #' @param shapefile_features Shapefile of points and/or polygons, without a corresponding
 #'  numeric variable. All points and polygons in this
 #'  shapefile will display simultaneously by default. Shapefile must contain
@@ -35,7 +35,9 @@
 #'  and a `"type"` variable (delineating different feature types within each feature
 #'  category, e.g. private school, public school). All observations corresponding
 #'   to a given value of the `"features"` variable must be either points or
-#'   polygons (i.e. no mixing of points and polygons within a feature category).
+#'   polygons (i.e. no mixing of points and polygons within a feature category). 
+#'   If the shapefile contains a `"year"` variable, the web app will include a 
+#'   slider for switching between different years of data.
 #' @export
 
 web_app <- function(project_name, title, response_questions, shapefile_vars, shapefile_features) {

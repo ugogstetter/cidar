@@ -581,6 +581,38 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
     
     unlink(temp2)
     
+    if (i %in% 2008:2011) {
+      # filtering to street-level geographic matches
+      libraries_1 <- libraries_1 |>
+        dplyr::filter(MAT_CENT == "0")
+    }
+    
+    if (i %in% 2012:2014) {
+      # filtering to address point-level geographic matches
+      libraries_1 <- libraries_1 |>
+        dplyr::filter(GAL == "addresspoint")
+    }
+    
+    if (i %in% 2015:2016) {
+      # removing libraries which could not be geocoded (MSTATUS of U) or had two matches with equally high scores (MSTATUS of T)
+      # removing libraries with a geocode accuracy score of less than 90, as this is what I'm also doing for the nonprofits dataset, and because the libraries data documentation also uses a SCORE of 90 as an accuracy cutoff
+      libraries_1 <- libraries_1 |>
+        dplyr::filter(MSTATUS == "E" & SCORE >= 90)
+    }
+    
+    if (i %in% 2017:2019) {
+      # filtering to geographic matches at street address-level precision
+      libraries_1 <- libraries_1 |>
+        dplyr::filter(GEOMATCH == "A")
+    }
+    
+    if (i %in% 2020:2023) {
+    # removing libraries which could not be geocoded (GEOSTATUS of U) or had two matches with equally high scores (GEOSTATUS of T)
+    # removing libraries with a geocode accuracy score of less than 90, as this is what I'm also doing for the nonprofits dataset, and because the libraries data documentation also uses a GEOSCORE of 90 as an accuracy cutoff
+    libraries_1 <- libraries_1 |>
+      dplyr::filter(GEOSTATUS == "E" & GEOSCORE >= 90)
+    }
+    
     libraries_1 <- libraries_1 |>
       dplyr::mutate(type = dplyr::case_when(
         C_OUT_TY == "CE" ~ "central library",
@@ -651,7 +683,7 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
       
       if (geog == "zip code") {
         libraries_1 <- libraries_1 |>
-          dplyr::filter(as.character(ZIP) %in% geoselect)
+          dplyr::filter(leading_zeroes(ZIP, 5) %in% geoselect)
       }
     }
     
@@ -660,7 +692,7 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
         name = LIBNAME,
         features = "libraries",
         year = i,
-        address = paste0(ADDRESS, ", ", CITY, ", ", STABR, " ", ZIP)
+        address = paste0(ADDRESS, ", ", CITY, ", ", STABR, " ", leading_zeroes(ZIP, 5))
       ) |>
       dplyr::select(c(name, features, year, address, type, geometry))
     

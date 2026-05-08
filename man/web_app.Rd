@@ -27,15 +27,15 @@ document.}
 
 \item{shapefile_vars}{Shapefile of data, specifically with numeric variables
 that can be color-coded, to display on map alongside a slider to select a variable
-to display. Shapefile must contain
-a \code{"year"} variable (the web app will include a selector slider for
-years), a \code{"variable"} variable (the web app will include a dropdown for
+to display. Shapefile must contain a \code{"variable"} variable (the web app will include a dropdown for
 viewers to select a variable for display, e.g. unemployment, median air quality), an
 \code{"estimate"} variable (for the value or
 estimate associated with each value in the \code{"variable"} column), and a \code{"name"} variable containing
 the names of the geographic areas (e.g. Orange County), which will be
 displayed alongside estimates upon mouse-over of the polygons. The
-shapefile's geometry must be polygons.}
+shapefile's geometry must be polygons. If the shapefile contains a \code{"year"}
+variable, the web app will include a slider for switching between different
+years of data.}
 
 \item{shapefile_features}{Shapefile of points and/or polygons, without a corresponding
 numeric variable. All points and polygons in this
@@ -45,7 +45,9 @@ a \code{"name"} variable (for the name of each individual feature, e.g. Central 
 and a \code{"type"} variable (delineating different feature types within each feature
 category, e.g. private school, public school). All observations corresponding
 to a given value of the \code{"features"} variable must be either points or
-polygons (i.e. no mixing of points and polygons within a feature category).}
+polygons (i.e. no mixing of points and polygons within a feature category).
+If the shapefile contains a \code{"year"} variable, the web app will include a
+slider for switching between different years of data.}
 }
 \description{
 Creates web app using the \link[shiny:shiny-package]{shiny} package,

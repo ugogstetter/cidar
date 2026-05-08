@@ -1,0 +1,177 @@
+---
+title: "Creating a Web App About Boston Land Use with `cidar`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cidar-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE, warning = FALSE}
+library(cidar)
+library(sf)
+library(arcgislayers)
+library(dplyr)
+```
+
+## Introduction
+
+In this vignette, we will be creating a web app with a map displaying the locations of local amenities in Boston, MA, as well as the prevalence of different land use types (single-family residential, apartments, commercial, etc.) across different Boston zip codes. If shared with Boston residents, the web app would allow these residents to gain insight through the data displayed on the map, as well as provide their own insight by responding to the six questions included in the web app.
+
+## Using `cidar`'s `retrieve_point_polygon` Function
+
+Because we plan to call `retrieve_point_polygon` to retrieve geospatial features from a particular place (Boston), but don't necessarily have Boston's GEOID (geographic identifier code) memorized, we will first call `cidar`'s `place_geoids` function to determine Boston's GEOID.
+
+```{r, message = FALSE, warning = FALSE}
+# setting `state` to `MA` so function only returns places in Massachusetts
+place_geoids(state = "MA") |>
+  # printing the first 25 places in the dataset (Boston is row #21)
+  head(25)
+```
+
+Next, we must determine what features we wish to display on the web app map. Calling `cidar`'s `retrieve_point_polygon_features` function returns a data frame with all feature sets retrievable via `retrieve_point_polygon`.
+
+```{r, message = FALSE, warning = FALSE}
+retrieve_point_polygon_features()
+```
+
+We will use libraries, transit stops, and parks, because these amenities are all things a person of any age or family status might want access to in their neighborhood.
+
+```{r, message = FALSE, warning = FALSE}
+# setting `yrs` to `NULL` so function returns most recent year of data for each feature set
+# setting `geog` to `"place"` because Boston is a place
+# setting `geoselect` to Boston's GEOID as determined above
+boston_features <- retrieve_point_polygon(features = c("parks", "libraries", "transit stops"), yrs = NULL, geog = "place", geoselect = "2507000") |>
+  # removing `year` variable because if a `year` variable exists in a provided dataframe, `cidar`'s `web_app` function will create a slider for viewers to select a year to display (as described in `web_app`'s documentation), and this is not necessary when all data is as recent as possible
+  select(!year)
+
+# displaying first few rows of shapefile dataset
+head(boston_features)
+```
+
+This `boston_features` shapefile will serve as the `shapefile_features` input for the `web_app` function. The `web_app` function also takes a `shapefile_vars` argument.
+
+## Pulling In an Outside Dataset
+
+The shapefile for `web_app`'s `shapefile_vars` input must, as specified in the `web_app` function description, include at least an `estimate` variable with numeric values, a `variable` variable providing different categories of estimates, and a `name` variable, with names for the different geographic areas of interest (which must be polygons). In other words, the `shapefile_vars` input must contain numeric values of variable(s) measured in aggregate for different geographic areas (e.g. different cities or different zip codes). An easy way to create a `shapefile_vars` input would be to use `cidar`'s `retrieve_aggregated` function. However, for this project, we want the web app to show data on Boston properties, a data type which exists at a local level and therefore would not be included in the datasets retrievable through `retrieve_aggregated`.
+
+Our first step will be to read in a csv file of recent property information, sourced from [this data.boston.gov webpage](https://data.boston.gov/dataset/property-assessment/resource/6b7e460e-33f6-4e61-80bc-1bef2e73ac54).
+
+```{r, message = FALSE, warning = FALSE}
+boston_properties <- read.csv("https://data.boston.gov/datastore/dump/6b7e460e-33f6-4e61-80bc-1bef2e73ac54?bom=True")
+```
+
+Next, we will reclassify the property use codes to create a manageable number of 10 use categories (each with a substantial amount of observations), and compute the percentage of properties in each zip code with each use. ([This document from mass.gov](https://www.mass.gov/doc/property-type-classification-codes-non-arms-length-codes-and-sales-report-spreadsheet/download) provides a reference for matching property use codes to use names.)
+
+```{r, message = FALSE, warning = FALSE}
+boston_properties <- boston_properties |>
+  # converting use code to character format with consistent number of digits
+  mutate(LUC = sprintf("%03d", LUC)) |>
+  # assigning use codes to use category names, and renaming `LUC` to `variable` in accordance with `web_app`'s variable naming requirements
+  mutate(variable = case_when(substr(LUC, 1, 1) == "0" ~ "mixed-use",
+                         substr(LUC, 1, 3) == "101" ~ "single-family",
+                         substr(LUC, 1, 3) == "104" ~ "two-family",
+                         substr(LUC, 1, 3) == "105" ~ "three-family",
+                         substr(LUC, 1, 3) == "102" ~ "condominium",
+                         substr(LUC, 1, 2) == "11" ~ "apartments",
+                         substr(LUC, 1, 1) == "1" ~ "other residential",
+                         substr(LUC, 1, 1) == "3" ~ "commercial",
+                         substr(LUC, 1, 1) == "4" ~ "industrial",
+                         .default = "other (non-residential)"),
+         # converting zip codes to character format with consistent number of digits, and renaming `ZIP_CODE` to `name` in accordance with `web_app`'s variable naming requirements
+         name = sprintf("%05d", ZIP_CODE)) |>
+  # selecting necessary variables
+  select(c(variable, name)) |>
+  # grouping by zip code
+  group_by(name) |>
+  # creating variable with count of properties in each zip code
+  mutate(count_zip = n()) |>
+  # ungrouping dataset
+  ungroup() |>
+  # grouping by zip code and use category
+  group_by(name, variable) |>
+  # creating variable with count of properties in each category within each zip code
+  mutate(count_category_zip = n()) |>
+  # ungrouping dataset
+  ungroup() |>
+  # creating variable (named `estimate` in accordance with `web_app`'s variable naming requirements) for percentage of properties in each use category within a given zip code
+  mutate(estimate = round((count_category_zip/count_zip)*100, 2)) |>
+  # deselecting variables used in calculation
+  select(!c(count_zip, count_category_zip)) |>
+  # removing duplicate rows
+  distinct()
+```
+
+Because this property data is going on a map, it needs to have spatial attributes. Therefore, we are pulling in a geospatial dataset of Boston zip codes (sourced from [this mass.gov webpage](https://www.mass.gov/info-details/massgis-data-zip-codes-5-digit-from-here-navteq)), then merging it with `boston_properties`.
+
+```{r, message = FALSE, warning = FALSE}
+# creating temporary file to assist in .zip file download
+temp <- tempfile()
+
+# downloading .zip file
+download.file("https://s3.us-east-1.amazonaws.com/download.massgis.digital.mass.gov/shapefiles/state/zipcodes_nt.zip", temp)
+
+# creating temporary file to assist in .zip file unzipping
+temp2 <- tempfile()
+
+# unzipping .zip file
+unzip(temp, exdir = temp2)
+
+# reading in shapefile
+zip_codes <- read_sf(paste0(temp2, "/ZIPCODES_NT_POLY.shp")) |>
+  # filtering to Suffolk County (where Boston is) to avoid duplicate zip codes
+  filter(COUNTY == "SUFFOLK") |>
+  # selecting zip code variable and geometry variable (containing geospatial information)
+  select(c(POSTCODE, geometry)) |>
+  # renaming zip code variable to match zip code variable in `boston_properties`
+  rename(name = POSTCODE)
+
+# unlinking temporary files
+unlink(temp)
+unlink(temp2)
+
+# transforming shapefile's CRS (coordinate reference system) to match the CRS of the shapefile returned by `retrieve_point_polygon` (WGS 84, which has EPSG registry code 4326)
+zip_codes <- st_transform(zip_codes, crs = 4326)
+
+# joining geospatial attributes from `zip_codes` with `boston_properties` using their shared `name` (zip code) variable
+properties_sf <- inner_join(zip_codes, boston_properties, by = join_by(name))
+```
+
+## Creating the Web App
+
+Before using `cidar`'s `web_app` function, we must authenticate with `cidar`'s `google_sheets_auth` function. This will allow viewer-provided responses to questions displayed on the web app to be stored in a Google Sheet.
+
+```{r}
+# code is commented out because you would replace "YOUR EMAIL" with the email address associated with your Google account
+# google_sheets_auth("YOUR EMAIL")
+```
+
+Finally, we will run the `web_app` function, which allows the two shapefile datasets we have just created to be displayed on a web app map. Inside the function parentheses, we will supply six questions for the web app to display to viewers; viewers would click through these questions, each prompting them to select a particular location on the map and submit a corresponding comment. They and other web app viewers would then be able to see those viewer-provided points and comments by selecting the corresponding question in the `Community data to display` dropdown on the web app.
+
+```{r}
+# # code is commented out because it will only run after `google_sheets_auth` is run successfully, as outlined in the previous code chunk
+# web_app(
+#   # because this project name is being used for the first time, a new Google Sheet will be created. afterwards, the same Google Sheet will be accessed and modified anytime web_app is called with this project name ("land use boston")
+#   project_name = "land use boston",
+#   # providing title to display on web app
+#   title = "Land Use in Boston, MA",
+#   # providing questions for viewers to click through and respond to in web app
+#   response_questions = c(
+#     "When the 'libraries' box is checked in 'Features to display', you'll see libraries displayed as points on the map. On the map, please select either a library near where you live, or a location near where you live which you think should house a library. Enter a comment below describing how access to a nearby library has impacted, or could impact, your everyday life.",
+#     "When the 'parks' box is checked in 'Features to display', you'll see parks displayed as polygons on the map. Parks are one feature that can support residents' health and well-being. On the map, please select a location near where you live that you see as especially vital to residents' health and well-being (this could be a park or something else), and enter a comment below describing how this location benefits residents.",
+#     "When the 'transit stops' box is checked in 'Features to display', you'll see transit stops displayed as points on the map. On the map, please select a location near where you live which you think would be a good location for a new transit stop, and explain why in the comment box below.",
+#     "If you select 'commercial' from the 'Data variable to display' dropdown, you'll see the Boston zip codes color-coded by percentage of commercial properties. On the map, please select a location near where you live which you see as a good spot for a new business, and enter a comment below describing the type of business you'd like to see.",
+#     "If you select 'industrial' from the 'Data variable to display' dropdown, you'll see the Boston zip codes color-coded by percentage of industrial properties. Industrial uses, such as manufacturing, can pose health risks. On the map, please select a location near where you live that you see as posing potential health risks to nearby residents, and enter a comment below describing the health risks you percieve.",
+#     "The 'Data variable to display' dropdown allows you to display the Boston zip codes color-coded by percentages of various property types where people might live (single-family, two-family, three-family, condominium, apartments, mixed-use, other residential). On the map, please select a location near where you live which houses residents in a way unconventional to the surrounding area (e.g. two-family home in a largely single-family area, single-family home surrounded by apartments). Enter a comment below describing your reaction to this (e.g. does it provide needed housing? disrupt the neighborhood flow?)."
+#  ),
+#  # providing the shapefiles we produced earlier
+#  shapefile_vars = properties_sf,
+#  shapefile_features = boston_features)
+```
