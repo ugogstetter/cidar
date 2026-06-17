@@ -1,4 +1,4 @@
-globalVariables(c("NAMELSAD"))
+globalVariables(c("NAMELSAD", "ALAND"))
 
 #' Retrieves CBSA GEOIDs for use in [retrieve_aggregated()]
 #' @description Using the tigris

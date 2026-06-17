@@ -1,4 +1,4 @@
-globalVariables(c("CBSA", "CBSA.Code", "County", "County.Code", "County.Name", "DataValue_2001", "DataValue_2023", "GEOID", "GeoFips", "GeoName", "Median.AQI", "NAME", "State", "State.Code", "State.Name", "Year", "bea_key_value", "below_100_percent_poverty_level.estimate", "below_100_percent_poverty_level.moe", "below_150_percent_poverty_level.estimate", "below_150_percent_poverty_level.moe", "census_key_value", "county", "county_code", "county_state", "estimate", "estimate_at_above_150", "estimate_below_100", "estimate_moe", "estimate_total", "estimate_vacant", "gdp", "housing_vacancy.estimate", "housing_vacancy.moe", "moe", "moe_at_above_150", "moe_below_100", "moe_vacant", "percent", "population", "state_abbr", "state_code", "state_name", "variable", "year", "Days.with.AQI", "Unhealthy.Days", "estimate_carpooled", "estimate_drove_alone", "estimate_female_1", "estimate_female_2", "estimate_male_1", "estimate_male_2", "estimate_married_1", "estimate_married_2", "estimate_owner_occupied", "estimate_transit", "homeowners.estimate", "homeowners.moe", "median_aqi", "moe_female_1", "moe_female_2", "moe_male_1", "moe_male_2", "moe_owner_occupied", "moe_transit", "public_transport_commutes.estimate", "public_transport_commutes.moe", "single_parent.estimate", "single_parent.moe", "unhealthy_air_days", "estimate_poverty_total", "moe_poverty_total", "estimate_vacancy_total", "moe_vacancy_total", "estimate_homeownership_total", "moe_homeownership_total", "moe_married_1", "moe_married_2", "moe_drove_alone", "moe_carpooled", "metropolitan_statistical_area", "violent_crime", "motor_vehicle_theft", "counties_principal_cities", "msa", "cbsa", "single_parent_families.estimate", "single_parent_families.moe", "category", "type", "name"))
+globalVariables(c("CBSA", "CBSA.Code", "County", "County.Code", "County.Name", "DataValue_2001", "DataValue_2023", "GEOID", "GeoFips", "GeoName", "Median.AQI", "NAME", "State", "State.Code", "State.Name", "Year", "bea_key_value", "below_100_percent_poverty_level.estimate", "below_100_percent_poverty_level.moe", "below_150_percent_poverty_level.estimate", "below_150_percent_poverty_level.moe", "census_key_value", "county", "county_code", "county_state", "estimate", "estimate_at_above_150", "estimate_below_100", "estimate_moe", "estimate_total", "estimate_vacant", "gdp", "housing_vacancy.estimate", "housing_vacancy.moe", "moe", "moe_at_above_150", "moe_below_100", "moe_vacant", "percent", "population", "state_abbr", "state_code", "state_name", "variable", "year", "Days.with.AQI", "Unhealthy.Days", "estimate_carpooled", "estimate_drove_alone", "estimate_female_1", "estimate_female_2", "estimate_male_1", "estimate_male_2", "estimate_married_1", "estimate_married_2", "estimate_owner_occupied", "estimate_transit", "homeowners.estimate", "homeowners.moe", "median_aqi", "moe_female_1", "moe_female_2", "moe_male_1", "moe_male_2", "moe_owner_occupied", "moe_transit", "public_transport_commutes.estimate", "public_transport_commutes.moe", "single_parent.estimate", "single_parent.moe", "unhealthy_air_days", "estimate_poverty_total", "moe_poverty_total", "estimate_vacancy_total", "moe_vacancy_total", "estimate_homeownership_total", "moe_homeownership_total", "moe_married_1", "moe_married_2", "moe_drove_alone", "moe_carpooled", "metropolitan_statistical_area", "violent_crime", "motor_vehicle_theft", "counties_principal_cities", "msa", "cbsa", "single_parent_families.estimate", "single_parent_families.moe", "category", "type", "name", "estimate_median_age", "estimate_at_above_18", "estimate_at_above_65", "moe_median_age", "moe_at_above_18", "moe_at_above_65", "median_age.estimate", "under_age_18.estimate", "age_18_to_64.estimate", "age_65_plus.estimate", "median_age.moe", "under_age_18.moe", "age_18_to_64.moe", "age_65_plus.moe", "land_sq_mi", "FIPSCode", "State_Abbr", "Jurisdiction_Name", "F1a", "JurisdictionName", "Jurisdiction", "QF1a", "FIPSCode...3", "full_FIPS", "ballots_cast", "jurisdiction_name", "B16008_009", "B16008_023", "adult_citizens", "merge_name", "ce_fips_2022", "town_fips_2020", "ct_GEOID"))
 
 # possible vars values include unemployment, high-skill employment, median family income, poverty, housing vacancy, median home value, median gross rent, households without vehicle, old-age dependency ratio, households with broadband, homeownership, single-parent families, public transport commutes, mean commute time, Gini index, sex, age, and race
 # seems like it always retrieves the ACS 5-year estimates for county and for CBSA?
@@ -1060,17 +1060,21 @@ voting_retrieval <- function(yrs, state, geoselect) {
       
       utils::download.file("https://www.eac.gov/sites/default/files/2023-06/2022_EAVS_for_Public_Release_nolabel_V1_CSV.zip", temp)
       
-      voting_1 <- utils::read.csv(utils::unzip(temp)) |>
+      temp2 <- tempfile()
+      
+      voting_1 <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State_Abbr, jurisdiction_name = Jurisdiction_Name, ballots_cast = F1a)
       
       unlink(temp)
+      
+      unlink(temp2)
     }
     
     if (i %in% 2018:2020) {
       
       voting_1 <- dplyr::case_when(i == 2018 ~ "https://www.eac.gov/sites/default/files/Research/EAVS_2018_for_Public_Release_Updates3.csv",
                        i == 2020 ~ "https://www.eac.gov/sites/default/files/EAVS%202020/2020_EAVS_for_Public_Release_nolabel_V2.csv") |>
-        read.csv() |>
+        utils::read.csv() |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State_Abbr, jurisdiction_name = Jurisdiction_Name, ballots_cast = F1a)
       
     }
@@ -1080,11 +1084,15 @@ voting_retrieval <- function(yrs, state, geoselect) {
       temp <- tempfile()
   
       utils::download.file("https://www.eac.gov/sites/default/files/Research/EAVS_2016_Final_Data_for_Public_Release_v2.csv.zip", temp)
+      
+      temp2 <- tempfile()
     
-      voting_1 <- utils::read.csv(utils::unzip(temp)) |>
+      voting_1 <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State, jurisdiction_name = JurisdictionName, ballots_cast = F1a)
     
       unlink(temp)
+      
+      unlink(temp2)
       
     }
       
@@ -1183,7 +1191,7 @@ voting_retrieval <- function(yrs, state, geoselect) {
   if (ct_included == TRUE) {
     
      # retrieving CSV to match CT cities/towns with planning regions instead of them now being designated with the old counties which are not in the counties dataset
-     ct_match <- read.csv("https://raw.githubusercontent.com/CT-Data-Collaborative/ct-town-to-planning-region/refs/heads/main/ct-town-to-planning-region.csv") |>
+     ct_match <- utils::read.csv("https://raw.githubusercontent.com/CT-Data-Collaborative/ct-town-to-planning-region/refs/heads/main/ct-town-to-planning-region.csv") |>
        dplyr::mutate(ct_GEOID = leading_zeroes(ce_fips_2022, 5), state_abbr = "CT", full_FIPS = leading_zeroes(town_fips_2020, 10)) |>
        dplyr::select(c(ct_GEOID, full_FIPS, state_abbr))
      

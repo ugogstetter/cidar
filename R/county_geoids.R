@@ -1,4 +1,4 @@
-globalVariables(c("STATEFP", "NAMELSAD", "STUSPS"))
+globalVariables(c("STATEFP", "NAMELSAD", "STUSPS", "ALAND"))
 
 #' Retrieves county GEOIDs for use in [retrieve_aggregated()]
 #' @description Using the tigris
