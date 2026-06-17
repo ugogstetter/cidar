@@ -2,7 +2,7 @@ globalVariables(c("FEATTYPE", "name", "stop_name", "stop_type_text", "STREET", "
 
 # defining function to add leading zeroes and convert numeric values to character as needed. x is the value, digits is the desired number of digits
 leading_zeroes <- function(x, digits) {
-  x <- as.character(x)
+  x <- as.character(format(x, scientific = FALSE))
   
   if (nchar(x) < digits) {
     num_zeroes <- (digits - nchar(x))
@@ -525,26 +525,41 @@ retrieve_schools <- function(schools_yrs, geog, geoselect, state, types) {
 }
 
 
-retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
+retrieve_libraries <- function(libraries_yrs, geog, geoselect, state, types) {
   
-  empty_sf <- sf::st_sf(features = character(), year = numeric(), name = character(), type = character(), address = character(), geometry = list(), crs = 4326)
+  empty_sf <- sf::st_sf(GEOID = character(), features = character(), year = numeric(), name = character(), type = character(), address = character(), geometry = list(), crs = 4326)
   
   if (!is.null(geog)) {
     if (geog == "cbsa" & min(libraries_yrs) < 2011) {
-      geog_cbsa <- cbsa_geoids(sf = TRUE) |>
+      geog_cbsa <- cbsa_geoids(sf = TRUE)
+      
+      if (!is.null(geoselect)) {
+        geog_cbsa <- geog_cbsa |>
         dplyr::filter(GEOID %in% geoselect)
+      }
     }
     
     if (geog == "place" & max(libraries_yrs) > 2014) {
-      # creating vector of state abbreviations just for requested places so tigris call in place_geoids will run faster
-      place_states <- tigris::states(year = 2023) |>
+      # creating vector of state abbreviations, just for requested places/states where applicable, so tigris call in place_geoids will run faster
+      place_states <- tigris::states(year = 2023)
+      
+      if (!is.null(geoselect)) {
+        place_states <- place_states |>
         dplyr::filter(GEOID %in% as.vector(substr(geoselect, 1, 2)))
+      }
+      
+      if (!is.null(state)) {
+        place_states <- place_states |>
+          dplyr::filter(STUSPS %in% state)
+      }
       place_states <- as.vector(place_states$STUSPS)
       
       geog_place <- place_geoids(state = place_states, sf = TRUE)
       
-      geog_place <- geog_place |>
+      if (!is.null(geoselect)) {
+        geog_place <- geog_place |>
         dplyr::filter(GEOID %in% geoselect)
+      }
     }
   }
   
@@ -627,11 +642,18 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
         dplyr::filter(type %in% types$libraries)
     }
     
-    libraries_1 <- sf::st_as_sf(libraries_1, coords = c("LONGITUD", "LATITUDE"), crs = 4326)
+    libraries_1 <- sf::st_as_sf(libraries_1, coords = c("LONGITUD", "LATITUDE"), crs = 4326) |>
+      # creating placeholder column for GEOID
+      dplyr::mutate(GEOID = NA)
     
+    if (!is.null(state)) {
+      libraries_1 <- libraries_1 |>
+        dplyr::filter(STABR %in% state)
+    }
     
     if (!(is.null(geog))) {
       if (geog == "state") {
+        # no need to test here whether geoselect is not NULL since geog is only "state" when not being used for retrieve_aggregated
         libraries_1 <- libraries_1 |>
           dplyr::filter(STABR %in% geoselect)
       }
@@ -639,48 +661,81 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
       if (geog == "county") {
         if (i <= 2014) {
           libraries_1 <- libraries_1 |>
-            dplyr::filter(paste0(leading_zeroes(FIPSST, 2), leading_zeroes(FIPSCO, 3)) %in% geoselect)
+            dplyr::mutate(GEOID = paste0(leading_zeroes(FIPSST, 2), leading_zeroes(FIPSCO, 3)))
         }
         
         if (i %in% 2015:2021) {
           libraries_1 <- libraries_1 |>
-            dplyr::filter(paste0(leading_zeroes(INCITSST, 2), leading_zeroes(INCITSCO, 3)) %in% geoselect)
+            dplyr::mutate(GEOID = paste0(leading_zeroes(INCITSST, 2), leading_zeroes(INCITSCO, 3)))
         }
         
         if (i >= 2022) {
           libraries_1 <- libraries_1 |>
-            dplyr::filter(substr(leading_zeroes(CENTRACT, 11), 1, 5) %in% geoselect)
+            dplyr::mutate(GEOID = substr(leading_zeroes(CENTRACT, 11), 1, 5))
+        }
+        if (!is.null(geoselect)) {
+          libraries_1 <- libraries_1 |>
+            dplyr::filter(GEOID %in% geoselect)
         }
       }
       
       if (geog == "cbsa") {
         if (i < 2011) {
+          # removing GEOID variable (which is currently all NAs) so there won't be a duplicate GEOID column in the output of st_intersection in addition to the one associated with cbsa_geoids, which will be added into libraries_intersect during st_intersection
+          libraries_1 <- libraries_1 |>
+            dplyr::select(!GEOID)
+          
           libraries_intersect <- sf::st_intersection(libraries_1, geog_cbsa)
           
           libraries_1 <- libraries_1 |>
             dplyr::filter(row.names(libraries_1) %in% rownames(libraries_intersect))
+          
+          # must order the rows properly for cbind to work correctly
+          libraries_intersect <- libraries_intersect[ order(as.numeric(row.names(libraries_intersect))), ]
+          
+          libraries_1 <- cbind(libraries_1, GEOID = libraries_intersect$GEOID)
         }
         
         if (i >= 2011) {
           libraries_1 <- libraries_1 |>
-            dplyr::filter(leading_zeroes(CBSA, 5) %in% geoselect)
+            dplyr::mutate(GEOID = leading_zeroes(CBSA, 5))
+          
+          if (!is.null(geoselect)) {
+            libraries_1 <- libraries_1 |>
+              dplyr::filter(GEOID %in% geoselect)
+          }
         }
       }
       
       if (geog == "place") {
         if (i <= 2014) {
           libraries_1 <- libraries_1 |>
-            dplyr::filter(paste0(leading_zeroes(FIPSST, 2), leading_zeroes(FIPSPLAC, 5)) %in% geoselect)
+            dplyr::mutate(GEOID = paste0(leading_zeroes(FIPSST, 2), leading_zeroes(FIPSPLAC, 5)))
+          
+          if (!is.null(geoselect)) {
+            libraries_1 <- libraries_1 |>
+              dplyr::filter(GEOID %in% geoselect)
+          }
         }
         
         if (i > 2014) {
+          # removing GEOID variable (which is currently all NAs) so there won't be a duplicate GEOID column in the output of st_intersection in addition to the one associated with place_geoids, which will be added into libraries_intersect during st_intersection
+          libraries_1 <- libraries_1 |>
+            dplyr::select(!GEOID)
+          
           libraries_intersect <- sf::st_intersection(libraries_1, geog_place)
           
           libraries_1 <- libraries_1 |>
             dplyr::filter(row.names(libraries_1) %in% rownames(libraries_intersect))
+          
+          # must order the rows properly for cbind to work correctly
+          libraries_intersect <- libraries_intersect[ order(as.numeric(row.names(libraries_intersect))), ]
+          
+          libraries_1 <- cbind(libraries_1, GEOID = libraries_intersect$GEOID)
         }
       }
       
+      # zip code is not used with retrieve_aggregated
       if (geog == "zip code") {
         libraries_1 <- libraries_1 |>
           dplyr::filter(leading_zeroes(ZIP, 5) %in% geoselect)
@@ -694,7 +749,7 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
         year = i,
         address = paste0(ADDRESS, ", ", CITY, ", ", STABR, " ", leading_zeroes(ZIP, 5))
       ) |>
-      dplyr::select(c(name, features, year, address, type, geometry))
+      dplyr::select(c(GEOID, name, features, year, address, type, geometry))
     
     libraries <- rbind(libraries, libraries_1)
   }
@@ -703,14 +758,18 @@ retrieve_libraries <- function(libraries_yrs, geog, geoselect, types) {
 }
 
 
-retrieve_nonprofits <- function(nonprofits_yrs, geog, geoselect, types) {
+retrieve_nonprofits <- function(nonprofits_yrs, geog, geoselect, state, types) {
   
   empty_sf <- sf::st_sf(features = character(), year = numeric(), name = character(), type = character(), address = character(), geometry = list(), crs = 4326)
   
-  if (is.null(geog)) {
-    all_states <- TRUE
-  } else {
-    all_states <- FALSE
+  # setting states variable to all states as default, but changes to less states if code below applies
+  states <- c("AK", "AL", "AR", "AS", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "GU", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MP", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VI", "VT", "WA", "WI", "WV", "WY")
+  
+  if (!is.null(state)) {
+    states <- state
+  }
+  
+  if (!is.null(geoselect)) {
     
     if (geog == "state") {
       states <- geoselect
@@ -725,40 +784,36 @@ retrieve_nonprofits <- function(nonprofits_yrs, geog, geoselect, types) {
       
       states <- as.vector(states_match$STUSPS)
     }
-    
-    if (geog == "cbsa") {
-      all_states <- TRUE
-    }
   }
   
-  if (all_states == TRUE) {
-    states <- c("AK", "AL", "AR", "AS", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "GU", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MP", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VI", "VT", "WA", "WI", "WV", "WY")
-  }
+  nonprofits_all <- data.frame(geo_match_addr = character(), type = character(), org_name_display = character(), geo_lat = numeric(), geo_lon = numeric(), GEOID = character(), land_sq_mi = numeric(), org_addr_full = character(), org_name_raw = character(), nteev2_subsector = character(), first_year_in_bmf = numeric(), last_year_in_bmf = numeric())
   
-  nonprofits_all <- data.frame(ORG_ADDR_MATCH = character(), NTEEV2 = character(), ORG_NAME_CURRENT = character(), LATITUDE = numeric(), LONGITUDE = numeric(), nonprofits_geoselect = character(), ORG_ADDR_FULL = character(), NCCS_LEVEL_3 = character(), ORG_YEAR_FIRST = numeric(), ORG_YEAR_LAST = numeric())
+  # saving initial timeout option value to change back to. then increasing limit before timeout so read.csv won't fail with larger csv files
+  orig_timeout <- getOption("timeout")
+  options(timeout = 600)
   
   for (i in states) {
-    nonprofits_1 <- utils::read.csv(paste0("https://nccsdata.s3.amazonaws.com/harmonized/bmf/unified/", i, "_BMF_V1.1.csv")) |>
-      dplyr::filter( # removing rows with geocoded addresses that appear to start with zip codes
-        (!((!grepl("\\D", substr(ORG_ADDR_MATCH, 1, 5))) & (((substr(ORG_ADDR_MATCH, 6, 6) == "-") & (!grepl("\\D", substr(ORG_ADDR_MATCH, 7, 10))) & substr(ORG_ADDR_MATCH, 11, 11) == ",") | (substr(ORG_ADDR_MATCH, 6, 6) == ",")))) &
+    nonprofits_1 <- utils::read.csv(paste0("https://nccsdata.s3.us-east-1.amazonaws.com/master/bmf/state_marts/csv/bmf_master_", i, ".csv")) |>
+      dplyr::filter( # removing rows that are not geocoded
+        (geo_is_geocoded == "TRUE") &
+           # removing rows with geocoded addresses that appear to start with zip codes
+        (!((!grepl("\\D", substr(geo_match_addr, 1, 5))) & (((substr(geo_match_addr, 6, 6) == "-") & (!grepl("\\D", substr(geo_match_addr, 7, 10))) & substr(geo_match_addr, 11, 11) == ",") | (substr(geo_match_addr, 6, 6) == ",")))) &
           # removing rows with geocoded addresses of a match score less than 90 (from my observation, 90 appears to be the approximate threshold for reasonably reliable geocoding)
-          (GEOCODER_SCORE >= 90) &
-          # removing rows with no zip codes given (as these are generally international addresses)
-          (F990_ORG_ADDR_ZIP != "00000-0000")
+          (geo_score >= 90)
       ) |>
-      dplyr::mutate(type = dplyr::case_when(substr(NTEEV2, 1, 3) == "ART" ~ "arts, culture, and humanities",
-                                            substr(NTEEV2, 1, 3) == "EDU" ~ "education",
-                                            substr(NTEEV2, 1, 3) == "ENV" ~ "environment and animals",
-                                            substr(NTEEV2, 1, 3) == "HEL" ~ "health",
-                                            substr(NTEEV2, 1, 3) == "HMS" ~ "human services",
-                                            substr(NTEEV2, 1, 3) == "IFS" ~ "international, foreign affairs",
-                                            substr(NTEEV2, 1, 3) == "MMB" ~ "mutual/membership benefit",
-                                            substr(NTEEV2, 1, 3) == "PSB" ~ "public, societal benefit",
-                                            substr(NTEEV2, 1, 3) == "REL" ~ "religion related",
-                                            substr(NTEEV2, 1, 3) == "UNI" ~ "university",
-                                            substr(NTEEV2, 1, 3) == "HOS" ~ "hospital",
+      dplyr::mutate(type = dplyr::case_when(nteev2_subsector == "ART" ~ "arts, culture, and humanities",
+                                            nteev2_subsector == "EDU" ~ "education",
+                                            nteev2_subsector == "ENV" ~ "environment and animals",
+                                            nteev2_subsector == "HEL" ~ "health",
+                                            nteev2_subsector == "HMS" ~ "human services",
+                                            nteev2_subsector == "IFA" ~ "international, foreign affairs",
+                                            nteev2_subsector == "MMB" ~ "mutual/membership benefit",
+                                            nteev2_subsector == "PSB" ~ "public, societal benefit",
+                                            nteev2_subsector == "REL" ~ "religion related",
+                                            nteev2_subsector == "UNI" ~ "university",
+                                            nteev2_subsector == "HOS" ~ "hospital",
                                             .default = "unknown"
-      ), nonprofits_geoselect = NA)
+      ), GEOID = NA, land_sq_mi = NA)
     
     
     if (!is.null(types$nonprofits)) {
@@ -768,82 +823,143 @@ retrieve_nonprofits <- function(nonprofits_yrs, geog, geoselect, types) {
     }
     
     if (!is.null(geog)) {
-      if (geog == "county") {
+      # zip code is not used in retrieve_aggregated, so setting the GEOID isn't necessary, and there will always be a geoselect value
+      if (geog == "zip code") {
         nonprofits_1 <- nonprofits_1 |>
-          dplyr::mutate(nonprofits_geoselect = paste(CENSUS_COUNTY_NAME, CENSUS_STATE_ABBR))
-      }
-      
-      if (geog == "cbsa") {
-        nonprofits_1 <- nonprofits_1 |>
-          dplyr::mutate(nonprofits_geoselect = as.character(CENSUS_CBSA_FIPS))
+          dplyr::filter(leading_zeroes(geo_postal, 5) %in% geoselect)
       }
     }
     
     nonprofits_1 <- nonprofits_1 |>
-      dplyr::select(c(ORG_ADDR_MATCH, type, ORG_NAME_CURRENT, LATITUDE, LONGITUDE, nonprofits_geoselect, ORG_ADDR_FULL, NCCS_LEVEL_3, ORG_YEAR_FIRST, ORG_YEAR_LAST))
+      dplyr::select(c(geo_match_addr, type, org_name_display, geo_lat, geo_lon, GEOID, land_sq_mi, org_addr_full, org_name_raw, nteev2_subsector, first_year_in_bmf, last_year_in_bmf))
     
     nonprofits_all <- rbind(nonprofits_all, nonprofits_1)
   }
   
-  nonprofits <- data.frame(ORG_ADDR_MATCH = character(), type = character(), ORG_NAME_CURRENT = character(), LATITUDE = numeric(), LONGITUDE = numeric(), nonprofits_geoselect = character(), year = numeric())
+  # changing timeout back to its initial value
+  options(timeout = orig_timeout)
+  
+  nonprofits <- data.frame(geo_match_addr = character(), type = character(), org_name_display = character(), geo_lat = numeric(), geo_lon = numeric(), GEOID = character(), land_sq_mi = numeric(), year = numeric())
   
   for (i in nonprofits_yrs) {
     nonprofits_2 <- nonprofits_all |>
-      dplyr::filter(ORG_YEAR_FIRST >= i & ORG_YEAR_LAST <= i) |>
+      dplyr::filter(last_year_in_bmf >= i & first_year_in_bmf <= i) |>
       dplyr::mutate(year = i) |>
-      # using same method for determining distinct nonprofits as is used in calculating COI
-      dplyr::distinct(ORG_ADDR_FULL, ORG_NAME_CURRENT, NCCS_LEVEL_3, .keep_all = TRUE) |>
-      dplyr::select(c(ORG_ADDR_MATCH, type, ORG_NAME_CURRENT, LATITUDE, LONGITUDE, nonprofits_geoselect, year))
+      # using same method for determining distinct nonprofits as is used in calculating COI, except replacing NCCS_LEVEL_3 with similar variable due to change in dataset
+      dplyr::distinct(org_addr_full, org_name_raw, nteev2_subsector, .keep_all = TRUE) |>
+      dplyr::select(c(geo_match_addr, type, org_name_display, geo_lat, geo_lon, GEOID, land_sq_mi, year))
     
     nonprofits <- rbind(nonprofits, nonprofits_2)
   }
   
-  nonprofits <- sf::st_as_sf(nonprofits, coords = c("LONGITUDE", "LATITUDE"), crs = 4326)
+  nonprofits <- sf::st_as_sf(nonprofits, coords = c("geo_lon", "geo_lat"), crs = 4326)
   
   if (!is.null(geog)) {
     if (geog == "county") {
-      nonprofits_counties <- county_geoids(state = states) |>
-        dplyr::filter(GEOID %in% geoselect) |>
-        dplyr::mutate(nonprofits_geoselect = paste(sub(",[^,]*$", "", name), state_abbr))
+      geog_county <- county_geoids(sf = TRUE, land_area = TRUE)
       
-      nonprofits <- dplyr::inner_join(nonprofits, nonprofits_counties, by = dplyr::join_by("nonprofits_geoselect"))
+      if (!is.null(geoselect)) {
+        geog_county <- geog_county |>
+          dplyr::filter(GEOID %in% geoselect)
+      }
+      
+      # removing GEOID and land_sq_mi variables (which are currently all NAs) so there won't be duplicate GEOID and land_sq_mi columns in the output of st_intersection in addition to the ones associated with county_geoids, which will be added into nonprofits_intersect during st_intersection
+      nonprofits <- nonprofits |>
+        dplyr::select(!c(GEOID, land_sq_mi))
+      
+      nonprofits_intersect <- sf::st_intersection(nonprofits, geog_county)
+      
+      nonprofits <- nonprofits |>
+        dplyr::filter(row.names(nonprofits) %in% rownames(nonprofits_intersect))
+      
+      # must order the rows properly for cbind to work correctly
+      nonprofits_intersect <- nonprofits_intersect[ order(as.numeric(row.names(nonprofits_intersect))), ]
+      
+      nonprofits <- cbind(nonprofits, GEOID = nonprofits_intersect$GEOID, land_sq_mi = nonprofits_intersect$land_sq_mi)
     }
     
     if (geog == "cbsa") {
+      geog_cbsa <- cbsa_geoids(sf = TRUE, land_area = TRUE)
+      
+      if (!is.null(geoselect)) {
+        geog_cbsa <- geog_cbsa |>
+          dplyr::filter(GEOID %in% geoselect)
+      }
+      
+      # removing GEOID and land_sq_mi variables (which are currently all NAs) so there won't be duplicate GEOID and land_sq_mi columns in the output of st_intersection in addition to the ones associated with cbsa_geoids, which will be added into nonprofits_intersect during st_intersection
       nonprofits <- nonprofits |>
-        dplyr::filter(nonprofits_geoselect %in% geoselect)
+        dplyr::select(!c(GEOID, land_sq_mi))
+      
+      nonprofits_intersect <- sf::st_intersection(nonprofits, geog_cbsa)
+      
+      nonprofits <- nonprofits |>
+        dplyr::filter(row.names(nonprofits) %in% rownames(nonprofits_intersect))
+      
+      # must order the rows properly for cbind to work correctly
+      nonprofits_intersect <- nonprofits_intersect[ order(as.numeric(row.names(nonprofits_intersect))), ]
+      
+      nonprofits <- cbind(nonprofits, GEOID = nonprofits_intersect$GEOID, land_sq_mi = nonprofits_intersect$land_sq_mi)
     }
     
     if (geog == "place") {
-      geog_place <- place_geoids(state = states, sf = TRUE)
+      # creating vector of state abbreviations, just for requested places/states where applicable, so tigris call in place_geoids will run faster
+      place_states <- tigris::states(year = 2023)
       
-      geog_place <- geog_place |>
-        dplyr::filter(GEOID %in% geoselect)
+      if (!is.null(geoselect)) {
+        place_states <- place_states |>
+          dplyr::filter(GEOID %in% as.vector(substr(geoselect, 1, 2)))
+      }
+      
+      if (!is.null(state)) {
+        place_states <- place_states |>
+          dplyr::filter(STUSPS %in% state)
+      }
+      place_states <- as.vector(place_states$STUSPS)
+      
+      geog_place <- place_geoids(state = place_states, sf = TRUE, land_area = TRUE)
+      
+      if (!is.null(geoselect)) {
+        geog_place <- geog_place |>
+          dplyr::filter(GEOID %in% geoselect)
+      }
+      
+      # removing GEOID and land_sq_mi variables (which are currently all NAs) so there won't be duplicate GEOID and land_sq_mi columns in the output of st_intersection in addition to the ones associated with place_geoids, which will be added into nonprofits_intersect during st_intersection
+      nonprofits <- nonprofits |>
+        dplyr::select(!c(GEOID, land_sq_mi))
       
       nonprofits_intersect <- sf::st_intersection(nonprofits, geog_place)
       
       nonprofits <- nonprofits |>
         dplyr::filter(row.names(nonprofits) %in% rownames(nonprofits_intersect))
+      
+      # must order the rows properly for cbind to work correctly
+      nonprofits_intersect <- nonprofits_intersect[ order(as.numeric(row.names(nonprofits_intersect))), ]
+      
+      nonprofits <- cbind(nonprofits, GEOID = nonprofits_intersect$GEOID, land_sq_mi = nonprofits_intersect$land_sq_mi)
     }
   }
   
   nonprofits <- nonprofits |>
-    # I am using NTEEV2 for type as it seems to have the smallest number of type categories out of the different variables for type
-    dplyr::mutate(name = ORG_NAME_CURRENT, features = "nonprofits", address = ORG_ADDR_MATCH
+    dplyr::mutate(name = org_name_display, features = "nonprofits", address = geo_match_addr
     ) |>
-    dplyr::select(c(name, type, features, year, address, geometry))
+    dplyr::select(c(GEOID, land_sq_mi, name, type, features, year, address, geometry))
 
   
   return(nonprofits)
 }
 
-retrieve_crashes <- function(crashes_yrs, geog, geoselect, types) {
+retrieve_crashes <- function(crashes_yrs, geog, geoselect, state, types) {
   
   empty_sf <- sf::st_sf(features = character(), year = numeric(), name = character(), type = character(), address = character(), geometry = list(), crs = 4326)
   
   crashes <- data.frame(STATE = numeric(), COUNTY = numeric(), YEAR = numeric(), LATITUDE = numeric(), LONGITUD = numeric(), MAN_COLL = numeric())
   
   for (i in crashes_yrs) {
+    
+    # saving initial timeout option value to change back to. then increasing limit before timeout so read.csv won't fail with larger csv files
+    orig_timeout <- getOption("timeout")
+    options(timeout = 600)
+    
     temp <- tempfile()
     
     utils::download.file(paste0("https://static.nhtsa.gov/nhtsa/downloads/FARS/", as.character(i), "/National/FARS", as.character(i), "NationalCSV.zip"), temp)
@@ -866,6 +982,9 @@ retrieve_crashes <- function(crashes_yrs, geog, geoselect, types) {
     crashes1 <- crashes1 |>
       dplyr::select(c(STATE, COUNTY, YEAR, LATITUDE, LONGITUD, MAN_COLL))
     
+    # changing timeout back to its initial value
+    options(timeout = orig_timeout)
+    
     unlink(temp)
     
     unlink(temp2)
@@ -880,7 +999,8 @@ retrieve_crashes <- function(crashes_yrs, geog, geoselect, types) {
                                           ((YEAR %in% 1999:2001 & MAN_COLL == 4) | (YEAR %in% 2002:2009 & MAN_COLL %in% 3:6) | (YEAR >= 2010 & MAN_COLL == 6)) ~ "collision at angle",
                                           ((YEAR %in% 1999:2001 & MAN_COLL %in% 5:6) | (YEAR >= 2002 & MAN_COLL %in% 7:8)) ~ "sideswipe",
                                           .default = "other/unknown"
-    )) |>
+    ),
+    GEOID = NA) |>
     dplyr::filter((!is.na(LATITUDE)) & (!is.na(LONGITUD)))
   
   if (!is.null(types$`fatal crashes`)) {
@@ -907,19 +1027,33 @@ retrieve_crashes <- function(crashes_yrs, geog, geoselect, types) {
   if (!is.null(geog)) {
     if (geog == "county") {
       crashes <- crashes |>
-        dplyr::mutate(GEOID = paste0(leading_zeroes(STATE, 2), leading_zeroes(COUNTY, 3))) |>
-        dplyr::filter(GEOID %in% geoselect)
+        dplyr::mutate(GEOID = paste0(leading_zeroes(STATE, 2), leading_zeroes(COUNTY, 3)))
+      
+      if (!is.null(geoselect)) {
+        crashes <- crashes |>
+          dplyr::filter(GEOID %in% geoselect)
+      }
     }
     
-    if (geog == "state") {
+    if (geog == "state" | !(is.null(state))) {
+      
+      if (geog == "state") {
+        state_select <- geoselect
+      }
+      if (!is.null(state)) {
+        state_select <- state
+      }
+      
       crashes <- crashes |>
-        dplyr::mutate(GEOID = leading_zeroes(STATE, 2))
+        dplyr::mutate(state_num = leading_zeroes(STATE, 2))
       
+      # we can assume in this case that geoselect is not null since geog cannot be state with retrieve_aggregated
       crashes_states <- tigris::states(year = 2023) |>
-        dplyr::filter(STUSPS %in% geoselect) |>
-        dplyr::select(GEOID)
+        dplyr::filter(STUSPS %in% state_select) |>
+        dplyr::select(GEOID) |>
+        dplyr::rename(state_num = GEOID)
       
-      crashes <- dplyr::inner_join(crashes, crashes_states, by = dplyr::join_by("GEOID"))
+      crashes <- dplyr::inner_join(crashes, crashes_states, by = dplyr::join_by("state_num"))
     }
     
     # I really tried to figure out what CRS this data is in and couldn't figure it out for certain, but another crash data document from NTHSA said it uses WGS84 (4326), and it sounds like the two main coordinate systems have a difference of only like 1-3 meters anyway. also, the documentation for this specific dataset discusses the coordinates being GPS, which it seems like is more aligned with WGS84
@@ -928,36 +1062,66 @@ retrieve_crashes <- function(crashes_yrs, geog, geoselect, types) {
     if (geog == "cbsa") {
       geog_cbsa <- cbsa_geoids(sf = TRUE)
       
-      geog_cbsa <- geog_cbsa |>
-        dplyr::filter(GEOID %in% geoselect)
+      if (!is.null(geoselect)) {
+        geog_cbsa <- geog_cbsa |>
+          dplyr::filter(GEOID %in% geoselect)
+      }
+      
+      # removing GEOID variable (which is currently all NAs) so there won't be a duplicate GEOID column in the output of st_intersection in addition to the one associated with cbsa_geoids, which will be added into crashes_intersect during st_intersection
+      crashes <- crashes |>
+        dplyr::select(!GEOID)
       
       crashes_intersect <- sf::st_intersection(crashes, geog_cbsa)
       
       crashes <- crashes |>
         dplyr::filter(row.names(crashes) %in% rownames(crashes_intersect))
+      
+      # must order the rows properly for cbind to work correctly
+      crashes_intersect <- crashes_intersect[ order(as.numeric(row.names(crashes_intersect))), ]
+      
+      crashes <- cbind(crashes, GEOID = crashes_intersect$GEOID)
     }
     
     if (geog == "place") {
-      # retrieving states corresponding to user-provided places so that place_geoids will only have to retrieve tigris outputs for the necessary states and thus the function can run faster
-      crashes_states <- tigris::states(year = 2023) |>
-        dplyr::filter(STUSPS %in% geoselect)
+      # removing GEOID variable (which is currently all NAs) so there won't be a duplicate GEOID column in the output of st_intersection in addition to the one associated with place_geoids, which will be added into crashes_intersect during st_intersection
+      crashes <- crashes |>
+        dplyr::select(!GEOID)
       
-      geog_place <- place_geoids(state = states, sf = TRUE)
+      if (!(is.null(geoselect))) {
+        
+        # creating vector of state abbreviations just for requested places so tigris call in place_geoids will run faster
+        place_states <- tigris::states(year = 2023) |>
+          dplyr::filter(GEOID %in% as.vector(substr(geoselect, 1, 2)))
+        
+        place_states <- as.vector(place_states$STUSPS)
+        
+        geog_place <- place_geoids(state = place_states, sf = TRUE)
+        
+        geog_place <- geog_place |>
+          dplyr::filter(GEOID %in% geoselect)
+      }
       
-      geog_place <- geog_place |>
-        dplyr::filter(GEOID %in% geoselect)
+      if (is.null(geoselect)) {
+        
+        geog_place <- place_geoids(sf = TRUE)
+      }
       
       crashes_intersect <- sf::st_intersection(crashes, geog_place)
       
       crashes <- crashes |>
         dplyr::filter(row.names(crashes) %in% rownames(crashes_intersect))
+      
+      # must order the rows properly for cbind to work correctly
+      crashes_intersect <- crashes_intersect[ order(as.numeric(row.names(crashes_intersect))), ]
+      
+      crashes <- cbind(crashes, GEOID = crashes_intersect$GEOID)
     }
   }
   
   crashes <- crashes |>
     dplyr::mutate(name = NA, features = "fatal crashes", year = YEAR, address = NA
     ) |>
-    dplyr::select(c(name, type, features, year, address, geometry))
+    dplyr::select(c(GEOID, name, type, features, year, address, geometry))
   
   return(crashes)
 }
@@ -1061,7 +1225,12 @@ retrieve_point_polygon.list <- function(features, yrs = 1999:2024, geog = NULL, 
   
   if ("libraries" %in% features & length(libraries_yrs) != 0) {
     
-    libraries <- retrieve_libraries(libraries_yrs, geog, geoselect, types)} else {libraries <- empty_sf}
+    libraries <- retrieve_libraries(libraries_yrs, geog, geoselect, state = NULL, types) |>
+      # filtering out the GEOID column that was added for use with retrieve_aggregated
+      dplyr::select(!GEOID)
+  } else {
+      libraries <- empty_sf
+      }
   
   
   if (is.null(yrs)) {
@@ -1072,7 +1241,12 @@ retrieve_point_polygon.list <- function(features, yrs = 1999:2024, geog = NULL, 
   
   if ("nonprofits" %in% features & length(nonprofits_yrs) != 0) {
     
-    nonprofits <- retrieve_nonprofits(nonprofits_yrs, geog, geoselect, types)} else {nonprofits <- empty_sf}
+    nonprofits <- retrieve_nonprofits(nonprofits_yrs, geog, geoselect, state = NULL, types) |>
+      # filtering out the GEOID and land_sq_mi columns that were added for use with retrieve_aggregated
+      dplyr::select(!c(GEOID, land_sq_mi))
+  } else {
+      nonprofits <- empty_sf
+      }
   
   
   if (is.null(yrs)) {
@@ -1083,7 +1257,12 @@ retrieve_point_polygon.list <- function(features, yrs = 1999:2024, geog = NULL, 
 
   if ("fatal crashes" %in% features & length(crashes_yrs) != 0) {
     
-    crashes <- retrieve_crashes(crashes_yrs, geog, geoselect, types)} else {crashes <- empty_sf}
+    crashes <- retrieve_crashes(crashes_yrs, geog, geoselect, types) |>
+      # filtering out the GEOID column that was added for use with retrieve_aggregated
+      dplyr::select(!GEOID)
+  } else {
+      crashes <- empty_sf
+      }
 
   
   sf_all <- rbind(sf_1, schools, libraries, nonprofits, crashes)
