@@ -36,7 +36,7 @@ ensure you have read the \code{\link[=retrieve_point_polygon_features]{retrieve_
 return the data frame of retrievable features and their types. The \code{features}
 argument for this \code{\link[=retrieve_point_polygon]{retrieve_point_polygon()}} function can be supplied in one of two ways:
 \itemize{
-\item Specify an atomic vector of feature sets to retrieve.
+\item Specify a character vector of feature sets to retrieve.
 \item Specify a list of named vectors, where vector names are feature sets and
 vector values are the types to include within each feature set. Set a vector
 equal to \code{NULL} to include all possible types within the given feature set.
@@ -59,7 +59,7 @@ determine whether a particular feature set is able to be filtered to a particula
 geographic area, and only specify a geographic area that all selected feature
 sets can be filtered to.}
 
-\item{geoselect}{If a value is supplied for \code{geog}, supply a vector (in character format) of two-letter state abbreviations; county,
+\item{geoselect}{If a value is supplied for \code{geog}, optionally supply a vector (in character format) of two-letter state abbreviations; county,
 CBSA, or place GEOIDS; or zip codes (depending on whether \code{geog} is set to \code{"state"},
 \code{"county"}, \code{"cbsa"} or \code{"place"}, or \code{"zip code"}) to filter to. By default, all possible
 values will be returned by the

@@ -7,6 +7,23 @@
 #' @export
 
 bea_key <- function(key) {
+  if (is.null(key)) {
+    print("`key` cannot be `NULL`.")
+  }
+
+  if (length(key) != 1) {
+    stop("`key` must have length 1.")
+  }
+
+  tryCatch(
+    {
+      key <- as.character(key)
+    },
+    error = function(e) {
+      stop("Must enter `key` value that can be coerced to character.")
+    }
+  )
+
   renv <- file.path(Sys.getenv("HOME"), ".Renviron")
   if (!file.exists(renv)) {
     file.create(renv)

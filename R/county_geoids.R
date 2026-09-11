@@ -18,12 +18,71 @@ globalVariables(c("STATEFP", "NAMELSAD", "STUSPS", "ALAND"))
 #'  statistical area description). If `FALSE`, the returned dataset's `name`
 #'  variable will use a shorter version of county names (e.g.
 #'  `"Autauga, Alabama"`) excluding each county's LSAD.
-#' @param land_area If `FALSE` (default value), the returned dataset does not 
-#'  include a land area variable. If `TRUE`, the returned dataset provides land 
+#' @param land_area If `FALSE` (default value), the returned dataset does not
+#'  include a land area variable. If `TRUE`, the returned dataset provides land
 #'  areas in square miles.
 #' @export
 
 county_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE, land_area = FALSE) {
+  if (!is.null(state)) {
+    state_test <- state %in% c("AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY")
+
+    if (FALSE %in% state_test) {
+      state_vals <- which(state_test == FALSE)
+
+      state_vec <- rep(NA, length(state_vals))
+
+      for (i in 1:length(state_vals)) {
+        state_val <- state_vals[i]
+        state_vec[i] <- state[state_val]
+      }
+
+      stop(paste0("`state` contains the following invalid state abbreviation(s): ", paste(state_vec, collapse = ", "), ". Make sure `state` is set equal to a character vector of two-letter abbreviations for any of the 50 states or DC."))
+    }
+  }
+
+  if (is.null(sf)) {
+    print("`sf` cannot be `NULL`.")
+  }
+
+  if (length(sf) != 1) {
+    stop("`sf` must have length 1.")
+  }
+
+  sf <- as.logical(sf)
+
+  if (!(sf %in% c(TRUE, FALSE))) {
+    stop("`sf` must be coercible to logical (`TRUE` or `FALSE`).")
+  }
+
+  if (is.null(namelsad)) {
+    print("`namelsad` cannot be `NULL`.")
+  }
+
+  if (length(namelsad) != 1) {
+    stop("`namelsad` must have length 1.")
+  }
+
+  namelsad <- as.logical(namelsad)
+
+  if (!(namelsad %in% c(TRUE, FALSE))) {
+    stop("`namelsad` must be coercible to logical (`TRUE` or `FALSE`).")
+  }
+
+  if (is.null(land_area)) {
+    print("`land_area` cannot be `NULL`.")
+  }
+
+  if (length(land_area) != 1) {
+    stop("`land_area` must have length 1.")
+  }
+
+  land_area <- as.logical(land_area)
+
+  if (!(land_area %in% c(TRUE, FALSE))) {
+    stop("`land_area` must be coercible to logical (`TRUE` or `FALSE`).")
+  }
+
   if (namelsad == TRUE) {
     geog_county <- tigris::counties(year = 2023, state = state) |>
       dplyr::select(c(STATEFP, GEOID, NAMELSAD, ALAND)) |>
@@ -35,13 +94,13 @@ county_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE, land_area =
       dplyr::select(c(STATEFP, GEOID, NAME, ALAND)) |>
       dplyr::rename(county = NAME)
   }
-  
+
   if (land_area == FALSE) {
     geog_county <- geog_county |>
       dplyr::select(!ALAND)
   } else {
     geog_county <- geog_county |>
-      dplyr::mutate(land_sq_mi = ALAND*0.0000003861) |>
+      dplyr::mutate(land_sq_mi = ALAND * 0.0000003861) |>
       dplyr::select(!ALAND)
   }
 

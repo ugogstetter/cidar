@@ -6,7 +6,7 @@ globalVariables(c("geometry_type", "features"))
 #' features, the table lists the geometry type (point or polygon), whether
 #' an API key is required for data retrieval, what the data source is, what
 #' subtypes the feature set is categorized into ("types"), what years the feature
-#'  set covers (`NA` means the feature set is updated regularly and thus, in 
+#'  set covers (`NA` means the feature set is updated regularly and thus, in
 #'  [retrieve_point_polygon()], can only be retrieved when `yrs` is set to `NULL`), and what geography types
 #'  the feature set can be filtered by. If an API key is required
 #' to retrieve a certain variable, run the indicated function for setting the

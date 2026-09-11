@@ -5,14 +5,12 @@ globalVariables(c("CBSA", "CBSA.Code", "County", "County.Code", "County.Name", "
 
 census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
   tidycensus::census_api_key(Sys.getenv("census_key_value"))
-  
+
   # if a state value is not provided but a geoselect value is, and if geog is place, supply state values corresponding to geoselect to input to the tidycensus calls so the function will only have to retrieve the states it needs
   if (is.null(state) & !is.null(geoselect)) {
-    
-  if (geog == "place") {
-
-    state <- unique(as.vector(substr(geoselect, 1, 2)))
-  }
+    if (geog == "place") {
+      state <- unique(as.vector(substr(geoselect, 1, 2)))
+    }
   }
 
   variables <- c()
@@ -82,15 +80,15 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
   if ("public transport commutes" %in% vars) {
     variables <- c(variables, transit = "DP03_0021", drove_alone = "DP03_0019", carpooled = "DP03_0020")
   }
-  
+
   if ("sex" %in% vars) {
     variables <- c(variables, male = "DP05_0002P", female = "DP05_0003P")
   }
-  
+
   if ("age" %in% vars) {
     variables <- c(variables, median_age = "DP05_0018", at_above_18 = "DP05_0021P", at_above_65 = "DP05_0024P")
   }
-  
+
   if ("race" %in% vars) {
     variables <- c(variables, hispanic_latino = "DP05_0076P", white = "DP05_0082P", black = "DP05_0083P", american_indian_alaska_native = "DP05_0084P", asian = "DP05_0085P", native_hawaiian_pacific_islander = "DP05_0086P", other_race = "DP05_0087P", two_or_more_races = "DP05_0088P")
   }
@@ -99,18 +97,17 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
   if (length(yrs[yrs == 2023]) > 0) {
-      census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = 2023, state = state, county = if (geog == "county") {
-        geoselect
-      } else {
-        NULL
-      }) |>
-        dplyr::mutate(year = 2023)
+    census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = 2023, state = state, county = if (geog == "county") {
+      geoselect
+    } else {
+      NULL
+    }) |>
+      dplyr::mutate(year = 2023)
 
-      census_data <- rbind(census_data, census_data_1)
+    census_data <- rbind(census_data, census_data_1)
   }
-  
+
   if (length(yrs[yrs == 2022]) > 0) {
-    
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0073P"
       variables["white"] <- "DP05_0079P"
@@ -121,19 +118,18 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0084P"
       variables["two_or_more_races"] <- "DP05_0085P"
     }
-    
+
     census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = 2022, state = state, county = if (geog == "county") {
       geoselect
     } else {
       NULL
     }) |>
       dplyr::mutate(year = 2022)
-    
+
     census_data <- rbind(census_data, census_data_1)
   }
-  
+
   if (length(yrs[yrs >= 2020 & yrs <= 2021]) > 0) {
-    
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0071P"
       variables["white"] <- "DP05_0077P"
@@ -144,7 +140,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0082P"
       variables["two_or_more_races"] <- "DP05_0083P"
     }
-    
+
     for (x in yrs[yrs >= 2020 & yrs <= 2021]) {
       census_data_1 <- tidycensus::get_acs(geography = geog, variables = variables, year = x, state = state, county = if (geog == "county") {
         geoselect
@@ -152,14 +148,13 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
         NULL
       }) |>
         dplyr::mutate(year = x)
-      
+
       census_data <- rbind(census_data, census_data_1)
     }
   }
 
 
   if (length(yrs[yrs == 2019]) > 0) {
-    
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0071P"
       variables["white"] <- "DP05_0077P"
@@ -170,7 +165,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0082P"
       variables["two_or_more_races"] <- "DP05_0083P"
     }
-    
+
     if ("households with broadband" %in% vars) {
       variables["households_with_broadband"] <- "DP02_0153P"
     }
@@ -187,7 +182,6 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
   if (length(yrs[yrs >= 2017 & yrs <= 2018]) > 0) {
-    
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0071P"
       variables["white"] <- "DP05_0077P"
@@ -198,7 +192,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0082P"
       variables["two_or_more_races"] <- "DP05_0083P"
     }
-    
+
     if ("households with broadband" %in% vars) {
       variables["households_with_broadband"] <- "DP02_0152P"
     }
@@ -218,13 +212,12 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
   if (length(yrs[yrs >= 2015 & yrs <= 2016]) > 0) {
-    
     if ("age" %in% vars) {
       variables["median_age"] <- "DP05_0017"
       variables["at_above_18"] <- "DP05_0022P"
       variables["at_above_65"] <- "DP05_0025P"
     }
-    
+
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0066P"
       variables["white"] <- "DP05_0072P"
@@ -235,7 +228,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0077P"
       variables["two_or_more_races"] <- "DP05_0078P"
     }
-    
+
     if ("households with broadband" %in% vars) {
       variables["households_with_broadband"] <- "DP02_0152P"
     }
@@ -260,13 +253,12 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
   if (length(yrs[yrs >= 2013 & yrs <= 2014]) > 0) {
-    
     if ("age" %in% vars) {
       variables["median_age"] <- "DP05_0017"
       variables["at_above_18"] <- "DP05_0022P"
       variables["at_above_65"] <- "DP05_0025P"
     }
-    
+
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0066P"
       variables["white"] <- "DP05_0072P"
@@ -306,13 +298,12 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
 
 
   if (length(yrs[yrs >= 2010 & yrs <= 2012]) > 0) {
-    
     if ("age" %in% vars) {
       variables["median_age"] <- "DP05_0017"
       variables["at_above_18"] <- "DP05_0022P"
       variables["at_above_65"] <- "DP05_0025P"
     }
-    
+
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0066P"
       variables["white"] <- "DP05_0072P"
@@ -323,7 +314,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0077P"
       variables["two_or_more_races"] <- "DP05_0078P"
     }
-    
+
     if ("households with broadband" %in% vars) {
       variables <- variables[!variables == variables["households_with_broadband"]]
     }
@@ -355,13 +346,12 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
   }
 
   if (length(yrs[yrs == 2009]) > 0) {
-    
     if ("age" %in% vars) {
       variables["median_age"] <- "DP05_0017"
       variables["at_above_18"] <- "DP05_0022P"
       variables["at_above_65"] <- "DP05_0025P"
     }
-    
+
     if ("race" %in% vars) {
       variables["hispanic_latino"] <- "DP05_0066P"
       variables["white"] <- "DP05_0072P"
@@ -372,7 +362,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       variables["other_race"] <- "DP05_0077P"
       variables["two_or_more_races"] <- "DP05_0078P"
     }
-    
+
     if ("households with broadband" %in% vars) {
       variables <- variables[!variables == variables["households_with_broadband"]]
     }
@@ -404,8 +394,7 @@ census_retrieval_vars <- function(vars, yrs, geog, state, geoselect) {
       census_data <- rbind(census_data, census_data_1)
     }
   }
-    
-    
+
 
   return(census_data)
 }
@@ -511,12 +500,12 @@ census_retrieval_cleaning <- function(vars, yrs, geog, state, geoselect) {
 
     census_data <- rbind(public_transport_commutes_split$`FALSE`, census_data_public_transport_commutes)
   }
-  
+
   if ("age" %in% vars) {
     age_split <- split(census_data, census_data$variable == "median_age" | census_data$variable == "at_above_18" | census_data$variable == "at_above_65")
-    
+
     census_data_age <- age_split$`TRUE`
-    
+
     # computes percentages of people below age 18, between 18 and 64, and 65 or older
     census_data_age <- census_data_age |>
       tidyr::pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
@@ -533,7 +522,7 @@ census_retrieval_cleaning <- function(vars, yrs, geog, state, geoselect) {
       dplyr::select(c(GEOID, NAME, year, median_age.estimate, under_age_18.estimate, age_18_to_64.estimate, age_65_plus.estimate, median_age.moe, under_age_18.moe, age_18_to_64.moe, age_65_plus.moe)) |>
       tidyr::pivot_longer(cols = median_age.estimate:age_65_plus.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
       tidyr::pivot_wider(names_from = estimate_moe, values_from = percent)
-    
+
     census_data <- rbind(age_split$`FALSE`, census_data_age)
   }
 
@@ -855,15 +844,16 @@ crime_retrieval <- function(vars, yrs) {
       temp <- tempfile(fileext = ".xls")
 
       dplyr::case_when(i == 2005 ~ "https://www2.fbi.gov/ucr/05cius/data/documents/05tbl06.xls",
-                       i >= 2006 & i <= 2009 ~ paste0("https://www2.fbi.gov/ucr/cius", as.character(i), "/data/documents/", substr(as.character(i), 3, 4), "tbl06.xls"),
-                       i == 2010 | i == 2011 ~ paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/table-6/output.xls"),
-                       i == 2012 | i == 2013 ~ paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/6tabledatadecpdf/table-6/output.xls"),
-                       i == 2014 ~ "https://ucr.fbi.gov/crime-in-the-u.s/2014/crime-in-the-u.s.-2014/tables/table-6/Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2014/output.xls",
-                       i == 2015 ~ "https://ucr.fbi.gov/crime-in-the-u.s/2015/crime-in-the-u.s.-2015/tables/table-6/table_6_crime_in_the_united_states_by_metropolitan_statistical_area_2015.xls/output.xls",
-                       i == 2016 ~ "https://ucr.fbi.gov/crime-in-the-u.s/2016/crime-in-the-u.s.-2016/tables/table-4/table-4/output.xls",
-                       i == 2017 | i == 2019 ~ paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/table-6/table-6/output.xls"),
-                       .default = "https://ucr.fbi.gov/crime-in-the-u.s/2018/crime-in-the-u.s.-2018/tables/table-6/table-6.xls/output.xls") |>
-      utils::download.file(temp, mode = "wb")
+        i >= 2006 & i <= 2009 ~ paste0("https://www2.fbi.gov/ucr/cius", as.character(i), "/data/documents/", substr(as.character(i), 3, 4), "tbl06.xls"),
+        i == 2010 | i == 2011 ~ paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/table-6/output.xls"),
+        i == 2012 | i == 2013 ~ paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/6tabledatadecpdf/table-6/output.xls"),
+        i == 2014 ~ "https://ucr.fbi.gov/crime-in-the-u.s/2014/crime-in-the-u.s.-2014/tables/table-6/Table_6_Crime_in_the_United_States_by_Metropolitan_Statistical_Area_2014/output.xls",
+        i == 2015 ~ "https://ucr.fbi.gov/crime-in-the-u.s/2015/crime-in-the-u.s.-2015/tables/table-6/table_6_crime_in_the_united_states_by_metropolitan_statistical_area_2015.xls/output.xls",
+        i == 2016 ~ "https://ucr.fbi.gov/crime-in-the-u.s/2016/crime-in-the-u.s.-2016/tables/table-4/table-4/output.xls",
+        i == 2017 | i == 2019 ~ paste0("https://ucr.fbi.gov/crime-in-the-u.s/", as.character(i), "/crime-in-the-u.s.-", as.character(i), "/tables/table-6/table-6/output.xls"),
+        .default = "https://ucr.fbi.gov/crime-in-the-u.s/2018/crime-in-the-u.s.-2018/tables/table-6/table-6.xls/output.xls"
+      ) |>
+        utils::download.file(temp, mode = "wb")
 
       crime_data_2 <- readxl::read_xls(temp, skip = 3, .name_repair = ~ tolower(gsub("Larceny_theft", "larceny", gsub("_+", "_", gsub("Forcible_rape", "rape", gsub("\\s|-|/", "_", gsub("\\d", "", gsub("man.*slaughter", "manslaughter", gsub("non-negligent", "nonnegligent", .x))))))))) |>
         dplyr::select(c("metropolitan_statistical_area", "counties_principal_cities", "violent_crime", "property_crime", "murder_and_nonnegligent_manslaughter", "rape", "robbery", "aggravated_assault", "burglary", "larceny", "motor_vehicle_theft")) |>
@@ -922,7 +912,6 @@ crime_retrieval <- function(vars, yrs) {
 }
 
 schools_retrieval <- function(yrs, geog, state, geoselect) {
-  
   retrieve_schools(schools_yrs = yrs, geog = geog, geoselect = geoselect, state = state, types = list("schools" = NULL)) |>
     dplyr::select(c(year, GEOID)) |>
     dplyr::group_by(year, GEOID) |>
@@ -934,11 +923,10 @@ schools_retrieval <- function(yrs, geog, state, geoselect) {
 }
 
 transit_retrieval <- function(yrs, geog, state, geoselect) {
-  
   retrieve_sf_1(features = "transit stops", yrs = yrs, geog = geog, geoselect = geoselect, state = state, types = list("transit stops" = NULL)) |>
     dplyr::select(c(year, GEOID, land_sq_mi)) |>
     dplyr::group_by(year, GEOID) |>
-    dplyr::mutate(estimate = round((dplyr::n())/land_sq_mi, 2), moe = NA, variable = "transit stops") |>
+    dplyr::mutate(estimate = round((dplyr::n()) / land_sq_mi, 2), moe = NA, variable = "transit stops") |>
     dplyr::ungroup() |>
     dplyr::select(!land_sq_mi) |>
     sf::st_drop_geometry() |>
@@ -947,7 +935,6 @@ transit_retrieval <- function(yrs, geog, state, geoselect) {
 }
 
 libraries_retrieval <- function(yrs, geog, state, geoselect) {
-  
   retrieve_libraries(libraries_yrs = yrs, geog = geog, geoselect = geoselect, state = state, types = list("libraries" = NULL)) |>
     dplyr::select(c(year, GEOID)) |>
     dplyr::group_by(year, GEOID) |>
@@ -959,11 +946,10 @@ libraries_retrieval <- function(yrs, geog, state, geoselect) {
 }
 
 nonprofits_retrieval <- function(yrs, geog, state, geoselect) {
-  
   retrieve_nonprofits(nonprofits_yrs = yrs, geog = geog, geoselect = geoselect, state = state, types = list("nonprofits" = NULL)) |>
     dplyr::select(c(year, GEOID, land_sq_mi)) |>
     dplyr::group_by(year, GEOID) |>
-    dplyr::mutate(estimate = round((dplyr::n())/land_sq_mi, 2), moe = NA, variable = "nonprofits") |>
+    dplyr::mutate(estimate = round((dplyr::n()) / land_sq_mi, 2), moe = NA, variable = "nonprofits") |>
     dplyr::ungroup() |>
     dplyr::select(!land_sq_mi) |>
     sf::st_drop_geometry() |>
@@ -972,11 +958,10 @@ nonprofits_retrieval <- function(yrs, geog, state, geoselect) {
 }
 
 health_nonprofits_retrieval <- function(yrs, geog, state, geoselect) {
-  
   retrieve_nonprofits(nonprofits_yrs = yrs, geog = geog, geoselect = geoselect, state = state, types = list("nonprofits" = c("health", "hospital"))) |>
     dplyr::select(c(year, GEOID, land_sq_mi)) |>
     dplyr::group_by(year, GEOID) |>
-    dplyr::mutate(estimate = round((dplyr::n())/land_sq_mi, 2), moe = NA, variable = "health-related nonprofits") |>
+    dplyr::mutate(estimate = round((dplyr::n()) / land_sq_mi, 2), moe = NA, variable = "health-related nonprofits") |>
     dplyr::ungroup() |>
     dplyr::select(!land_sq_mi) |>
     sf::st_drop_geometry() |>
@@ -985,11 +970,10 @@ health_nonprofits_retrieval <- function(yrs, geog, state, geoselect) {
 }
 
 crashes_retrieval <- function(yrs, geog, state, geoselect) {
-  
   tidycensus::census_api_key(Sys.getenv("census_key_value"))
-  
+
   crashes_population <- data.frame(GEOID = character(), population = numeric(), year = numeric())
-  
+
   for (x in yrs) {
     crashes_population_1 <- tidycensus::get_acs(geography = geog, variables = "DP05_0001", year = x, state = state, county = if (geog == "county") {
       geoselect
@@ -998,249 +982,246 @@ crashes_retrieval <- function(yrs, geog, state, geoselect) {
     }) |>
       dplyr::mutate(year = x, population = estimate) |>
       dplyr::select(c(GEOID, population, year))
-    
+
     crashes_population <- rbind(crashes_population, crashes_population_1)
   }
-  
+
   crashes <- retrieve_crashes(crashes_yrs = yrs, geog = geog, geoselect = geoselect, state = state, types = list("fatal crashes" = NULL)) |>
     dplyr::select(c(year, GEOID))
-  
+
   crashes <- dplyr::inner_join(crashes, crashes_population, by = dplyr::join_by(GEOID, year)) |>
     dplyr::group_by(year, GEOID) |>
-    dplyr::mutate(estimate = round(100000*(dplyr::n()/population), 2), moe = NA, variable = "fatal crashes") |>
+    dplyr::mutate(estimate = round(100000 * (dplyr::n() / population), 2), moe = NA, variable = "fatal crashes") |>
     dplyr::ungroup() |>
     dplyr::select(!population) |>
     sf::st_drop_geometry() |>
     as.data.frame() |>
     dplyr::distinct()
-  
+
   return(crashes)
 }
 
 voting_retrieval <- function(yrs, state, geoselect) {
-  
   tidycensus::census_api_key(Sys.getenv("census_key_value"))
-  
+
   ct_included <- FALSE
-  
+
   wi_included <- FALSE
-  
+
   if (is.null(state) & is.null(geoselect)) {
-    
     ct_included <- TRUE
     wi_included <- TRUE
-   
-     }
-  
-  if ("CT" %in% state) {ct_included <- TRUE}
-  
-  if (!is.null(geoselect)) {
-    
-    if (substr(geoselect, 1, 2) == "09") {ct_included <- TRUE}
-    
   }
-  
-  if (("WI" %in% state) & (max(yrs) >= 2018)) {wi_included <- TRUE}
-  
-  if (!is.null(geoselect)) {
-    
-    if ((substr(geoselect, 1, 2) == "55") & (max(yrs) >= 2018)) {wi_included <- TRUE}
-    
+
+  if ("CT" %in% state) {
+    ct_included <- TRUE
   }
-  
+
+  if (!is.null(geoselect)) {
+    if (substr(geoselect, 1, 2) == "09") {
+      ct_included <- TRUE
+    }
+  }
+
+  if (("WI" %in% state) & (max(yrs) >= 2018)) {
+    wi_included <- TRUE
+  }
+
+  if (!is.null(geoselect)) {
+    if ((substr(geoselect, 1, 2) == "55") & (max(yrs) >= 2018)) {
+      wi_included <- TRUE
+    }
+  }
+
   voting_df <- data.frame(year = numeric(), GEOID = character(), ballots_cast = numeric(), state_abbr = character(), jurisdiction_name = character(), full_FIPS = character())
-  
+
   voting_pop <- data.frame(year = numeric(), GEOID = character(), name = character(), adult_citizens = numeric())
-  
+
   for (i in yrs) {
-    
     if (i %in% 2022) {
-      
       temp <- tempfile()
-      
+
       utils::download.file("https://www.eac.gov/sites/default/files/2023-06/2022_EAVS_for_Public_Release_nolabel_V1_CSV.zip", temp)
-      
+
       temp2 <- tempfile()
-      
+
       voting_1 <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State_Abbr, jurisdiction_name = Jurisdiction_Name, ballots_cast = F1a)
-      
+
       unlink(temp)
-      
+
       unlink(temp2)
     }
-    
+
     if (i %in% 2018:2020) {
-      
-      voting_1 <- dplyr::case_when(i == 2018 ~ "https://www.eac.gov/sites/default/files/Research/EAVS_2018_for_Public_Release_Updates3.csv",
-                       i == 2020 ~ "https://www.eac.gov/sites/default/files/EAVS%202020/2020_EAVS_for_Public_Release_nolabel_V2.csv") |>
+      voting_1 <- dplyr::case_when(
+        i == 2018 ~ "https://www.eac.gov/sites/default/files/Research/EAVS_2018_for_Public_Release_Updates3.csv",
+        i == 2020 ~ "https://www.eac.gov/sites/default/files/EAVS%202020/2020_EAVS_for_Public_Release_nolabel_V2.csv"
+      ) |>
         utils::read.csv() |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State_Abbr, jurisdiction_name = Jurisdiction_Name, ballots_cast = F1a)
-      
     }
-    
+
     if (i == 2016) {
-      
       temp <- tempfile()
-  
+
       utils::download.file("https://www.eac.gov/sites/default/files/Research/EAVS_2016_Final_Data_for_Public_Release_v2.csv.zip", temp)
-      
+
       temp2 <- tempfile()
-    
+
       voting_1 <- utils::read.csv(utils::unzip(temp, exdir = temp2)) |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State, jurisdiction_name = JurisdictionName, ballots_cast = F1a)
-    
+
       unlink(temp)
-      
+
       unlink(temp2)
-      
     }
-      
+
     if (i == 2014 | i == 2010) {
-      
       temp <- tempfile()
-      
-      dplyr::case_when(i == 2014 ~ "https://www.eac.gov/sites/default/files/eac_assets/1/1/2014_EAVS_Excel_Files1.zip",
-                       i == 2010 ~ "https://www.eac.gov/sites/default/files/eac_assets/1/28/Final%20EAVS%20Data%20-%20Sections%20C%20to%20F_EXCEL.zip") |>
+
+      dplyr::case_when(
+        i == 2014 ~ "https://www.eac.gov/sites/default/files/eac_assets/1/1/2014_EAVS_Excel_Files1.zip",
+        i == 2010 ~ "https://www.eac.gov/sites/default/files/eac_assets/1/28/Final%20EAVS%20Data%20-%20Sections%20C%20to%20F_EXCEL.zip"
+      ) |>
         utils::download.file(temp)
-      
+
       temp2 <- tempfile()
-      
+
       voting_1 <- readxl::read_xlsx(utils::unzip(temp,
-                                                 files = dplyr::case_when(i == 2014 ~ "EAVS_Section_F.xlsx", 
-                                                                          i == 2010 ~ "EAVS Section F.xlsx"),
-                                                 exdir = temp2)) |>
+        files = dplyr::case_when(
+          i == 2014 ~ "EAVS_Section_F.xlsx",
+          i == 2010 ~ "EAVS Section F.xlsx"
+        ),
+        exdir = temp2
+      )) |>
         dplyr::mutate(year = i, full_FIPS = FIPSCode, state_abbr = State, jurisdiction_name = Jurisdiction, ballots_cast = QF1a)
-      
+
       unlink(temp)
-      
+
       unlink(temp2)
-      
     }
- 
+
     if (i == 2012) {
-      
       temp <- tempfile()
-      
+
       utils::download.file("https://www.eac.gov/sites/default/files/eac_assets/1/6/Excel%20Files-Part%202.zip", temp)
-      
+
       temp2 <- tempfile()
-      
-      voting_1 <- readxl::read_xls(utils::unzip(temp, exdir = temp2))|>
+
+      voting_1 <- readxl::read_xls(utils::unzip(temp, exdir = temp2)) |>
         dplyr::mutate(year = i, full_FIPS = `FIPSCode...3`, state_abbr = State, jurisdiction_name = Jurisdiction, ballots_cast = QF1a)
-      
+
       unlink(temp)
-      
+
       unlink(temp2)
     }
-    
+
     voting_1 <- voting_1 |>
       dplyr::mutate(full_FIPS = leading_zeroes(full_FIPS, 10)) |>
       dplyr::mutate(GEOID = substr(full_FIPS, 1, 5), ballots_cast = as.numeric(ballots_cast)) |>
       dplyr::filter(ballots_cast >= 0) |>
       dplyr::select(c(year, GEOID, ballots_cast, state_abbr, jurisdiction_name, full_FIPS))
-    
+
     voting_df <- rbind(voting_df, voting_1)
-    
+
     if (i == 2010) {
-      
-      voting_pop_1 <- tidycensus::get_acs(geography = "county",
-                                          variables = c("B16008_009", "B16008_023"),
-                                          year = i, state = state, county = geoselect) |>
+      voting_pop_1 <- tidycensus::get_acs(
+        geography = "county",
+        variables = c("B16008_009", "B16008_023"),
+        year = i, state = state, county = geoselect
+      ) |>
         dplyr::select(!moe) |>
         tidyr::pivot_wider(names_from = "variable", values_from = "estimate") |>
         dplyr::mutate(adult_citizens = B16008_009 + B16008_023, year = i, name = NAME) |>
         dplyr::select(c(GEOID, name, year, adult_citizens))
-      
     } else {
-    
-      voting_pop_1 <- tidycensus::get_acs(geography = "county",
-                                          variables = dplyr::case_when(i %in% 2012:2014 ~ "S1601_C01_024",
-                                                                       i %in% 2016:2022 ~ "S1601_C01_020"),
-                                          year = i, state = state, county = geoselect) |>
+      voting_pop_1 <- tidycensus::get_acs(
+        geography = "county",
+        variables = dplyr::case_when(
+          i %in% 2012:2014 ~ "S1601_C01_024",
+          i %in% 2016:2022 ~ "S1601_C01_020"
+        ),
+        year = i, state = state, county = geoselect
+      ) |>
         dplyr::mutate(year = i, adult_citizens = estimate, name = NAME) |>
         dplyr::select(c(GEOID, name, year, adult_citizens))
-     
     }
-    
+
     voting_pop <- rbind(voting_pop, voting_pop_1)
   }
-  
+
   if (wi_included == TRUE) {
-    
-     # preparing version of counties dataset to merge with Wisconsin data
-     wi_counties <- voting_pop |>
-       dplyr::mutate(merge_name = toupper(name))
-     
-     # isolating data on Wisconsin cities/towns with names and counties but without effective corresponding GEOIDs
-     merge_wi <- split(voting_df, (voting_df$state_abbr == "WI") & (voting_df$year %in% 2018:2022))$`TRUE` |>
-       dplyr::select(!GEOID) |>
-       # removing Wisconsin cities/towns stretching across multiple counties
-       dplyr::filter(gsub(".*- ", "", jurisdiction_name) != "MULTIPLE COUNTIES") |>
-       dplyr::mutate(merge_name = paste0(gsub(".*- ", "", jurisdiction_name), ", WISCONSIN"))
-     
-     # assigning effective GEOIDs to Wisconsin cities/towns
-     merge_wi <- dplyr::left_join(merge_wi, wi_counties, by = dplyr::join_by(merge_name, year)) |>
-       dplyr::select(!merge_name)
-     
-     # isolating data without ineffective Wisconsin cities/towns
-     voting_df <- split(voting_df, (voting_df$state_abbr == "WI") & (voting_df$year %in% 2018:2022))$`FALSE`
-     
+    # preparing version of counties dataset to merge with Wisconsin data
+    wi_counties <- voting_pop |>
+      dplyr::mutate(merge_name = toupper(name))
+
+    # isolating data on Wisconsin cities/towns with names and counties but without effective corresponding GEOIDs
+    merge_wi <- split(voting_df, (voting_df$state_abbr == "WI") & (voting_df$year %in% 2018:2022))$`TRUE` |>
+      dplyr::select(!GEOID) |>
+      # removing Wisconsin cities/towns stretching across multiple counties
+      dplyr::filter(gsub(".*- ", "", jurisdiction_name) != "MULTIPLE COUNTIES") |>
+      dplyr::mutate(merge_name = paste0(gsub(".*- ", "", jurisdiction_name), ", WISCONSIN"))
+
+    # assigning effective GEOIDs to Wisconsin cities/towns
+    merge_wi <- dplyr::left_join(merge_wi, wi_counties, by = dplyr::join_by(merge_name, year)) |>
+      dplyr::select(!merge_name)
+
+    # isolating data without ineffective Wisconsin cities/towns
+    voting_df <- split(voting_df, (voting_df$state_abbr == "WI") & (voting_df$year %in% 2018:2022))$`FALSE`
   }
-  
+
   if (ct_included == TRUE) {
-    
-     # retrieving CSV to match CT cities/towns with planning regions instead of them now being designated with the old counties which are not in the counties dataset
-     ct_match <- utils::read.csv("https://raw.githubusercontent.com/CT-Data-Collaborative/ct-town-to-planning-region/refs/heads/main/ct-town-to-planning-region.csv") |>
-       dplyr::mutate(ct_GEOID = leading_zeroes(ce_fips_2022, 5), state_abbr = "CT", full_FIPS = leading_zeroes(town_fips_2020, 10)) |>
-       dplyr::select(c(ct_GEOID, full_FIPS, state_abbr))
-     
-     # assigning effective GEOIDs (corresponding to planning regions) to CT cities/towns
-     voting_df <- dplyr::left_join(voting_df, ct_match, by = dplyr::join_by(full_FIPS, state_abbr)) |>
-       dplyr::mutate(GEOID = dplyr::case_when(!is.na(ct_GEOID) ~ ct_GEOID,
-                                              .default = GEOID)) |>
-       dplyr::select(!ct_GEOID)
-     
+    # retrieving CSV to match CT cities/towns with planning regions instead of them now being designated with the old counties which are not in the counties dataset
+    ct_match <- utils::read.csv("https://raw.githubusercontent.com/CT-Data-Collaborative/ct-town-to-planning-region/refs/heads/main/ct-town-to-planning-region.csv") |>
+      dplyr::mutate(ct_GEOID = leading_zeroes(ce_fips_2022, 5), state_abbr = "CT", full_FIPS = leading_zeroes(town_fips_2020, 10)) |>
+      dplyr::select(c(ct_GEOID, full_FIPS, state_abbr))
+
+    # assigning effective GEOIDs (corresponding to planning regions) to CT cities/towns
+    voting_df <- dplyr::left_join(voting_df, ct_match, by = dplyr::join_by(full_FIPS, state_abbr)) |>
+      dplyr::mutate(GEOID = dplyr::case_when(!is.na(ct_GEOID) ~ ct_GEOID,
+        .default = GEOID
+      )) |>
+      dplyr::select(!ct_GEOID)
   }
-     
+
   # assigning effective GEOIDs to all other cities/towns without GEOID info corresponding to their county, except for cities/towns spanning across multiple states
   voting_df <- voting_df |>
     dplyr::mutate(GEOID = dplyr::case_when(full_FIPS == "1706613000" ~ "17113",
-                                           full_FIPS == "1714000000" ~ "17031",
-                                           full_FIPS == "1722255000" ~ "17163",
-                                           full_FIPS == "1728326000" ~ "17095",
-                                           full_FIPS == "1759000000" ~ "17143",
-                                           year <= 2012 & full_FIPS %in% c("2309999901", "2309999902", "2309999903", "2309999904", "2309999905") ~ "23031",
-                                           year > 2012 & full_FIPS == "2309999901" ~ "23017",
-                                           year > 2012 & full_FIPS == "2309999902" ~ "23005",
-                                           year > 2012 & full_FIPS %in% c("2309999903", "2309999904") ~ "23029",
-                                           year > 2012 & full_FIPS == "2309999905" ~ "23025",
-                                           full_FIPS == "3612295082" ~ "36123",
-                                           full_FIPS == "4611300000" ~ "46102",
-                                           full_FIPS == "5151500000" ~ "51019",
-                  .default = GEOID))
-  
+      full_FIPS == "1714000000" ~ "17031",
+      full_FIPS == "1722255000" ~ "17163",
+      full_FIPS == "1728326000" ~ "17095",
+      full_FIPS == "1759000000" ~ "17143",
+      year <= 2012 & full_FIPS %in% c("2309999901", "2309999902", "2309999903", "2309999904", "2309999905") ~ "23031",
+      year > 2012 & full_FIPS == "2309999901" ~ "23017",
+      year > 2012 & full_FIPS == "2309999902" ~ "23005",
+      year > 2012 & full_FIPS %in% c("2309999903", "2309999904") ~ "23029",
+      year > 2012 & full_FIPS == "2309999905" ~ "23025",
+      full_FIPS == "3612295082" ~ "36123",
+      full_FIPS == "4611300000" ~ "46102",
+      full_FIPS == "5151500000" ~ "51019",
+      .default = GEOID
+    ))
+
   # merging with valid GEOIDs (almost all GEOIDs at this point are valid)
   voting_df <- dplyr::inner_join(voting_df, voting_pop, by = dplyr::join_by(GEOID, year)) |>
     # filtering out US territories
     dplyr::filter(!(state_abbr %in% c("AS", "GU", "MP", "PR", "VI")))
-  
+
   if (wi_included == TRUE) {
-  
-      # merging with Wisconsin data
-      voting_df <- rbind(voting_df, merge_wi)
-      
+    # merging with Wisconsin data
+    voting_df <- rbind(voting_df, merge_wi)
   }
-  
+
   # computing total numbers of voting-age citizens and ballots cast in each county, and using this info to compute voter turnout
   voting_df <- voting_df |>
     dplyr::group_by(GEOID, year) |>
     dplyr::mutate(adult_citizens = sum(adult_citizens), ballots_cast = sum(ballots_cast)) |>
-    dplyr::mutate(estimate = round((ballots_cast/adult_citizens)*100, 2), moe = NA, variable = "voter turnout") |>
+    dplyr::mutate(estimate = round((ballots_cast / adult_citizens) * 100, 2), moe = NA, variable = "voter turnout") |>
     dplyr::select(c(GEOID, year, estimate, moe, variable)) |>
     dplyr::ungroup() |>
     dplyr::distinct()
-  
+
   return(voting_df)
 }
 
@@ -1254,7 +1235,7 @@ voting_retrieval <- function(yrs, state, geoselect) {
 #' [retrieve_aggregated_vars()] function description, and have run that function to
 #' return the data frame of retrievable variables. The `vars` argument of this
 #' [retrieve_aggregated()] function can be supplied in one of two ways:
-#' * As a vector of all variables you wish to retrieve. To retrieve all
+#' * As a character vector of all variables you wish to retrieve. To retrieve all
 #' variables within one or more categories as given in the
 #' [retrieve_aggregated_vars()] data frame, set [retrieve_aggregated()]'s `vars`
 #'  argument equal to a call to the [categories_vars()] function, which will
@@ -1263,18 +1244,18 @@ voting_retrieval <- function(yrs, state, geoselect) {
 #'  data frame filtered to only the rows corresponding to variables you wish to
 #'  retrieve.
 #' @param yrs If yrs is a numeric vector, this function will retrieve all
-#' specified varaibles for all years in the specified vector. If yrs is `NULL`,
+#' specified variables for all years in the specified vector. If yrs is `NULL`,
 #' this function will retrieve all most recent years of selected variables If yrs is not provided,
 #' retrieve all available years for all variables associated with specific years.
 #'  The years for which data is available for each variable are included in the
-#'   [retrieve_aggregated_vars()] dataset. Please note that if `yrs` is 
-#'   equal to `NA` in that dataset, the variable can only be retrieved in 
+#'   [retrieve_aggregated_vars()] dataset. Please note that if `yrs` is
+#'   equal to `NA` in that dataset, the variable can only be retrieved in
 #'   this [retrieve_aggregated()] function when `yrs` is set to `NULL`.
 #' @param geog Specify `"county"`, `"cbsa"` (core based statistical
 #' area), or `"place"` (cities/towns/villages/census-designated places). The
 #' geographic area types for which data is available for each variable are
 #' included in the [retrieve_aggregated_vars()] data frame.
-#' @param state Optionally (ONLY if `geog` is set to `"county"` or `"place"`, 
+#' @param state Optionally (ONLY if `geog` is set to `"county"` or `"place"`,
 #' and `geoselect` is `NULL`),
 #' supply a vector of state abbreviations to filter to. By default, all possible
 #'  values will be returned by the function.
@@ -1294,12 +1275,161 @@ voting_retrieval <- function(yrs, state, geoselect) {
 #' @export
 
 retrieve_aggregated <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL, vars_info = TRUE, sf = FALSE) {
+  if (!(class(vars) == "character") & !(class(vars) == "data.frame")) {
+    stop("`vars` must be of class `character` or `data.frame`.")
+  }
+
+  if (!is.null(yrs)) {
+    if (!is.numeric(yrs)) {
+      tryCatch(
+        {
+          yrs <- as.numeric(yrs)
+        },
+        error = function(e) {
+          stop("Must enter `yrs` value that can be coerced to numeric.")
+        }
+      )
+    }
+
+    if (FALSE %in% (yrs %% 1 == 0)) {
+      stop("All numeric values in `yrs` must be whole numbers.")
+    }
+  }
+
+  if (is.null(geog)) {
+    print("`geog` cannot be `NULL`.")
+  }
+
+  if (length(geog) != 1) {
+    stop("`geog` must have length 1.")
+  }
+
+  if (!(geog %in% c("county", "cbsa", "place"))) {
+    stop("`geog` must be `county`, `cbsa`, or `place`.")
+  }
+
+  if (is.null(vars_info)) {
+    print("`vars_info` cannot be `NULL`.")
+  }
+
+  if (length(vars_info) != 1) {
+    stop("`vars_info` must have length 1.")
+  }
+
+  vars_info <- as.logical(vars_info)
+
+  if (!(vars_info %in% c(TRUE, FALSE))) {
+    stop("`vars_info` must be coercible to logical (`TRUE` or `FALSE`).")
+  }
+
+  if (is.null(sf)) {
+    print("`sf` cannot be `NULL`.")
+  }
+
+  if (length(sf) != 1) {
+    stop("`sf` must have length 1.")
+  }
+
+  sf <- as.logical(sf)
+
+  if (!(sf %in% c(TRUE, FALSE))) {
+    stop("`sf` must be coercible to logical (`TRUE` or `FALSE`).")
+  }
+
+
+  if (!is.null(state)) {
+    state_test <- state %in% c("AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY")
+
+    if (FALSE %in% state_test) {
+      state_vals <- which(state_test == FALSE)
+
+      state_vec <- rep(NA, length(state_vals))
+
+      for (i in 1:length(state_vals)) {
+        state_val <- state_vals[i]
+        state_vec[i] <- state[state_val]
+      }
+
+      stop(paste0("`state` contains the following invalid state abbreviation(s): ", paste(state_vec, collapse = ", "), ". Make sure `state` is set equal to a character vector of two-letter abbreviations for any of the 50 states or DC."))
+    }
+  }
+
+  if (!is.null(geoselect) & !is.null(state)) {
+    stop("If a value is provided for `state`, then `geoselect` must be `NULL`.")
+  }
+
+  if (!is.null(geoselect)) {
+    tryCatch(
+      {
+        geoselect <- as.character(geoselect)
+      },
+      error = function(e) {
+        stop("Must enter `geoselect` value that can be coerced to character.")
+      }
+    )
+
+    if (geog == "county") {
+      geoselect_test <- geoselect %in% county_geoids()$GEOID
+
+      if (FALSE %in% geoselect_test) {
+        geoselect_vals <- which(geoselect_test == FALSE)
+
+        geoselect_vec <- rep(NA, length(geoselect_vals))
+
+        for (i in 1:length(geoselect_vals)) {
+          geoselect_val <- geoselect_vals[i]
+          geoselect_vec[i] <- geoselect[geoselect_val]
+        }
+
+        stop(paste0("`geoselect` contains the following invalid GEOID(s): ", paste(geoselect_vec, collapse = ", "), ". Use GEOIDs that are present in the `GEOID` column of the dataset retrieved by `county_geoids()`."))
+      }
+    }
+
+    if (geog == "cbsa") {
+      geoselect_test <- geoselect %in% cbsa_geoids()$GEOID
+
+      if (FALSE %in% geoselect_test) {
+        geoselect_vals <- which(geoselect_test == FALSE)
+
+        geoselect_vec <- rep(NA, length(geoselect_vals))
+
+        for (i in 1:length(geoselect_vals)) {
+          geoselect_val <- geoselect_vals[i]
+          geoselect_vec[i] <- geoselect[geoselect_val]
+        }
+
+        stop(paste0("`geoselect` contains the following invalid GEOID(s): ", paste(geoselect_vec, collapse = ", "), ". Use GEOIDs that are present in the `GEOID` column of the dataset retrieved by `cbsa_geoids()`."))
+      }
+    }
+
+    if (geog == "place") {
+      geoselect_test <- geoselect %in% place_geoids()$GEOID
+
+      if (FALSE %in% geoselect_test) {
+        geoselect_vals <- which(geoselect_test == FALSE)
+
+        geoselect_vec <- rep(NA, length(geoselect_vals))
+
+        for (i in 1:length(geoselect_vals)) {
+          geoselect_val <- geoselect_vals[i]
+          geoselect_vec[i] <- geoselect[geoselect_val]
+        }
+
+        stop(paste0("`geoselect` contains the following invalid GEOID(s): ", paste(geoselect_vec, collapse = ", "), ". Use GEOIDs that are present in the `GEOID` column of the dataset retrieved by `place_geoids()`."))
+      }
+    }
+  }
+
   UseMethod("retrieve_aggregated", vars)
 }
 
 #' @rdname retrieve_aggregated
 #' @export
 retrieve_aggregated.data.frame <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL, vars_info = TRUE, sf = FALSE) {
+  if (!("variable" %in% colnames(vars))) {
+    stop("The data frame you have provided for `vars` must be a filtered version of the `retrieve_aggregated_vars()` data frame.")
+  }
+
   vars <- vars$variable
 
   retrieve_aggregated(vars, yrs, geog, state, geoselect, vars_info, sf)
@@ -1308,6 +1438,42 @@ retrieve_aggregated.data.frame <- function(vars, yrs = 1980:2024, geog, state = 
 #' @rdname retrieve_aggregated
 #' @export
 retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = NULL, geoselect = NULL, vars_info = TRUE, sf = FALSE) {
+  vars_test <- vars %in% retrieve_aggregated_vars()$variable
+
+  if (FALSE %in% vars_test) {
+    vars_vals <- which(vars_test == FALSE)
+
+    vars_vec <- rep(NA, length(vars_vals))
+
+    for (i in 1:length(vars_vals)) {
+      vars_val <- vars_vals[i]
+      vars_vec[i] <- geoselect[vars_val]
+    }
+
+    stop(paste0("`vars` contains the following invalid variable names: ", paste(vars_vec, collapse = ", "), ". All variables available for retrieval through this function are listed in the `variable` column of the dataset retrieved by `retrieve_aggregated_vars()`."))
+  }
+
+  if (!is.null(yrs)) {
+    na_yrs <- retrieve_aggregated_vars() |>
+      dplyr::filter(is.na(yrs_available)) |>
+      dplyr::select(variable)
+
+    na_yrs <- as.character(na_yrs)
+
+    na_yrs_test <- vars %in% na_yrs
+
+    if (TRUE %in% na_yrs_test) {
+      na_yrs_vals <- which(na_yrs_test == TRUE)
+
+      na_yrs_vec <- rep(NA, length(na_yrs_vals))
+
+      for (i in 1:length(na_yrs_vals)) {
+        na_yrs_val <- na_yrs_vals[i]
+        na_yrs_vec[i] <- geoselect[na_yrs_val]
+      }
+    }
+  }
+
   # creating an empty dataframe with column names for use when rbind-ing datasets together
   empty_df <- data.frame(matrix(nrow = 0, ncol = 5))
   colnames(empty_df) <- c("GEOID", "variable", "estimate", "moe", "year")
@@ -1317,26 +1483,69 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if (is.null(yrs)) {
     census_yrs <- 2023
   } else {
-  census_yrs <- yrs[yrs >= 2009 & yrs <= 2023]
+    census_yrs <- yrs[yrs >= 2009 & yrs <= 2023]
   }
 
   if (all(("unemployment" %in% vars | "high-skill employment" %in% vars | "median family income" %in% vars | "poverty" %in% vars | "old-age dependency ratio" %in% vars | "housing vacancy" %in% vars | "Gini index" %in% vars | "median home value" %in% vars | "median gross rent" %in% vars | "households without vehicle" %in% vars | "households with broadband" %in% vars | "homeownership" %in% vars | "single-parent families" %in% vars | "public transport commutes" %in% vars | "mean commute time" %in% vars | "sex" %in% vars | "age" %in% vars | "race" %in% vars), length(census_yrs) != 0, (!identical(vars, "old-age dependency ratio") | !identical(yrs, 2009)), (!identical(vars, "Gini index") | !identical(yrs, 2009)), (!identical(vars, c("old-age dependency ratio", "Gini index")) | !identical(yrs, 2009)), (!identical(vars, "households with broadband") | sum(match(yrs, 2013:2024), na.rm = TRUE) > 0))) {
     census_vars <- vars[vars %in% c("unemployment", "high-skill employment", "median family income", "poverty", "old-age dependency ratio", "housing vacancy", "Gini index", "median home value", "median gross rent", "households without vehicle", "households with broadband", "homeownership", "single-parent families", "public transport commutes", "mean commute time", "sex", "age", "race")]
 
     census_data <- census_retrieval_cleaning(vars = census_vars, yrs = census_yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(census_data) == 0) {
+      census_test <- vars %in% c("unemployment", "high-skill employment", "median family income", "poverty", "old-age dependency ratio", "housing vacancy", "Gini index", "median home value", "median gross rent", "households without vehicle", "households with broadband", "homeownership", "single-parent families", "public transport commutes", "mean commute time", "sex", "age", "race")
+
+      census_vals <- which(census_test == TRUE)
+
+      census_vec <- rep(NA, length(census_vals))
+
+      for (i in 1:length(census_vals)) {
+        census_val <- census_vals[i]
+        census_vec[i] <- vars[census_val]
+      }
+
+      warning(paste0("For the following variable(s) in `vars`, data is not available for the given year(s) and geography: `", paste(census_vec, collapse = "`, `"), "`. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
+    }
   } else {
+    census_test <- vars %in% c("unemployment", "high-skill employment", "median family income", "poverty", "old-age dependency ratio", "housing vacancy", "Gini index", "median home value", "median gross rent", "households without vehicle", "households with broadband", "homeownership", "single-parent families", "public transport commutes", "mean commute time", "sex", "age", "race")
+
+    if (TRUE %in% census_test) {
+      census_vals <- which(census_test == TRUE)
+
+      census_vec <- rep(NA, length(census_vals))
+
+      for (i in 1:length(census_vals)) {
+        census_val <- census_vals[i]
+        census_vec[i] <- vars[census_val]
+      }
+
+      warning(paste0("The following variable(s) in `vars` are not retrievable for any of the given `yrs` values: `", paste(census_vec, collapse = "`, `"), "`. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information."))
+    }
+
     census_data <- empty_df
   }
 
-if (is.null(yrs)) {
-  bea_yrs <- 2023
-} else {
-  bea_yrs <- yrs[yrs >= 2001 & yrs <= 2023]
-}
+  if (is.null(yrs)) {
+    bea_yrs <- 2023
+  } else {
+    bea_yrs <- yrs[yrs >= 2001 & yrs <= 2023]
+  }
 
   if ("GDP per capita" %in% vars & length(bea_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
     bea_data <- bea_retrieval(yrs = bea_yrs, geog = geog, geoselect = geoselect)
+
+    if (nrow(bea_data) == 0) {
+      warning("For the `GDP per capita` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("GDP per capita" %in% vars) {
+      if (geog == "place") {
+        warning("The `GDP per capita` variable is not available for the `place` geography. See the `geogs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+      }
+
+      if (length(bea_yrs) == 0) {
+        warning("The `GDP per capita` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+      }
+    }
     bea_data <- empty_df
   }
 
@@ -1344,14 +1553,48 @@ if (is.null(yrs)) {
   if (is.null(yrs)) {
     aqi_yrs <- 2024
   } else {
-  aqi_yrs <- yrs[yrs >= 1980 & yrs <= 2024]
+    aqi_yrs <- yrs[yrs >= 1980 & yrs <= 2024]
   }
 
   if (("median AQI" %in% vars | "unhealthy air days" %in% vars) & length(aqi_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
     aqi_vars <- vars[vars %in% c("median AQI", "unhealthy air days")]
 
     aqi_data <- aqi_retrieval(vars = aqi_vars, yrs = aqi_yrs, geog = geog, state = state)
+
+    if (nrow(aqi_data) == 0) {
+      if ("median AQI" & "unhealthy air days" %in% vars) {
+        aqi_paste <- "`median AQI` and `unhealthy air days` variables"
+      } else {
+        if ("median AQI" %in% vars) {
+          aqi_paste <- "`median AQI` variable"
+        } else {
+          aqi_paste <- "`unhealthy air days` variable"
+        }
+      }
+
+      warning(paste0("For the ", aqi_paste, ", data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
+    }
   } else {
+    if ("median AQI" %in% vars | "unhealthy air days" %in% vars) {
+      if ("median AQI" & "unhealthy air days" %in% vars) {
+        aqi_paste <- "`median AQI` and `unhealthy air days` variables are"
+      } else {
+        if ("median AQI" %in% vars) {
+          aqi_paste <- "`median AQI` variable is"
+        } else {
+          aqi_paste <- "`unhealthy air days` variable is"
+        }
+      }
+
+      if (geog == "place") {
+        warning(paste0("The ", aqi_paste, " not available for the `place` geography. See the `geogs_available` column of the retrieve_aggregated_vars() dataset for more information."))
+      }
+
+      if (length(aqi_yrs) == 0) {
+        warning(paste0("The ", aqi_paste, " not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information."))
+      }
+    }
+
     aqi_data <- empty_df
   }
 
@@ -1359,131 +1602,228 @@ if (is.null(yrs)) {
   if (is.null(yrs)) {
     crime_yrs <- 2024
   } else {
-  crime_yrs <- yrs[yrs >= 1999 & yrs <= 2024]
+    crime_yrs <- yrs[yrs >= 1999 & yrs <= 2024]
   }
 
   if (("violent crime" %in% vars | "murder and nonnegligent manslaughter" %in% vars | "rape" %in% vars | "robbery" %in% vars | "aggravated assault" %in% vars | "property crime" %in% vars | "burglary" %in% vars | "larceny" %in% vars | "motor vehicle theft" %in% vars) & length(crime_yrs) != 0 & geog == "cbsa") {
     crime_vars <- vars[vars %in% c("violent crime", "murder and nonnegligent manslaughter", "rape", "robbery", "aggravated assault", "property crime", "burglary", "larceny", "motor vehicle theft")]
 
     crime_data <- crime_retrieval(vars = crime_vars, yrs = crime_yrs)
+
+    if (nrow(crime_data) == 0) {
+      crime_test <- vars %in% c("violent crime", "murder and nonnegligent manslaughter", "rape", "robbery", "aggrevated assault", "property crime", "burglary", "larceny", "motor vehicle theft")
+
+      crime_vals <- which(crime_test == TRUE)
+
+      crime_vec <- rep(NA, length(crime_vals))
+
+      for (i in 1:length(crime_vals)) {
+        crime_val <- crime_vals[i]
+        crime_vec[i] <- vars[crime_val]
+      }
+
+      warning(paste0("For the following variable(s), data is not available for the given year(s) and geography: `", paste(crime_vec, collapse = "`, `"), "`. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
+    }
   } else {
+    crime_test <- vars %in% c("violent crime", "murder and nonnegligent manslaughter", "rape", "robbery", "aggrevated assault", "property crime", "burglary", "larceny", "motor vehicle theft")
+
+    if (TRUE %in% crime_test) {
+      crime_vals <- which(crime_test == TRUE)
+
+      crime_vec <- rep(NA, length(crime_vals))
+
+      for (i in 1:length(crime_vals)) {
+        crime_val <- crime_vals[i]
+        crime_vec[i] <- vars[crime_val]
+      }
+
+      if (geog != "cbsa") {
+        warning(paste0("The following variable(s) in `vars` are only retrievable when `geog` is `cbsa`: `", paste(crime_vec, collapse = "`, `"), "`."))
+      }
+
+      if (length(crime_yrs) == 0) {
+        warning(paste0("The following variable(s) in `vars` are not retrievable for any of the given `yrs` values: `", paste(crime_vec, collapse = "`, `"), "`. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information."))
+      }
+    }
+
     crime_data <- empty_df
   }
-  
-  
+
+
   if (is.null(yrs)) {
     schools_yrs <- 2024
   } else {
-  schools_yrs <- yrs[yrs >= 2015 & yrs <= 2024]
+    schools_yrs <- yrs[yrs >= 2015 & yrs <= 2024]
   }
-  
-  if ("schools" %in% vars & length(schools_yrs) != 0)  {
+
+  if ("schools" %in% vars & length(schools_yrs) != 0) {
     schools_data <- schools_retrieval(yrs = schools_yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(schools_data) == 0) {
+      warning("For the `schools` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("schools" %in% vars) {
+      warning("The `schools` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+    }
+
     schools_data <- empty_df
   }
-  
+
   if ("transit stops" %in% vars & is.null(yrs)) {
     transit_data <- transit_retrieval(yrs = yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(transit_data) == 0) {
+      warning("For the `transit stops` variable, data is not currently available for the given geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("transit stops" %in% vars) {
+      warning("Because its data source is continually updated, the `transit stops` variable is only available when `yrs` is set to `NULL`.")
+    }
+
     transit_data <- empty_df
   }
-  
+
   if (is.null(yrs)) {
     libraries_yrs <- 2023
   } else {
     libraries_yrs <- yrs[yrs >= 2008 & yrs <= 2023]
   }
-  
-  if ("libraries" %in% vars & length(libraries_yrs) != 0)  {
+
+  if ("libraries" %in% vars & length(libraries_yrs) != 0) {
     libraries_data <- libraries_retrieval(yrs = libraries_yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(libraries_data) == 0) {
+      warning("For the `libraries` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("libraries" %in% vars) {
+      warning("The `libraries` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+    }
+
     libraries_data <- empty_df
   }
-  
+
   if (is.null(yrs)) {
     nonprofits_yrs <- 2023
   } else {
     nonprofits_yrs <- yrs[yrs >= 1989 & yrs <= 2023]
   }
-  
-  if ("nonprofits" %in% vars & length(nonprofits_yrs) != 0)  {
+
+  if ("nonprofits" %in% vars & length(nonprofits_yrs) != 0) {
     nonprofits_data <- nonprofits_retrieval(yrs = nonprofits_yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(nonprofits_data) == 0) {
+      warning("For the `nonprofits` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("nonprofits" %in% vars) {
+      warning("The `nonprofits` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+    }
+
     nonprofits_data <- empty_df
   }
-  
-  if ("health-related nonprofits" %in% vars & length(nonprofits_yrs) != 0)  {
+
+  if ("health-related nonprofits" %in% vars & length(nonprofits_yrs) != 0) {
     health_nonprofits_data <- health_nonprofits_retrieval(yrs = nonprofits_yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(health_nonprofits_data) == 0) {
+      warning("For the `health-related nonprofits` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("health-related nonprofits" %in% vars) {
+      warning("The `health-related nonprofits` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+    }
+
     health_nonprofits_data <- empty_df
   }
-  
-  if ("fatal crashes" %in% vars & length(census_yrs) != 0)  {
+
+  if ("fatal crashes" %in% vars & length(census_yrs) != 0) {
     crashes_data <- crashes_retrieval(yrs = census_yrs, geog = geog, state = state, geoselect = geoselect)
+
+    if (nrow(crashes_data) == 0) {
+      warning("For the `fatal crashes` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("fatal crashes" %in% vars) {
+      warning("The `fatal crashes` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+    }
+
     crashes_data <- empty_df
   }
-  
+
   if (is.null(yrs)) {
     voting_yrs <- 2022
   } else {
     voting_yrs <- yrs[yrs %in% c(2010, 2012, 2014, 2016, 2018, 2020, 2022)]
   }
-  
-  if ("voter turnout" %in% vars & length(voting_yrs) != 0 & geog == "county")  {
+
+  if ("voter turnout" %in% vars & length(voting_yrs) != 0 & geog == "county") {
     voting_data <- voting_retrieval(yrs = voting_yrs, state = state, geoselect = geoselect)
+
+    if (nrow(voting_data) == 0) {
+      warning("For the `voter turnout` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
+    }
   } else {
+    if ("voter turnout" %in% vars) {
+      if (geog != "county") {
+        warning("The `voter turnout` variable is only available for the `county` geography.")
+      }
+
+      if (length(voting_yrs) == 0) {
+        warning("The `voter turnout` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+      }
+    }
+
     voting_data <- empty_df
   }
 
-  data_all <- rbind(census_data, bea_data, aqi_data, crime_data, schools_data, transit_data, libraries_data, nonprofits_data, health_nonprofits_data, crashes_data, voting_data)
+  if (nrow(census_data) == 0 & nrow(bea_data) == 0 & nrow(aqi_data) == 0 & nrow(crime_data) == 0 & nrow(schools_data) == 0 & nrow(transit_data) == 0 & nrow(libraries_data) == 0 & nrow(nonprofits_data) == 0 & nrow(health_nonprofits_data) == 0 & nrow(crashes_data) == 0 & nrow(voting_data) == 0) {
+    data_all <- data.frame(GEOID = character(), name = character(), year = numeric(), variable = character(), estimate = numeric(), moe = numeric())
+  } else {
+    data_all <- rbind(census_data, bea_data, aqi_data, crime_data, schools_data, transit_data, libraries_data, nonprofits_data, health_nonprofits_data, crashes_data, voting_data)
 
+    # retrieving county/CBSA/place names to join with data
+    if (geog == "county") {
+      geog_county <- county_geoids(state = state, sf = sf) |>
+        dplyr::select(!state_abbr)
 
-  # retrieving county/CBSA/place names to join with data
-  if (geog == "county") {
-    geog_county <- county_geoids(state = state, sf = sf) |>
-      dplyr::select(!state_abbr)
+      data_all <- dplyr::inner_join(geog_county, data_all, by = dplyr::join_by(GEOID))
 
-    data_all <- dplyr::inner_join(geog_county, data_all, by = dplyr::join_by(GEOID))
-
-    data_all <- data_all[, c("GEOID", "name", "year", "variable", "estimate", "moe")]
-  }
-
-  if (geog == "cbsa") {
-    geog_cbsa <- cbsa_geoids(sf = sf)
-
-    data_all <- dplyr::inner_join(geog_cbsa, data_all, by = dplyr::join_by(GEOID))
-
-    data_all <- data_all[, c("GEOID", "name", "year", "variable", "estimate", "moe")]
-  }
-
-  if (geog == "place") {
-    
-    if (is.null(state) & !is.null(geoselect)) {
-      
-      # creating vector of state abbreviations just for requested places so tigris call in place_geoids will run faster
-      place_states <- tigris::states(year = 2023) |>
-        dplyr::filter(GEOID %in% as.vector(substr(geoselect, 1, 2)))
-      
-      place_states <- as.vector(place_states$STUSPS)
-      
-    } else {
-      
-      place_states <- state
+      data_all <- data_all[, c("GEOID", "name", "year", "variable", "estimate", "moe")]
     }
-    
-    geog_place <- place_geoids(state = place_states, sf = sf) |>
-      dplyr::select(!state_abbr)
 
-    data_all <- dplyr::inner_join(geog_place, data_all, by = dplyr::join_by(GEOID))
+    if (geog == "cbsa") {
+      geog_cbsa <- cbsa_geoids(sf = sf)
 
-    data_all <- data_all[, c("GEOID", "name", "year", "variable", "estimate", "moe")]
-  }
+      data_all <- dplyr::inner_join(geog_cbsa, data_all, by = dplyr::join_by(GEOID))
 
-  if (!is.null(geoselect)) {
-    data_all <- data_all |>
-      dplyr::filter(GEOID %in% geoselect)
+      data_all <- data_all[, c("GEOID", "name", "year", "variable", "estimate", "moe")]
+    }
+
+    if (geog == "place") {
+      if (is.null(state) & !is.null(geoselect)) {
+        # creating vector of state abbreviations just for requested places so tigris call in place_geoids will run faster
+        place_states <- tigris::states(year = 2023) |>
+          dplyr::filter(GEOID %in% as.vector(substr(geoselect, 1, 2)))
+
+        place_states <- as.vector(place_states$STUSPS)
+      } else {
+        place_states <- state
+      }
+
+      geog_place <- place_geoids(state = place_states, sf = sf) |>
+        dplyr::select(!state_abbr)
+
+      data_all <- dplyr::inner_join(geog_place, data_all, by = dplyr::join_by(GEOID))
+
+      data_all <- data_all[, c("GEOID", "name", "year", "variable", "estimate", "moe")]
+    }
+
+    if (!is.null(geoselect)) {
+      data_all <- data_all |>
+        dplyr::filter(GEOID %in% geoselect)
+    }
   }
 
   if (vars_info == TRUE) {
@@ -1502,22 +1842,22 @@ if (is.null(yrs)) {
       dplyr::filter(variable != "poverty")
 
     vars_info_df <- rbind(vars_info_df, poverty_subset, poverty_subset_2)
-    
+
     age_subset <- subset(vars_info_df, variable == "age")
-    
+
     age_subset_2 <- age_subset_3 <- age_subset_4 <- age_subset
-    
+
     age_subset$variable <- "median age"
-    
+
     age_subset_2$variable <- "under age 18"
-    
+
     age_subset_3$variable <- "age 18 to 64"
-    
+
     age_subset_4$variable <- "age 65 plus"
-    
+
     vars_info_df <- vars_info_df |>
       dplyr::filter(variable != "age")
-    
+
     vars_info_df <- rbind(vars_info_df, age_subset, age_subset_2, age_subset_3, age_subset_4)
 
     data_all <- dplyr::inner_join(data_all, vars_info_df, by = dplyr::join_by(variable))

@@ -75,18 +75,21 @@ boston_properties <- boston_properties |>
   # converting use code to character format with consistent number of digits
   mutate(LUC = sprintf("%03d", LUC)) |>
   # assigning use codes to use category names, and renaming `LUC` to `variable` in accordance with `web_app`'s variable naming requirements
-  mutate(variable = case_when(substr(LUC, 1, 1) == "0" ~ "mixed-use",
-                         substr(LUC, 1, 3) == "101" ~ "single-family",
-                         substr(LUC, 1, 3) == "104" ~ "two-family",
-                         substr(LUC, 1, 3) == "105" ~ "three-family",
-                         substr(LUC, 1, 3) == "102" ~ "condominium",
-                         substr(LUC, 1, 2) == "11" ~ "apartments",
-                         substr(LUC, 1, 1) == "1" ~ "other residential",
-                         substr(LUC, 1, 1) == "3" ~ "commercial",
-                         substr(LUC, 1, 1) == "4" ~ "industrial",
-                         .default = "other (non-residential)"),
-         # converting zip codes to character format with consistent number of digits, and renaming `ZIP_CODE` to `name` in accordance with `web_app`'s variable naming requirements
-         name = sprintf("%05d", ZIP_CODE)) |>
+  mutate(
+    variable = case_when(substr(LUC, 1, 1) == "0" ~ "mixed-use",
+      substr(LUC, 1, 3) == "101" ~ "single-family",
+      substr(LUC, 1, 3) == "104" ~ "two-family",
+      substr(LUC, 1, 3) == "105" ~ "three-family",
+      substr(LUC, 1, 3) == "102" ~ "condominium",
+      substr(LUC, 1, 2) == "11" ~ "apartments",
+      substr(LUC, 1, 1) == "1" ~ "other residential",
+      substr(LUC, 1, 1) == "3" ~ "commercial",
+      substr(LUC, 1, 1) == "4" ~ "industrial",
+      .default = "other (non-residential)"
+    ),
+    # converting zip codes to character format with consistent number of digits, and renaming `ZIP_CODE` to `name` in accordance with `web_app`'s variable naming requirements
+    name = sprintf("%05d", ZIP_CODE)
+  ) |>
   # selecting necessary variables
   select(c(variable, name)) |>
   # grouping by zip code
@@ -102,7 +105,7 @@ boston_properties <- boston_properties |>
   # ungrouping dataset
   ungroup() |>
   # creating variable (named `estimate` in accordance with `web_app`'s variable naming requirements) for percentage of properties in each use category within a given zip code
-  mutate(estimate = round((count_category_zip/count_zip)*100, 2)) |>
+  mutate(estimate = round((count_category_zip / count_zip) * 100, 2)) |>
   # deselecting variables used in calculation
   select(!c(count_zip, count_category_zip)) |>
   # removing duplicate rows

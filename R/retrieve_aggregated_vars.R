@@ -8,7 +8,7 @@ globalVariables(c("category"))
 #' governance, and demographics. For each variable, the table lists its
 #' corresponding category as well as other information on the given variable
 #' including whether an API key is required for retrieval, data source, data
-#' type, and available years (`yrs_available` is `NA` when the source data is updated regularly and thus, in 
+#' type, and available years (`yrs_available` is `NA` when the source data is updated regularly and thus, in
 #'  [retrieve_aggregated()], the variable can only be retrieved when `yrs` is set to `NULL`) and geographic scales. If an API key is required
 #' to retrieve a certain variable, run the indicated function for setting the
 #' API key before attempting to retrieve the variable for the first time

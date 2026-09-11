@@ -24,7 +24,7 @@
 #'  estimate associated with each value in the `"variable"` column), and a `"name"` variable containing
 #'    the names of the geographic areas (e.g. Orange County), which will be
 #'    displayed alongside estimates upon mouse-over of the polygons. The
-#'  shapefile's geometry must be polygons. If the shapefile contains a `"year"` 
+#'  shapefile's geometry must be polygons. If the shapefile contains a `"year"`
 #'  variable, the web app will include a slider for switching between different
 #'   years of data.
 #' @param shapefile_features Shapefile of points and/or polygons, without a corresponding
@@ -35,8 +35,8 @@
 #'  and a `"type"` variable (delineating different feature types within each feature
 #'  category, e.g. private school, public school). All observations corresponding
 #'   to a given value of the `"features"` variable must be either points or
-#'   polygons (i.e. no mixing of points and polygons within a feature category). 
-#'   If the shapefile contains a `"year"` variable, the web app will include a 
+#'   polygons (i.e. no mixing of points and polygons within a feature category).
+#'   If the shapefile contains a `"year"` variable, the web app will include a
 #'   slider for switching between different years of data.
 #' @export
 
@@ -74,35 +74,47 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
 
   shapefile_vars <- sf::st_transform(shapefile_vars, crs = "WGS84")
   shapefile_features <- sf::st_transform(shapefile_features, crs = "WGS84")
-  
-  if ("year" %in% colnames(shapefile_vars)) {vars_yr <- TRUE} else {vars_yr <- FALSE}
-  if ("year" %in% colnames(shapefile_features)) {features_yr <- TRUE} else {features_yr <- FALSE}
+
+  if ("year" %in% colnames(shapefile_vars)) {
+    vars_yr <- TRUE
+  } else {
+    vars_yr <- FALSE
+  }
+  if ("year" %in% colnames(shapefile_features)) {
+    features_yr <- TRUE
+  } else {
+    features_yr <- FALSE
+  }
 
   if (vars_yr == TRUE) {
     wellPanel_vars <- shiny::wellPanel(
       style = "border-width: 2px; border-color: black",
       shiny::selectInput("variable_input", "Data variable to display", choices = c("none", unique(shapefile_vars$variable)), selected = "none"),
       shiny::conditionalPanel(condition = "input.variable_input != 'none'", shiny::sliderInput("vars_year_input", "Data year to display", min = min(shapefile_vars$year, na.rm = TRUE), max = max(shapefile_vars$year, na.rm = TRUE), value = min(shapefile_vars$year, na.rm = TRUE), step = min(shapefile_vars$year[shapefile_vars$year != min(shapefile_vars$year, na.rm = TRUE)], na.rm = TRUE) - min(shapefile_vars$year, na.rm = TRUE), sep = ""))
-    )}
+    )
+  }
   if (vars_yr == FALSE) {
     wellPanel_vars <- shiny::wellPanel(
       style = "border-width: 2px; border-color: black",
       shiny::selectInput("variable_input", "Data variable to display", choices = c("none", unique(shapefile_vars$variable)), selected = "none")
-    )}
-  
+    )
+  }
+
   if (features_yr == TRUE) {
     wellPanel_features <- shiny::wellPanel(
       style = "border-width: 2px; border-color: black",
       shiny::checkboxGroupInput("features_input", "Features to display", choices = unique(shapefile_features$features), selected = unique(shapefile_features$features)),
       shiny::conditionalPanel(condition = "input.features_input.length != 0", shiny::sliderInput("features_year_input", "Data year to display", min = min(shapefile_features$year, na.rm = TRUE), max = max(shapefile_features$year, na.rm = TRUE), value = min(shapefile_features$year, na.rm = TRUE), step = min(shapefile_features$year[shapefile_features$year != min(shapefile_features$year, na.rm = TRUE)], na.rm = TRUE) - min(shapefile_features$year, na.rm = TRUE), sep = ""))
-    )}
+    )
+  }
   if (features_yr == FALSE) {
     wellPanel_features <- shiny::wellPanel(
       style = "border-width: 2px; border-color: black",
       shiny::checkboxGroupInput("features_input", "Features to display", choices = unique(shapefile_features$features), selected = unique(shapefile_features$features))
-    )}
-  
-  
+    )
+  }
+
+
   ui <- shiny::fluidPage(
     shiny::titlePanel(title),
     shiny::sidebarLayout(
@@ -149,39 +161,39 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
     })
 
     if (features_yr == TRUE & vars_yr == TRUE) {
-    filtered_features <- shiny::reactive({
-      shapefile_features[shapefile_features$year == input$features_year_input, ][shapefile_features$features[shapefile_features$year == input$features_year_input] %in% input$features_input, ]
-   }) |>
-      # binding the event makes the features and their legend reload every time the vars or features are changed, so that the features will stay on top of the vars on the map and so the features legend won't go above the vars legend
-      shiny::bindEvent(input$vars_year_input, input$variable_input, input$features_input, input$features_year_input)
+      filtered_features <- shiny::reactive({
+        shapefile_features[shapefile_features$year == input$features_year_input, ][shapefile_features$features[shapefile_features$year == input$features_year_input] %in% input$features_input, ]
+      }) |>
+        # binding the event makes the features and their legend reload every time the vars or features are changed, so that the features will stay on top of the vars on the map and so the features legend won't go above the vars legend
+        shiny::bindEvent(input$vars_year_input, input$variable_input, input$features_input, input$features_year_input)
     }
-    
+
     if (features_yr == FALSE & vars_yr == TRUE) {
       filtered_features <- shiny::reactive({
-          shapefile_features[shapefile_features$features %in% input$features_input, ]
+        shapefile_features[shapefile_features$features %in% input$features_input, ]
       }) |>
         # binding the event makes the features and their legend reload every time the vars or features are changed, so that the features will stay on top of the vars on the map and so the features legend won't go above the vars legend
         shiny::bindEvent(input$vars_year_input, input$variable_input, input$features_input)
     }
-    
+
     if (features_yr == TRUE & vars_yr == FALSE) {
       filtered_features <- shiny::reactive({
-          shapefile_features[shapefile_features$year == input$features_year_input, ][shapefile_features$features[shapefile_features$year == input$features_year_input] %in% input$features_input, ]
+        shapefile_features[shapefile_features$year == input$features_year_input, ][shapefile_features$features[shapefile_features$year == input$features_year_input] %in% input$features_input, ]
       }) |>
         # binding the event makes the features and their legend reload every time the vars or features are changed, so that the features will stay on top of the vars on the map and so the features legend won't go above the vars legend
         shiny::bindEvent(input$variable_input, input$features_input, input$features_year_input)
     }
-    
+
     if (features_yr == FALSE & vars_yr == FALSE) {
       filtered_features <- shiny::reactive({
-          shapefile_features[shapefile_features$features %in% input$features_input, ]
+        shapefile_features[shapefile_features$features %in% input$features_input, ]
       }) |>
         # binding the event makes the features and their legend reload every time the vars or features are changed, so that the features will stay on top of the vars on the map and so the features legend won't go above the vars legend
         shiny::bindEvent(input$variable_input, input$features_input)
     }
-    
+
     features_pal <- leaflet::colorFactor(palette = "RdGy", domain = shapefile_features$features)
-    
+
 
     vars_none <- shiny::reactive({
       ifelse(input$variable_input == "none", TRUE, FALSE)
@@ -341,23 +353,23 @@ web_app <- function(project_name, title, response_questions, shapefile_vars, sha
             leaflet::clearGroup(group = x)
         }
       }
-      
+
       for (i in unique(filtered_features()$features)) {
         if (unique(sf::st_geometry_type(filtered_features()[filtered_features()$features == i, ])) == "POLYGON") {
           leaflet::leafletProxy("map", data = filtered_features()[filtered_features()$features == i, ]) |>
             leaflet::addPolygons(group = i, label = ~name, color = ~ features_pal(features), fillOpacity = 0.9)
         }
-        
+
         if (unique(sf::st_geometry_type(filtered_features()[filtered_features()$features == i, ])) == "POINT") {
           leaflet::leafletProxy("map", data = filtered_features()[filtered_features()$features == i, ]) |>
             leaflet::addCircles(group = i, label = ~name, color = ~ features_pal(features), fillOpacity = 0.9)
         }
       }
-      
+
       # setting layerId makes legend reload itself when addLegend is run again rather than creating an additional legend
       leaflet::leafletProxy("map") |>
         leaflet::addLegend(data = filtered_features(), pal = features_pal, values = ~ shapefile_features$features, title = "feature", layerId = "features legend")
-      
+
       if (nrow(filtered_features()) == 0) {
         leaflet::leafletProxy("map") |>
           leaflet::removeControl(layerId = "features legend")

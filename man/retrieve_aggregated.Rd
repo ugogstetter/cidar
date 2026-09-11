@@ -42,7 +42,7 @@ retrieve_aggregated(
 return the data frame of retrievable variables. The \code{vars} argument of this
 \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function can be supplied in one of two ways:
 \itemize{
-\item As a vector of all variables you wish to retrieve. To retrieve all
+\item As a character vector of all variables you wish to retrieve. To retrieve all
 variables within one or more categories as given in the
 \code{\link[=retrieve_aggregated_vars]{retrieve_aggregated_vars()}} data frame, set \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}'s \code{vars}
 argument equal to a call to the \code{\link[=categories_vars]{categories_vars()}} function, which will
@@ -53,7 +53,7 @@ retrieve.
 }}
 
 \item{yrs}{If yrs is a numeric vector, this function will retrieve all
-specified varaibles for all years in the specified vector. If yrs is \code{NULL},
+specified variables for all years in the specified vector. If yrs is \code{NULL},
 this function will retrieve all most recent years of selected variables If yrs is not provided,
 retrieve all available years for all variables associated with specific years.
 The years for which data is available for each variable are included in the
