@@ -26,7 +26,7 @@ areas in square miles.}
 Using the tigris
 \link[tigris:core_based_statistical_areas]{core_based_statistical_areas()}
 function, returns a dataset of CBSAs (Core Based Statistical
-Areas) with their corresponding GEOIDs, as designated by the U.S.
+Areas) located within the 50 U.S. states and D.C., with their corresponding GEOIDs, as designated by the U.S.
 Census Bureau for the year 2023, for use in querying the \code{\link[=retrieve_aggregated]{retrieve_aggregated()}}
 function.
 }

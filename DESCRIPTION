@@ -20,7 +20,8 @@ Imports:
     leaflet,
     tigris,
     arcgislayers,
-    leaflet.extras2
+    leaflet.extras2,
+    htmltools
 Suggests: 
     knitr,
     rmarkdown,

@@ -3,12 +3,12 @@ globalVariables(c("STATEFP", "STUSPS", "NAMELSAD", "place", "ALAND"))
 #' Retrieves place GEOIDs for use in [retrieve_aggregated()]
 #' @description Using the tigris
 #' [places()][tigris::places] and [states()][tigris::states]
-#' functions, returns a dataset of places with their
+#' functions, returns a dataset of places in U.S. states and D.C. with their
 #' corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
 #' the year 2023, for use in querying the [retrieve_aggregated()] function.
 #' @param state Optionally, specify a vector of two-letter state abbreviations to filter
 #' to. By default, all Census places (cities/towns/villages/census-designated
-#' places) in U.S. states and territories will be returned by the function.
+#' places) in U.S. states and D.C. will be returned by the function.
 #' @param sf If `FALSE` (default value), function returns a data frame without
 #'  geospatial polygon geometry. If `TRUE`, function returns a shapefile with
 #'  geospatial polygon geometry.
@@ -39,6 +39,8 @@ place_geoids <- function(state = NULL, sf = FALSE, namelsad = TRUE, land_area = 
 
       stop(paste0("`state` contains the following invalid state abbreviation(s): ", paste(state_vec, collapse = ", "), ". Make sure `state` is set equal to a character vector of two-letter abbreviations for any of the 50 states or DC."))
     }
+  } else {
+    state <- c("AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY")
   }
 
   if (is.null(sf)) {

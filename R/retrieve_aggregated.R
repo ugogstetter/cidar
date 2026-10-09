@@ -453,11 +453,11 @@ census_retrieval_cleaning <- function(vars, yrs, geog, state, geoselect) {
     census_data_homeownership <- census_data_homeownership |>
       tidyr::pivot_wider(names_from = variable, values_from = c(estimate, moe), names_sep = "_") |>
       dplyr::mutate(
-        homeowners.estimate = round((estimate_owner_occupied / estimate_homeownership_total) * 100, 2),
-        homeowners.moe = round((tidycensus::moe_prop(num = estimate_owner_occupied, denom = estimate_homeownership_total, moe_num = moe_owner_occupied, moe_denom = moe_homeownership_total)) * 100, 2)
+        homeownership.estimate = round((estimate_owner_occupied / estimate_homeownership_total) * 100, 2),
+        homeownership.moe = round((tidycensus::moe_prop(num = estimate_owner_occupied, denom = estimate_homeownership_total, moe_num = moe_owner_occupied, moe_denom = moe_homeownership_total)) * 100, 2)
       ) |>
-      dplyr::select(c(GEOID, NAME, year, homeowners.estimate, homeowners.moe)) |>
-      tidyr::pivot_longer(cols = homeowners.estimate:homeowners.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
+      dplyr::select(c(GEOID, NAME, year, homeownership.estimate, homeownership.moe)) |>
+      tidyr::pivot_longer(cols = homeownership.estimate:homeownership.moe, names_to = c("variable", "estimate_moe"), values_to = "percent", names_sep = "[.]") |>
       tidyr::pivot_wider(names_from = estimate_moe, values_from = percent)
 
     census_data <- rbind(homeownership_split$`FALSE`, census_data_homeownership)
@@ -556,8 +556,15 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       "Year" = bea_year
     )
 
-    county_GDP <- bea.R::beaGet(userSpecList, asTable = TRUE) |>
-      tidyr::pivot_longer(cols = paste0("DataValue_", as.character(min(yrs))):paste0("DataValue_", as.character(max(yrs))), names_to = "year", values_to = "gdp") |>
+    county_GDP <- bea.R::beaGet(userSpecList, asTable = TRUE)
+    
+    if (nrow(county_GDP) == 0) {
+      bea_data <- data.frame(matrix(nrow = 0, ncol = 5))
+      colnames(bea_data) <- c("GEOID", "variable", "estimate", "moe", "year")
+    } else {
+      
+      county_GDP <- county_GDP |>
+        tidyr::pivot_longer(cols = paste0("DataValue_", as.character(min(yrs))):paste0("DataValue_", as.character(max(yrs))), names_to = "year", values_to = "gdp") |>
       dplyr::mutate(
         year = as.numeric(substr(year, 11, 14)),
         gdp = gdp * 1000
@@ -578,7 +585,13 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       "Year" = bea_year
     )
 
-    county_population <- bea.R::beaGet(userSpecList, asTable = TRUE) |>
+    county_population <- bea.R::beaGet(userSpecList, asTable = TRUE)
+    
+    if (nrow(county_population) == 0) {
+      bea_data <- data.frame(matrix(nrow = 0, ncol = 5))
+      colnames(bea_data) <- c("GEOID", "variable", "estimate", "moe", "year")
+    } else {
+      county_population <- county_population |>
       tidyr::pivot_longer(cols = paste0("DataValue_", as.character(min(yrs))):paste0("DataValue_", as.character(max(yrs))), names_to = "year", values_to = "population") |>
       dplyr::mutate(year = as.numeric(substr(year, 11, 14))) |>
       dplyr::select(GeoFips, population, year, GeoName)
@@ -594,8 +607,11 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       ) |>
       dplyr::rename(GEOID = GeoFips) |>
       dplyr::select(c(GEOID, variable, estimate, moe, year))
+    }
+    }
   }
 
+  # NOTE: data retrieval with CBSA has not been working for a few months, even though it was working before that and there didn't appear to be something in the documentation saying it wouldn't now work. the code is updated with the understanding that GDP per capita is now only available by county
   if (geog == "cbsa") {
     # U.S. MSA GDP over time
 
@@ -617,7 +633,13 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       "Year" = bea_year
     )
 
-    msa_GDP <- bea.R::beaGet(userSpecList, asTable = TRUE) |>
+    msa_GDP <- bea.R::beaGet(userSpecList, asTable = TRUE)
+    
+    if (nrow(msa_GDP) == 0) {
+      bea_data <- data.frame(matrix(nrow = 0, ncol = 5))
+      colnames(bea_data) <- c("GEOID", "variable", "estimate", "moe", "year")
+    } else {
+      msa_GDP <- msa_GDP |>
       tidyr::pivot_longer(cols = paste0("DataValue_", as.character(min(yrs))):paste0("DataValue_", as.character(max(yrs))), names_to = "year", values_to = "gdp") |>
       dplyr::mutate(
         year = as.numeric(substr(year, 11, 14)),
@@ -639,7 +661,13 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       "Year" = bea_year
     )
 
-    msa_population <- bea.R::beaGet(userSpecList, asTable = TRUE) |>
+    msa_population <- bea.R::beaGet(userSpecList, asTable = TRUE)
+    
+    if (nrow(msa_population) == 0) {
+      bea_data <- data.frame(matrix(nrow = 0, ncol = 5))
+      colnames(bea_data) <- c("GEOID", "variable", "estimate", "moe", "year")
+    } else {
+      msa_population <- msa_population |>
       tidyr::pivot_longer(cols = paste0("DataValue_", as.character(min(yrs))):paste0("DataValue_", as.character(max(yrs))), names_to = "year", values_to = "population") |>
       dplyr::mutate(year = as.numeric(substr(year, 11, 14))) |>
       dplyr::select(GeoFips, population, year, GeoName)
@@ -656,6 +684,8 @@ bea_retrieval <- function(yrs, geog, geoselect) {
       ) |>
       dplyr::rename(GEOID = GeoFips) |>
       dplyr::select(c(GEOID, variable, estimate, moe, year))
+    }
+    }
   }
 
   return(bea_data)
@@ -665,7 +695,7 @@ bea_retrieval <- function(yrs, geog, geoselect) {
 # should I be concerned that some counties don't seem to have many days with AQI? (see column in original datasets)
 # the value of geog can be either "county" or "cbsa"
 
-aqi_retrieval <- function(vars, yrs, geog, state) {
+aqi_retrieval <- function(vars, yrs, geog, state, geoselect) {
   if (geog == "county") {
     temp <- tempfile()
 
@@ -731,7 +761,66 @@ aqi_retrieval <- function(vars, yrs, geog, state) {
     }
 
     # matches GEOIDS to counties in the counties AQI dataset, matching on county and state name
-    aqi_counties <- county_geoids(state = state, namelsad = FALSE) |>
+    if (!is.null(geoselect)) {
+      
+      geoselect_states <- unique(substr(geoselect, 1, 2))
+      
+      state_val <- dplyr::case_when(geoselect_states == "01" ~ "AL",
+                                    geoselect_states == "02" ~ "AK",
+                                    geoselect_states == "04" ~ "AZ",
+                                    geoselect_states == "05" ~ "AR",
+                                    geoselect_states == "06" ~ "CA",
+                                    geoselect_states == "08" ~ "CO",
+                                    geoselect_states == "09" ~ "CT",
+                                    geoselect_states == "10" ~ "DE",
+                                    geoselect_states == "11" ~ "DC",
+                                    geoselect_states == "12" ~ "FL",
+                                    geoselect_states == "13" ~ "GA",
+                                    geoselect_states == "15" ~ "HI",
+                                    geoselect_states == "16" ~ "ID",
+                                    geoselect_states == "17" ~ "IL",
+                                    geoselect_states == "18" ~ "IN",
+                                    geoselect_states == "19" ~ "IA",
+                                    geoselect_states == "20" ~ "KS",
+                                    geoselect_states == "21" ~ "KY",
+                                    geoselect_states == "22" ~ "LA",
+                                    geoselect_states == "23" ~ "ME",
+                                    geoselect_states == "24" ~ "MD",
+                                    geoselect_states == "25" ~ "MA",
+                                    geoselect_states == "26" ~ "MI",
+                                    geoselect_states == "27" ~ "MN",
+                                    geoselect_states == "28" ~ "MS",
+                                    geoselect_states == "29" ~ "MO",
+                                    geoselect_states == "30" ~ "MT",
+                                    geoselect_states == "31" ~ "NE",
+                                    geoselect_states == "32" ~ "NV",
+                                    geoselect_states == "33" ~ "NH",
+                                    geoselect_states == "34" ~ "NJ",
+                                    geoselect_states == "35" ~ "NM",
+                                    geoselect_states == "36" ~ "NY",
+                                    geoselect_states == "37" ~ "NC",
+                                    geoselect_states == "38" ~ "ND",
+                                    geoselect_states == "39" ~ "OH",
+                                    geoselect_states == "40" ~ "OK",
+                                    geoselect_states == "41" ~ "OR",
+                                    geoselect_states == "42" ~ "PA",
+                                    geoselect_states == "44" ~ "RI",
+                                    geoselect_states == "45" ~ "SC",
+                                    geoselect_states == "46" ~ "SD",
+                                    geoselect_states == "47" ~ "TN",
+                                    geoselect_states == "48" ~ "TX",
+                                    geoselect_states == "49" ~ "UT",
+                                    geoselect_states == "50" ~ "VT",
+                                    geoselect_states == "51" ~ "VA",
+                                    geoselect_states == "53" ~ "WA",
+                                    geoselect_states == "54" ~ "WV",
+                                    geoselect_states == "55" ~ "WI",
+                                    geoselect_states == "56" ~ "WY")
+    } else {
+      state_val <- state
+    }
+    
+    aqi_counties <- county_geoids(state = state_val, namelsad = FALSE) |>
       dplyr::select(GEOID, name) |>
       dplyr::rename(county_state = name)
 
@@ -1018,7 +1107,7 @@ voting_retrieval <- function(yrs, state, geoselect) {
   }
 
   if (!is.null(geoselect)) {
-    if (substr(geoselect, 1, 2) == "09") {
+    if (TRUE %in% (substr(geoselect, 1, 2) == "09")) {
       ct_included <- TRUE
     }
   }
@@ -1028,7 +1117,7 @@ voting_retrieval <- function(yrs, state, geoselect) {
   }
 
   if (!is.null(geoselect)) {
-    if ((substr(geoselect, 1, 2) == "55") & (max(yrs) >= 2018)) {
+    if ((TRUE %in% (substr(geoselect, 1, 2) == "55")) & (max(yrs) >= 2018)) {
       wi_included <- TRUE
     }
   }
@@ -1278,17 +1367,21 @@ retrieve_aggregated <- function(vars, yrs = 1980:2024, geog, state = NULL, geose
   if (!(class(vars) == "character") & !(class(vars) == "data.frame")) {
     stop("`vars` must be of class `character` or `data.frame`.")
   }
+  
+  if (length(geog) != 1) {
+    stop("`geog` must have length 1.")
+  }
+  
+  if (!is.null(state) & geog == "cbsa") {
+    stop("A `state` value cannot be provided when `geog` is `cbsa`, because CBSAs can extend across state lines.")
+  }
 
   if (!is.null(yrs)) {
-    if (!is.numeric(yrs)) {
-      tryCatch(
-        {
-          yrs <- as.numeric(yrs)
-        },
-        error = function(e) {
-          stop("Must enter `yrs` value that can be coerced to numeric.")
-        }
-      )
+    
+    yrs <- suppressWarnings(as.numeric(yrs))
+    
+    if (NA %in% yrs) {
+      stop("Must enter `yrs` value that can be coerced to numeric.")
     }
 
     if (FALSE %in% (yrs %% 1 == 0)) {
@@ -1296,20 +1389,8 @@ retrieve_aggregated <- function(vars, yrs = 1980:2024, geog, state = NULL, geose
     }
   }
 
-  if (is.null(geog)) {
-    print("`geog` cannot be `NULL`.")
-  }
-
-  if (length(geog) != 1) {
-    stop("`geog` must have length 1.")
-  }
-
   if (!(geog %in% c("county", "cbsa", "place"))) {
     stop("`geog` must be `county`, `cbsa`, or `place`.")
-  }
-
-  if (is.null(vars_info)) {
-    print("`vars_info` cannot be `NULL`.")
   }
 
   if (length(vars_info) != 1) {
@@ -1320,10 +1401,6 @@ retrieve_aggregated <- function(vars, yrs = 1980:2024, geog, state = NULL, geose
 
   if (!(vars_info %in% c(TRUE, FALSE))) {
     stop("`vars_info` must be coercible to logical (`TRUE` or `FALSE`).")
-  }
-
-  if (is.null(sf)) {
-    print("`sf` cannot be `NULL`.")
   }
 
   if (length(sf) != 1) {
@@ -1359,17 +1436,66 @@ retrieve_aggregated <- function(vars, yrs = 1980:2024, geog, state = NULL, geose
   }
 
   if (!is.null(geoselect)) {
-    tryCatch(
-      {
-        geoselect <- as.character(geoselect)
-      },
-      error = function(e) {
-        stop("Must enter `geoselect` value that can be coerced to character.")
-      }
-    )
+    
+    geoselect <- as.character(geoselect)
 
     if (geog == "county") {
-      geoselect_test <- geoselect %in% county_geoids()$GEOID
+      
+      geoselect_states <- unique(substr(geoselect, 1, 2))
+      
+      state_val <- dplyr::case_when(geoselect_states == "01" ~ "AL",
+                                    geoselect_states == "02" ~ "AK",
+                                    geoselect_states == "04" ~ "AZ",
+                                    geoselect_states == "05" ~ "AR",
+                                    geoselect_states == "06" ~ "CA",
+                                    geoselect_states == "08" ~ "CO",
+                                    geoselect_states == "09" ~ "CT",
+                                    geoselect_states == "10" ~ "DE",
+                                    geoselect_states == "11" ~ "DC",
+                                    geoselect_states == "12" ~ "FL",
+                                    geoselect_states == "13" ~ "GA",
+                                    geoselect_states == "15" ~ "HI",
+                                    geoselect_states == "16" ~ "ID",
+                                    geoselect_states == "17" ~ "IL",
+                                    geoselect_states == "18" ~ "IN",
+                                    geoselect_states == "19" ~ "IA",
+                                    geoselect_states == "20" ~ "KS",
+                                    geoselect_states == "21" ~ "KY",
+                                    geoselect_states == "22" ~ "LA",
+                                    geoselect_states == "23" ~ "ME",
+                                    geoselect_states == "24" ~ "MD",
+                                    geoselect_states == "25" ~ "MA",
+                                    geoselect_states == "26" ~ "MI",
+                                    geoselect_states == "27" ~ "MN",
+                                    geoselect_states == "28" ~ "MS",
+                                    geoselect_states == "29" ~ "MO",
+                                    geoselect_states == "30" ~ "MT",
+                                    geoselect_states == "31" ~ "NE",
+                                    geoselect_states == "32" ~ "NV",
+                                    geoselect_states == "33" ~ "NH",
+                                    geoselect_states == "34" ~ "NJ",
+                                    geoselect_states == "35" ~ "NM",
+                                    geoselect_states == "36" ~ "NY",
+                                    geoselect_states == "37" ~ "NC",
+                                    geoselect_states == "38" ~ "ND",
+                                    geoselect_states == "39" ~ "OH",
+                                    geoselect_states == "40" ~ "OK",
+                                    geoselect_states == "41" ~ "OR",
+                                    geoselect_states == "42" ~ "PA",
+                                    geoselect_states == "44" ~ "RI",
+                                    geoselect_states == "45" ~ "SC",
+                                    geoselect_states == "46" ~ "SD",
+                                    geoselect_states == "47" ~ "TN",
+                                    geoselect_states == "48" ~ "TX",
+                                    geoselect_states == "49" ~ "UT",
+                                    geoselect_states == "50" ~ "VT",
+                                    geoselect_states == "51" ~ "VA",
+                                    geoselect_states == "53" ~ "WA",
+                                    geoselect_states == "54" ~ "WV",
+                                    geoselect_states == "55" ~ "WI",
+                                    geoselect_states == "56" ~ "WY")
+      
+      geoselect_test <- geoselect %in% county_geoids(state = state_val)$GEOID
 
       if (FALSE %in% geoselect_test) {
         geoselect_vals <- which(geoselect_test == FALSE)
@@ -1403,7 +1529,62 @@ retrieve_aggregated <- function(vars, yrs = 1980:2024, geog, state = NULL, geose
     }
 
     if (geog == "place") {
-      geoselect_test <- geoselect %in% place_geoids()$GEOID
+      
+      geoselect_states <- unique(substr(geoselect, 1, 2))
+      
+      state_val <- dplyr::case_when(geoselect_states == "01" ~ "AL",
+                                    geoselect_states == "02" ~ "AK",
+                                    geoselect_states == "04" ~ "AZ",
+                                    geoselect_states == "05" ~ "AR",
+                                    geoselect_states == "06" ~ "CA",
+                                    geoselect_states == "08" ~ "CO",
+                                    geoselect_states == "09" ~ "CT",
+                                    geoselect_states == "10" ~ "DE",
+                                    geoselect_states == "11" ~ "DC",
+                                    geoselect_states == "12" ~ "FL",
+                                    geoselect_states == "13" ~ "GA",
+                                    geoselect_states == "15" ~ "HI",
+                                    geoselect_states == "16" ~ "ID",
+                                    geoselect_states == "17" ~ "IL",
+                                    geoselect_states == "18" ~ "IN",
+                                    geoselect_states == "19" ~ "IA",
+                                    geoselect_states == "20" ~ "KS",
+                                    geoselect_states == "21" ~ "KY",
+                                    geoselect_states == "22" ~ "LA",
+                                    geoselect_states == "23" ~ "ME",
+                                    geoselect_states == "24" ~ "MD",
+                                    geoselect_states == "25" ~ "MA",
+                                    geoselect_states == "26" ~ "MI",
+                                    geoselect_states == "27" ~ "MN",
+                                    geoselect_states == "28" ~ "MS",
+                                    geoselect_states == "29" ~ "MO",
+                                    geoselect_states == "30" ~ "MT",
+                                    geoselect_states == "31" ~ "NE",
+                                    geoselect_states == "32" ~ "NV",
+                                    geoselect_states == "33" ~ "NH",
+                                    geoselect_states == "34" ~ "NJ",
+                                    geoselect_states == "35" ~ "NM",
+                                    geoselect_states == "36" ~ "NY",
+                                    geoselect_states == "37" ~ "NC",
+                                    geoselect_states == "38" ~ "ND",
+                                    geoselect_states == "39" ~ "OH",
+                                    geoselect_states == "40" ~ "OK",
+                                    geoselect_states == "41" ~ "OR",
+                                    geoselect_states == "42" ~ "PA",
+                                    geoselect_states == "44" ~ "RI",
+                                    geoselect_states == "45" ~ "SC",
+                                    geoselect_states == "46" ~ "SD",
+                                    geoselect_states == "47" ~ "TN",
+                                    geoselect_states == "48" ~ "TX",
+                                    geoselect_states == "49" ~ "UT",
+                                    geoselect_states == "50" ~ "VT",
+                                    geoselect_states == "51" ~ "VA",
+                                    geoselect_states == "53" ~ "WA",
+                                    geoselect_states == "54" ~ "WV",
+                                    geoselect_states == "55" ~ "WI",
+                                    geoselect_states == "56" ~ "WY")
+      
+      geoselect_test <- geoselect %in% place_geoids(state = state_val)$GEOID
 
       if (FALSE %in% geoselect_test) {
         geoselect_vals <- which(geoselect_test == FALSE)
@@ -1447,7 +1628,7 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
 
     for (i in 1:length(vars_vals)) {
       vars_val <- vars_vals[i]
-      vars_vec[i] <- geoselect[vars_val]
+      vars_vec[i] <- vars[vars_val]
     }
 
     stop(paste0("`vars` contains the following invalid variable names: ", paste(vars_vec, collapse = ", "), ". All variables available for retrieval through this function are listed in the `variable` column of the dataset retrieved by `retrieve_aggregated_vars()`."))
@@ -1491,20 +1672,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
 
     census_data <- census_retrieval_cleaning(vars = census_vars, yrs = census_yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(census_data) == 0) {
-      census_test <- vars %in% c("unemployment", "high-skill employment", "median family income", "poverty", "old-age dependency ratio", "housing vacancy", "Gini index", "median home value", "median gross rent", "households without vehicle", "households with broadband", "homeownership", "single-parent families", "public transport commutes", "mean commute time", "sex", "age", "race")
-
-      census_vals <- which(census_test == TRUE)
-
-      census_vec <- rep(NA, length(census_vals))
-
-      for (i in 1:length(census_vals)) {
-        census_val <- census_vals[i]
-        census_vec[i] <- vars[census_val]
-      }
-
-      warning(paste0("For the following variable(s) in `vars`, data is not available for the given year(s) and geography: `", paste(census_vec, collapse = "`, `"), "`. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
-    }
   } else {
     census_test <- vars %in% c("unemployment", "high-skill employment", "median family income", "poverty", "old-age dependency ratio", "housing vacancy", "Gini index", "median home value", "median gross rent", "households without vehicle", "households with broadband", "homeownership", "single-parent families", "public transport commutes", "mean commute time", "sex", "age", "race")
 
@@ -1517,7 +1684,7 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
         census_val <- census_vals[i]
         census_vec[i] <- vars[census_val]
       }
-
+      
       warning(paste0("The following variable(s) in `vars` are not retrievable for any of the given `yrs` values: `", paste(census_vec, collapse = "`, `"), "`. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information."))
     }
 
@@ -1530,16 +1697,13 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
     bea_yrs <- yrs[yrs >= 2001 & yrs <= 2023]
   }
 
-  if ("GDP per capita" %in% vars & length(bea_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
+  if ("GDP per capita" %in% vars & length(bea_yrs) != 0 & geog == "county") {
     bea_data <- bea_retrieval(yrs = bea_yrs, geog = geog, geoselect = geoselect)
 
-    if (nrow(bea_data) == 0) {
-      warning("For the `GDP per capita` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("GDP per capita" %in% vars) {
-      if (geog == "place") {
-        warning("The `GDP per capita` variable is not available for the `place` geography. See the `geogs_available` column of the retrieve_aggregated_vars() dataset for more information.")
+      if (geog == "place" | geog == "cbsa") {
+        warning("The `GDP per capita` variable is not available for the `", paste(geog), "` geography. See the `geogs_available` column of the retrieve_aggregated_vars() dataset for more information.")
       }
 
       if (length(bea_yrs) == 0) {
@@ -1559,21 +1723,8 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if (("median AQI" %in% vars | "unhealthy air days" %in% vars) & length(aqi_yrs) != 0 & (geog == "county" | geog == "cbsa")) {
     aqi_vars <- vars[vars %in% c("median AQI", "unhealthy air days")]
 
-    aqi_data <- aqi_retrieval(vars = aqi_vars, yrs = aqi_yrs, geog = geog, state = state)
+    aqi_data <- aqi_retrieval(vars = aqi_vars, yrs = aqi_yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(aqi_data) == 0) {
-      if ("median AQI" & "unhealthy air days" %in% vars) {
-        aqi_paste <- "`median AQI` and `unhealthy air days` variables"
-      } else {
-        if ("median AQI" %in% vars) {
-          aqi_paste <- "`median AQI` variable"
-        } else {
-          aqi_paste <- "`unhealthy air days` variable"
-        }
-      }
-
-      warning(paste0("For the ", aqi_paste, ", data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
-    }
   } else {
     if ("median AQI" %in% vars | "unhealthy air days" %in% vars) {
       if ("median AQI" & "unhealthy air days" %in% vars) {
@@ -1610,20 +1761,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
 
     crime_data <- crime_retrieval(vars = crime_vars, yrs = crime_yrs)
 
-    if (nrow(crime_data) == 0) {
-      crime_test <- vars %in% c("violent crime", "murder and nonnegligent manslaughter", "rape", "robbery", "aggrevated assault", "property crime", "burglary", "larceny", "motor vehicle theft")
-
-      crime_vals <- which(crime_test == TRUE)
-
-      crime_vec <- rep(NA, length(crime_vals))
-
-      for (i in 1:length(crime_vals)) {
-        crime_val <- crime_vals[i]
-        crime_vec[i] <- vars[crime_val]
-      }
-
-      warning(paste0("For the following variable(s), data is not available for the given year(s) and geography: `", paste(crime_vec, collapse = "`, `"), "`. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
-    }
   } else {
     crime_test <- vars %in% c("violent crime", "murder and nonnegligent manslaughter", "rape", "robbery", "aggrevated assault", "property crime", "burglary", "larceny", "motor vehicle theft")
 
@@ -1659,9 +1796,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if ("schools" %in% vars & length(schools_yrs) != 0) {
     schools_data <- schools_retrieval(yrs = schools_yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(schools_data) == 0) {
-      warning("For the `schools` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("schools" %in% vars) {
       warning("The `schools` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
@@ -1673,9 +1807,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if ("transit stops" %in% vars & is.null(yrs)) {
     transit_data <- transit_retrieval(yrs = yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(transit_data) == 0) {
-      warning("For the `transit stops` variable, data is not currently available for the given geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("transit stops" %in% vars) {
       warning("Because its data source is continually updated, the `transit stops` variable is only available when `yrs` is set to `NULL`.")
@@ -1693,9 +1824,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if ("libraries" %in% vars & length(libraries_yrs) != 0) {
     libraries_data <- libraries_retrieval(yrs = libraries_yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(libraries_data) == 0) {
-      warning("For the `libraries` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("libraries" %in% vars) {
       warning("The `libraries` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
@@ -1713,9 +1841,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if ("nonprofits" %in% vars & length(nonprofits_yrs) != 0) {
     nonprofits_data <- nonprofits_retrieval(yrs = nonprofits_yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(nonprofits_data) == 0) {
-      warning("For the `nonprofits` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("nonprofits" %in% vars) {
       warning("The `nonprofits` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
@@ -1727,9 +1852,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if ("health-related nonprofits" %in% vars & length(nonprofits_yrs) != 0) {
     health_nonprofits_data <- health_nonprofits_retrieval(yrs = nonprofits_yrs, geog = geog, state = state, geoselect = geoselect)
 
-    if (nrow(health_nonprofits_data) == 0) {
-      warning("For the `health-related nonprofits` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("health-related nonprofits" %in% vars) {
       warning("The `health-related nonprofits` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
@@ -1740,10 +1862,7 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
 
   if ("fatal crashes" %in% vars & length(census_yrs) != 0) {
     crashes_data <- crashes_retrieval(yrs = census_yrs, geog = geog, state = state, geoselect = geoselect)
-
-    if (nrow(crashes_data) == 0) {
-      warning("For the `fatal crashes` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
+    
   } else {
     if ("fatal crashes" %in% vars) {
       warning("The `fatal crashes` variable is not retrievable for any of the given `yrs` values. See the `yrs_available` column of the retrieve_aggregated_vars() dataset for more information.")
@@ -1761,9 +1880,6 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   if ("voter turnout" %in% vars & length(voting_yrs) != 0 & geog == "county") {
     voting_data <- voting_retrieval(yrs = voting_yrs, state = state, geoselect = geoselect)
 
-    if (nrow(voting_data) == 0) {
-      warning("For the `voter turnout` variable, data is not available for the given year(s) and geography. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation.")
-    }
   } else {
     if ("voter turnout" %in% vars) {
       if (geog != "county") {
@@ -1785,7 +1901,68 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
 
     # retrieving county/CBSA/place names to join with data
     if (geog == "county") {
-      geog_county <- county_geoids(state = state, sf = sf) |>
+      
+      if (!is.null(geoselect)) {
+        
+        geoselect_states <- unique(substr(geoselect, 1, 2))
+        
+        state_val <- dplyr::case_when(geoselect_states == "01" ~ "AL",
+                                      geoselect_states == "02" ~ "AK",
+                                      geoselect_states == "04" ~ "AZ",
+                                      geoselect_states == "05" ~ "AR",
+                                      geoselect_states == "06" ~ "CA",
+                                      geoselect_states == "08" ~ "CO",
+                                      geoselect_states == "09" ~ "CT",
+                                      geoselect_states == "10" ~ "DE",
+                                      geoselect_states == "11" ~ "DC",
+                                      geoselect_states == "12" ~ "FL",
+                                      geoselect_states == "13" ~ "GA",
+                                      geoselect_states == "15" ~ "HI",
+                                      geoselect_states == "16" ~ "ID",
+                                      geoselect_states == "17" ~ "IL",
+                                      geoselect_states == "18" ~ "IN",
+                                      geoselect_states == "19" ~ "IA",
+                                      geoselect_states == "20" ~ "KS",
+                                      geoselect_states == "21" ~ "KY",
+                                      geoselect_states == "22" ~ "LA",
+                                      geoselect_states == "23" ~ "ME",
+                                      geoselect_states == "24" ~ "MD",
+                                      geoselect_states == "25" ~ "MA",
+                                      geoselect_states == "26" ~ "MI",
+                                      geoselect_states == "27" ~ "MN",
+                                      geoselect_states == "28" ~ "MS",
+                                      geoselect_states == "29" ~ "MO",
+                                      geoselect_states == "30" ~ "MT",
+                                      geoselect_states == "31" ~ "NE",
+                                      geoselect_states == "32" ~ "NV",
+                                      geoselect_states == "33" ~ "NH",
+                                      geoselect_states == "34" ~ "NJ",
+                                      geoselect_states == "35" ~ "NM",
+                                      geoselect_states == "36" ~ "NY",
+                                      geoselect_states == "37" ~ "NC",
+                                      geoselect_states == "38" ~ "ND",
+                                      geoselect_states == "39" ~ "OH",
+                                      geoselect_states == "40" ~ "OK",
+                                      geoselect_states == "41" ~ "OR",
+                                      geoselect_states == "42" ~ "PA",
+                                      geoselect_states == "44" ~ "RI",
+                                      geoselect_states == "45" ~ "SC",
+                                      geoselect_states == "46" ~ "SD",
+                                      geoselect_states == "47" ~ "TN",
+                                      geoselect_states == "48" ~ "TX",
+                                      geoselect_states == "49" ~ "UT",
+                                      geoselect_states == "50" ~ "VT",
+                                      geoselect_states == "51" ~ "VA",
+                                      geoselect_states == "53" ~ "WA",
+                                      geoselect_states == "54" ~ "WV",
+                                      geoselect_states == "55" ~ "WI",
+                                      geoselect_states == "56" ~ "WY")
+      } else {
+        state_val <- state
+      }
+      
+      
+      geog_county <- county_geoids(state = state_val, sf = sf) |>
         dplyr::select(!state_abbr)
 
       data_all <- dplyr::inner_join(geog_county, data_all, by = dplyr::join_by(GEOID))
@@ -1802,17 +1979,65 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
     }
 
     if (geog == "place") {
-      if (is.null(state) & !is.null(geoselect)) {
-        # creating vector of state abbreviations just for requested places so tigris call in place_geoids will run faster
-        place_states <- tigris::states(year = 2023) |>
-          dplyr::filter(GEOID %in% as.vector(substr(geoselect, 1, 2)))
-
-        place_states <- as.vector(place_states$STUSPS)
+      if (!is.null(geoselect)) {
+        geoselect_states <- unique(substr(geoselect, 1, 2))
+        
+        state_val <- dplyr::case_when(geoselect_states == "01" ~ "AL",
+                                      geoselect_states == "02" ~ "AK",
+                                      geoselect_states == "04" ~ "AZ",
+                                      geoselect_states == "05" ~ "AR",
+                                      geoselect_states == "06" ~ "CA",
+                                      geoselect_states == "08" ~ "CO",
+                                      geoselect_states == "09" ~ "CT",
+                                      geoselect_states == "10" ~ "DE",
+                                      geoselect_states == "11" ~ "DC",
+                                      geoselect_states == "12" ~ "FL",
+                                      geoselect_states == "13" ~ "GA",
+                                      geoselect_states == "15" ~ "HI",
+                                      geoselect_states == "16" ~ "ID",
+                                      geoselect_states == "17" ~ "IL",
+                                      geoselect_states == "18" ~ "IN",
+                                      geoselect_states == "19" ~ "IA",
+                                      geoselect_states == "20" ~ "KS",
+                                      geoselect_states == "21" ~ "KY",
+                                      geoselect_states == "22" ~ "LA",
+                                      geoselect_states == "23" ~ "ME",
+                                      geoselect_states == "24" ~ "MD",
+                                      geoselect_states == "25" ~ "MA",
+                                      geoselect_states == "26" ~ "MI",
+                                      geoselect_states == "27" ~ "MN",
+                                      geoselect_states == "28" ~ "MS",
+                                      geoselect_states == "29" ~ "MO",
+                                      geoselect_states == "30" ~ "MT",
+                                      geoselect_states == "31" ~ "NE",
+                                      geoselect_states == "32" ~ "NV",
+                                      geoselect_states == "33" ~ "NH",
+                                      geoselect_states == "34" ~ "NJ",
+                                      geoselect_states == "35" ~ "NM",
+                                      geoselect_states == "36" ~ "NY",
+                                      geoselect_states == "37" ~ "NC",
+                                      geoselect_states == "38" ~ "ND",
+                                      geoselect_states == "39" ~ "OH",
+                                      geoselect_states == "40" ~ "OK",
+                                      geoselect_states == "41" ~ "OR",
+                                      geoselect_states == "42" ~ "PA",
+                                      geoselect_states == "44" ~ "RI",
+                                      geoselect_states == "45" ~ "SC",
+                                      geoselect_states == "46" ~ "SD",
+                                      geoselect_states == "47" ~ "TN",
+                                      geoselect_states == "48" ~ "TX",
+                                      geoselect_states == "49" ~ "UT",
+                                      geoselect_states == "50" ~ "VT",
+                                      geoselect_states == "51" ~ "VA",
+                                      geoselect_states == "53" ~ "WA",
+                                      geoselect_states == "54" ~ "WV",
+                                      geoselect_states == "55" ~ "WI",
+                                      geoselect_states == "56" ~ "WY")
       } else {
-        place_states <- state
+        state_val <- state
       }
 
-      geog_place <- place_geoids(state = place_states, sf = sf) |>
+      geog_place <- place_geoids(state = state_val, sf = sf) |>
         dplyr::select(!state_abbr)
 
       data_all <- dplyr::inner_join(geog_place, data_all, by = dplyr::join_by(GEOID))
@@ -1866,6 +2091,90 @@ retrieve_aggregated.character <- function(vars, yrs = 1980:2024, geog, state = N
   data_all <- data_all |>
     dplyr::filter(!is.na(estimate)) |>
     dplyr::arrange(GEOID, year, variable, name)
+  
+  variable_test <- vars %in% unique(data_all$variable)
+  
+  if (FALSE %in% variable_test) {
+  
+    variable_vals <- which(variable_test == FALSE)
+  
+    variable_vec <- rep(NA, length(variable_vals))
+  
+    for (i in 1:length(variable_vals)) {
+      variable_val <- variable_vals[i]
+      variable_vec[i] <- vars[variable_val]
+    }
+    
+    aggregated_vars <- retrieve_aggregated_vars()
+    
+    drop_from_vector <- c()
+    
+    for (i in 1:length(variable_vec)) {
+      
+      val_dropped <- FALSE
+      
+      if (variable_vec[i] == "voter turnout") {
+        yrs_covered <- c(2010, 2012, 2014, 2016, 2018, 2020, 2022)
+        
+        if (!(TRUE %in% (yrs_covered %in% yrs))) {
+          drop_from_vector <- c(drop_from_vector, i)
+          val_dropped <- TRUE
+        }
+      } else {
+      
+      yrs_covered_char <- aggregated_vars |>
+        dplyr::filter(variable == variable_vec[i]) |>
+        dplyr::select(yrs_available) |>
+        as.character()
+      
+      if (is.na(yrs_covered_char)) {
+        
+        if (!is.null(yrs)) {
+        
+        drop_from_vector <- c(drop_from_vector, i)
+        val_dropped <- TRUE
+        }
+        
+      } else {
+        
+      if (nchar(yrs_covered_char) == 9) {
+        yrs_covered <- as.numeric(substr(yrs_covered_char, 1, 4)):as.numeric(substr(yrs_covered_char, 6, 9))
+      }
+      
+      if (nchar(yrs_covered_char) == 20) {
+        yrs_covered <- c(as.numeric(substr(yrs_covered_char, 1, 4)):as.numeric(substr(yrs_covered_char, 6, 9)), as.numeric(substr(yrs_covered_char, 12, 15)):as.numeric(substr(yrs_covered_char, 17, 20)))
+      }
+        
+        if (!(TRUE %in% (yrs_covered %in% yrs))) {
+          drop_from_vector <- c(drop_from_vector, i)
+          val_dropped <- TRUE
+        }
+        
+      }
+      }
+      if (val_dropped == FALSE) {
+        
+        geogs_covered <- aggregated_vars |>
+          dplyr::filter(variable == variable_vec[i]) |>
+          dplyr::select(geogs_available) |>
+          as.character()
+        
+        geogs_covered <- strsplit(geogs_covered, ", ")[[1]]
+        
+        if (!(geog %in% geogs_covered)) {
+          drop_from_vector <- c(drop_from_vector, i)
+        }
+      }
+      }
+      
+    if (!is.null(drop_from_vector)) {
+      variable_vec <- variable_vec[-drop_from_vector]
+    }
+  
+    if (length(variable_vec) > 0) {
+  warning(paste0("For the following variable(s), data is not available for the given year(s) and any of the given geographies: `", paste(variable_vec, collapse = "`, `"), "`. The inputs provided were valid, some datasets simply do not cover all geographic areas due to limitations in data collection and aggregation."))
+    }
+  }
 
   return(data_all)
 }

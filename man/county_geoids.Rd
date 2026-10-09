@@ -8,7 +8,7 @@ county_geoids(state = NULL, sf = FALSE, namelsad = TRUE, land_area = FALSE)
 }
 \arguments{
 \item{state}{Optionally, specify a vector of two-letter state abbreviations to filter
-to. By default, all Census-designated counties in U.S. states and territories
+to. By default, all Census-designated counties in U.S. states and D.C.
 will be returned by the function.}
 
 \item{sf}{If \code{FALSE} (default value), function returns a data frame without
@@ -29,7 +29,7 @@ areas in square miles.}
 \description{
 Using the tigris
 \link[tigris:counties]{counties()} and \link[tigris:states]{states()}
-functions, returns a dataset of counties with their
+functions, returns a dataset of counties in U.S. states and D.C. with their
 corresponding states and GEOIDs, as designated by the U.S. Census Bureau for
 the year 2023, for use in querying the \code{\link[=retrieve_aggregated]{retrieve_aggregated()}} function.
 }

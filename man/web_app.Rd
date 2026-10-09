@@ -8,8 +8,14 @@ web_app(
   project_name,
   title,
   response_questions,
-  shapefile_vars,
-  shapefile_features
+  shapefile_vars = NULL,
+  shapefile_features = NULL,
+  vars_pal = "BuPu",
+  features_pal = "RdGy",
+  community_data_color = "cadetblue",
+  select_on_click = rep(FALSE, length(response_questions)),
+  allow_multiple_responses = FALSE,
+  allow_skips = FALSE
 )
 }
 \arguments{
@@ -25,7 +31,7 @@ of data you are looking for from them. Each prompt will appear as a different
 question, with data to be included on a different sheet in the Google Sheets
 document.}
 
-\item{shapefile_vars}{Shapefile of data, specifically with numeric variables
+\item{shapefile_vars}{Shapefile of polygon data, specifically with numeric variables
 that can be color-coded, to display on map alongside a slider to select a variable
 to display. Shapefile must contain a \code{"variable"} variable (the web app will include a dropdown for
 viewers to select a variable for display, e.g. unemployment, median air quality), an
@@ -34,20 +40,48 @@ estimate associated with each value in the \code{"variable"} column), and a \cod
 the names of the geographic areas (e.g. Orange County), which will be
 displayed alongside estimates upon mouse-over of the polygons. The
 shapefile's geometry must be polygons. If the shapefile contains a \code{"year"}
-variable, the web app will include a slider for switching between different
-years of data.}
+variable (which must take more than one possible value), the web app will include a slider for switching between different
+years of data. Providing \code{shapefile_vars} is optional if a shapefile is provided
+for \code{shapefile_features}.}
 
-\item{shapefile_features}{Shapefile of points and/or polygons, without a corresponding
-numeric variable. All points and polygons in this
+\item{shapefile_features}{Shapefile containing point, linestring, and/or polygon
+geography types, without a corresponding numeric variable. All points, lines, and polygons in this
 shapefile will display simultaneously by default. Shapefile must contain
-a \code{"features"} variable (for the name of the feature category, e.g. park, school),
-a \code{"name"} variable (for the name of each individual feature, e.g. Central Park),
-and a \code{"type"} variable (delineating different feature types within each feature
-category, e.g. private school, public school). All observations corresponding
-to a given value of the \code{"features"} variable must be either points or
-polygons (i.e. no mixing of points and polygons within a feature category).
-If the shapefile contains a \code{"year"} variable, the web app will include a
-slider for switching between different years of data.}
+a \code{"features"} variable (for the name of the feature category, e.g. park, school) and
+a \code{"name"} variable (for the name of each individual feature, e.g. Central Park).
+All observations corresponding
+to a given value of the \code{"features"} variable must be either points, lines, or
+polygons (i.e. no mixing of points, lines, and/or polygons within a feature category).
+If the shapefile contains a \code{"year"} variable (which must take more than one possible value), the web app will include a
+slider for switching between different years of data. Providing \code{shapefile_features}
+is optional if a shapefile is provided for \code{shapefile_vars}.}
+
+\item{vars_pal}{Optionally, define a color palette for displaying the values
+of the \code{"estimate"} variable from \code{shapefile_vars} on the web app map. By default,
+the palette is set to \code{"BuPu"}.}
+
+\item{features_pal}{Optionally, define a color palette for displaying the values
+of the \code{"features"} variable from \code{shapefile_features} on the web app map. By default,
+the palette is set to \code{"RdGy"}.}
+
+\item{community_data_color}{Optionally, define a color for the markers and points/lines/polygons
+used to denote a feature or location at which community-provided data is present, when the
+viewer selects a question for corresponding community-provided data to be shown. The color
+must be one of those available as a value of \code{markerColor} for \code{leaflet::awesomeIcons}. By default,
+the color is set to \code{"cadetblue"}.}
+
+\item{select_on_click}{Optionally, provide a vector the same length as \code{response_questions}
+where \code{TRUE} indicates the corresponding question should be responded to through
+selecting an existing point, line, or polygon on the map, and \code{FALSE} indicates
+the corresponding question should be responded through creating a new point on the map.
+The default value is \code{FALSE} for all provided questions.}
+
+\item{allow_multiple_responses}{By default, this is set to \code{FALSE}, meaning that
+respondents can only answer each question once. Set to \code{TRUE} to allow for multiple responses
+to each question from a single person.}
+
+\item{allow_skips}{By default, this is set to \code{FALSE}. Set to \code{TRUE} to allow
+respondents to skip questions.}
 }
 \description{
 Creates web app using the \link[shiny:shiny-package]{shiny} package,

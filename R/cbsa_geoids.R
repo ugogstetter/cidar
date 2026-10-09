@@ -4,7 +4,7 @@ globalVariables(c("NAMELSAD", "ALAND"))
 #' @description Using the tigris
 #' [core_based_statistical_areas()][tigris::core_based_statistical_areas]
 #' function, returns a dataset of CBSAs (Core Based Statistical
-#' Areas) with their corresponding GEOIDs, as designated by the U.S.
+#' Areas) located within the 50 U.S. states and D.C., with their corresponding GEOIDs, as designated by the U.S.
 #' Census Bureau for the year 2023, for use in querying the [retrieve_aggregated()]
 #' function.
 #' @param sf If `FALSE` (default value), function returns a data frame without
@@ -22,6 +22,7 @@ globalVariables(c("NAMELSAD", "ALAND"))
 #' @export
 
 cbsa_geoids <- function(sf = FALSE, namelsad = TRUE, land_area = FALSE) {
+  
   if (is.null(sf)) {
     print("`sf` cannot be `NULL`.")
   }
@@ -94,6 +95,10 @@ cbsa_geoids <- function(sf = FALSE, namelsad = TRUE, land_area = FALSE) {
   if (sf == TRUE) {
     geog_cbsa <- sf::st_transform(geog_cbsa, crs = 4326)
   }
+  
+  # filtering out CBSAs located in U.S. territories
+  geog_cbsa <- geog_cbsa |>
+    dplyr::filter(!(substr(name, nchar(name) - 12, nchar(name) - 11) %in% c("AS", "GU", "MP", "PR", "VI")))
 
   return(geog_cbsa)
 }

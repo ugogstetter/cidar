@@ -117,8 +117,60 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
 
       if (!(is.null(geoselect))) {
         # creating vector of state abbreviations just for requested counties so tigris call will run faster
-        county_states <- as.vector(substr(geoselect, 1, 2))
-
+        county_states <- unique(as.vector(substr(geoselect, 1, 2)))
+        
+        county_states <- dplyr::case_when(county_states == "01" ~ "AL",
+                                          county_states == "02" ~ "AK",
+                                          county_states == "04" ~ "AZ",
+                                          county_states == "05" ~ "AR",
+                                          county_states == "06" ~ "CA",
+                                          county_states == "08" ~ "CO",
+                                          county_states == "09" ~ "CT",
+                                          county_states == "10" ~ "DE",
+                                          county_states == "11" ~ "DC",
+                                          county_states == "12" ~ "FL",
+                                          county_states == "13" ~ "GA",
+                                          county_states == "15" ~ "HI",
+                                          county_states == "16" ~ "ID",
+                                          county_states == "17" ~ "IL",
+                                          county_states == "18" ~ "IN",
+                                          county_states == "19" ~ "IA",
+                                          county_states == "20" ~ "KS",
+                                          county_states == "21" ~ "KY",
+                                          county_states == "22" ~ "LA",
+                                          county_states == "23" ~ "ME",
+                                          county_states == "24" ~ "MD",
+                                          county_states == "25" ~ "MA",
+                                          county_states == "26" ~ "MI",
+                                          county_states == "27" ~ "MN",
+                                          county_states == "28" ~ "MS",
+                                          county_states == "29" ~ "MO",
+                                          county_states == "30" ~ "MT",
+                                          county_states == "31" ~ "NE",
+                                          county_states == "32" ~ "NV",
+                                          county_states == "33" ~ "NH",
+                                          county_states == "34" ~ "NJ",
+                                          county_states == "35" ~ "NM",
+                                          county_states == "36" ~ "NY",
+                                          county_states == "37" ~ "NC",
+                                          county_states == "38" ~ "ND",
+                                          county_states == "39" ~ "OH",
+                                          county_states == "40" ~ "OK",
+                                          county_states == "41" ~ "OR",
+                                          county_states == "42" ~ "PA",
+                                          county_states == "44" ~ "RI",
+                                          county_states == "45" ~ "SC",
+                                          county_states == "46" ~ "SD",
+                                          county_states == "47" ~ "TN",
+                                          county_states == "48" ~ "TX",
+                                          county_states == "49" ~ "UT",
+                                          county_states == "50" ~ "VT",
+                                          county_states == "51" ~ "VA",
+                                          county_states == "53" ~ "WA",
+                                          county_states == "54" ~ "WV",
+                                          county_states == "55" ~ "WI",
+                                          county_states == "56" ~ "WY")
+         
         geog_county <- county_geoids(state = county_states, sf = TRUE, land_area = TRUE) |>
           dplyr::filter(GEOID %in% geoselect)
       }
@@ -130,12 +182,14 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
       sf_1_intersect <- suppressWarnings(sf::st_intersection(sf_1, geog_county))
 
       sf_1 <- sf_1 |>
+        dplyr::mutate(row_name = as.numeric(row.names(sf_1))) |>
         dplyr::filter(row.names(sf_1) %in% rownames(sf_1_intersect))
 
-      # must order the rows properly for cbind to work correctly
-      sf_1_intersect <- sf_1_intersect[order(as.numeric(row.names(sf_1_intersect))), ]
+      sf_1_intersect <- sf_1_intersect |>
+        dplyr::mutate(row_name = trunc(as.numeric(rownames(sf_1_intersect))))
 
-      sf_1 <- cbind(sf_1, GEOID = sf_1_intersect$GEOID, land_sq_mi = sf_1_intersect$land_sq_mi)
+      sf_1 <- dplyr::right_join(sf_1, as.data.frame(sf_1_intersect)[c("GEOID", "land_sq_mi", "row_name")], by = dplyr::join_by(row_name)) |>
+        dplyr::select(!row_name)
     }
 
     if (geog == "cbsa") {
@@ -155,12 +209,14 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
       sf_1_intersect <- suppressWarnings(sf::st_intersection(sf_1, geog_cbsa))
 
       sf_1 <- sf_1 |>
+        dplyr::mutate(row_name = as.numeric(row.names(sf_1))) |>
         dplyr::filter(row.names(sf_1) %in% rownames(sf_1_intersect))
-
-      # must order the rows properly for cbind to work correctly
-      sf_1_intersect <- sf_1_intersect[order(as.numeric(row.names(sf_1_intersect))), ]
-
-      sf_1 <- cbind(sf_1, GEOID = sf_1_intersect$GEOID, land_sq_mi = sf_1_intersect$land_sq_mi)
+      
+      sf_1_intersect <- sf_1_intersect |>
+        dplyr::mutate(row_name = trunc(as.numeric(rownames(sf_1_intersect))))
+      
+      sf_1 <- dplyr::right_join(sf_1, as.data.frame(sf_1_intersect)[c("GEOID", "land_sq_mi", "row_name")], by = dplyr::join_by(row_name)) |>
+        dplyr::select(!row_name)
     }
 
     if (geog == "place") {
@@ -188,12 +244,14 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
       sf_1_intersect <- suppressWarnings(sf::st_intersection(sf_1, geog_place))
 
       sf_1 <- sf_1 |>
+        dplyr::mutate(row_name = as.numeric(row.names(sf_1))) |>
         dplyr::filter(row.names(sf_1) %in% rownames(sf_1_intersect))
-
-      # must order the rows properly for cbind to work correctly
-      sf_1_intersect <- sf_1_intersect[order(as.numeric(row.names(sf_1_intersect))), ]
-
-      sf_1 <- cbind(sf_1, GEOID = sf_1_intersect$GEOID, land_sq_mi = sf_1_intersect$land_sq_mi)
+      
+      sf_1_intersect <- sf_1_intersect |>
+        dplyr::mutate(row_name = trunc(as.numeric(rownames(sf_1_intersect))))
+      
+      sf_1 <- dplyr::right_join(sf_1, as.data.frame(sf_1_intersect)[c("GEOID", "land_sq_mi", "row_name")], by = dplyr::join_by(row_name)) |>
+        dplyr::select(!row_name)
     }
   }
 
@@ -1122,24 +1180,16 @@ retrieve_point_polygon <- function(features, yrs = 1999:2024, geog = NULL, geose
   }
 
   if (!is.null(yrs)) {
-    if (!is.numeric(yrs)) {
-      tryCatch(
-        {
-          yrs <- as.numeric(yrs)
-        },
-        error = function(e) {
-          stop("Must enter `yrs` value that can be coerced to numeric.")
-        }
-      )
+    
+    yrs <- suppressWarnings(as.numeric(yrs))
+    
+    if (NA %in% yrs) {
+      stop("Must enter `yrs` value that can be coerced to numeric.")
     }
 
     if (FALSE %in% (yrs %% 1 == 0)) {
       stop("All numeric values in `yrs` must be whole numbers.")
     }
-  }
-
-  if (is.null(dataset_info)) {
-    print("`dataset_info` cannot be `NULL`.")
   }
 
   if (length(dataset_info) != 1) {
@@ -1168,14 +1218,8 @@ retrieve_point_polygon <- function(features, yrs = 1999:2024, geog = NULL, geose
   }
 
   if (!is.null(geoselect)) {
-    tryCatch(
-      {
-        geoselect <- as.character(geoselect)
-      },
-      error = function(e) {
-        stop("Must enter `geoselect` value that can be coerced to character.")
-      }
-    )
+    
+    geoselect <- as.character(geoselect)
 
     if (geog == "county") {
       geoselect_test <- geoselect %in% county_geoids()$GEOID
@@ -1358,7 +1402,11 @@ retrieve_point_polygon.list <- function(features, yrs = 1999:2024, geog = NULL, 
   if (("parks" %in% features | "transit stops" %in% features) & is.null(yrs) & (geog != "zip code")) {
     sf_1 <- retrieve_sf_1(features, yrs, geog, geoselect, state = NULL, types) |>
       # filtering out the GEOID and land area columns that were added for use with retrieve_aggregated
-      dplyr::select(!c(GEOID, land_sq_mi))
+      dplyr::select(!c(GEOID, land_sq_mi)) |>
+      # removing duplicate rows, which can occur if parks extend across multiple geographic areas, and are useful for using the function with retrieve_aggregated, but not useful with retrieve_point_polygon
+      dplyr::group_by_all() |>
+      dplyr::slice_head(n = 1) |>
+      dplyr::ungroup()
 
     if (nrow(sf_1) == 0) {
       if ("parks" %in% features) {
