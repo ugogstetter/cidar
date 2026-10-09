@@ -22,7 +22,7 @@ google_sheets_auth <- function(email) {
   google_sheet_key <- gargle::secret_make_key()
   
   for (i in 1:length(oldenv)) {
-    if (substr(oldenv[i], 1, 17) == "google_sheet_key") {
+    if (substr(oldenv[i], 1, 16) == "google_sheet_key") {
       oldenv[i] <- paste0("google_sheet_key=\"", google_sheet_key, "\"")
       write(oldenv, renv, sep = "\n", append = FALSE)
       replaced <- TRUE
