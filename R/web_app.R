@@ -85,7 +85,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
   vars_palette_defined <- vars_pal
   features_palette_defined <- features_pal
   
-  googlesheets4::gs4_auth(token = gargle::secret_read_rds(".secrets/gs4-token.rds", key = "google_sheets_key"))
+  googlesheets4::gs4_auth(token = gargle::secret_read_rds(".secrets/gs4-token.rds", key = "google_sheet_key"))
 
   num_questions <- length(response_questions)
 

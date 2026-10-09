@@ -19,17 +19,17 @@ google_sheets_auth <- function(email) {
   replaced <- FALSE
   
   # creating encryption key
-  google_sheets_key <- gargle::secret_make_key()
+  google_sheet_key <- gargle::secret_make_key()
   
   for (i in 1:length(oldenv)) {
-    if (substr(oldenv[i], 1, 17) == "google_sheets_key") {
-      oldenv[i] <- paste0("google_sheets_key=\"", google_sheets_key, "\"")
+    if (substr(oldenv[i], 1, 17) == "google_sheet_key") {
+      oldenv[i] <- paste0("google_sheet_key=\"", google_sheet_key, "\"")
       write(oldenv, renv, sep = "\n", append = FALSE)
       replaced <- TRUE
     }
   }
   if (replaced == FALSE) {
-    write(paste0("google_sheets_key=\"", google_sheets_key, "\""), renv, sep = "\n", append = TRUE)
+    write(paste0("google_sheet_key=\"", google_sheet_key, "\""), renv, sep = "\n", append = TRUE)
   }
   
   secrets <- file.path(Sys.getenv("HOME"), ".secrets")
@@ -40,5 +40,5 @@ google_sheets_auth <- function(email) {
   
   googlesheets4::gs4_auth(email = email, cache = FALSE)
   
-  gargle::secret_write_rds(googlesheets4::gs4_token(), ".secrets/gs4-token.rds", key = "google_sheets_key")
+  gargle::secret_write_rds(googlesheets4::gs4_token(), ".secrets/gs4-token.rds", key = "google_sheet_key")
 }
