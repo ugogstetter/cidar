@@ -19,7 +19,7 @@ google_sheets_auth <- function(email) {
   replaced <- FALSE
   
   # creating encryption key
-  google_sheet_key <- paste0("aa", gargle::secret_make_key())
+  google_sheet_key <- gargle::secret_make_key()
   
   for (i in 1:length(oldenv)) {
     if (substr(oldenv[i], 1, 16) == "google_sheet_key") {
