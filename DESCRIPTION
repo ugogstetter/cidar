@@ -21,7 +21,8 @@ Imports:
     tigris,
     arcgislayers,
     leaflet.extras2,
-    htmltools
+    htmltools,
+    gargle
 Suggests: 
     knitr,
     rmarkdown,
