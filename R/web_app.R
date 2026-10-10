@@ -517,7 +517,48 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
         }
       },
       priority = 1
-    ) |> shiny::bindEvent(input$submit_button, input$respond_again, ignoreNULL = TRUE)
+    ) |> shiny::bindEvent(input$submit_button, ignoreNULL = TRUE)
+    
+    shiny::observe(
+      {
+        if (question_counter() > 0) {
+          map_click_true <- FALSE
+          
+          if (select_on_click[question_counter()] == FALSE) {
+            
+            data_collected <- data.frame(input$map_click$lat, input$map_click$lng, input$comment, Sys.time())
+            googlesheets4::sheet_append(ss = sheet_id, data = data_collected, sheet = paste0("q", as.character(question_counter())))
+          }
+          
+          if (select_on_click[question_counter()] == TRUE) {
+            
+            if (!is.null(shapefile_vars)) {
+              if (input$map_shape_click$id %in% filtered_vars()$id) {
+                sheet_name <- filtered_vars()$name[filtered_vars()$id == input$map_shape_click$id]
+              }
+            }
+            
+            if (!is.null(shapefile_features)) {
+              if (input$map_shape_click$id %in% filtered_features()$id) {
+                sheet_name <- filtered_features()$name[filtered_features()$id == input$map_shape_click$id]
+              }
+            }
+            
+            data_collected <- data.frame(input$map_shape_click$id, sheet_name, input$comment, Sys.time())
+            googlesheets4::sheet_append(ss = sheet_id, data = data_collected, sheet = paste0("q", as.character(question_counter())))
+          }
+          
+          leaflet::leafletProxy("map") |>
+            leaflet::clearGroup(group = "point selection")
+        }
+        
+        if (input$submit_button > 0 & question_counter() <= num_questions) {
+          leaflet::leafletProxy("map") |>
+            leaflet::addProviderTiles("Stadia.StamenTonerLite", layerId = "map_click", group = "point selection")
+        }
+      },
+      priority = 1
+    ) |> shiny::bindEvent(input$respond_again, ignoreNULL = TRUE)
 
     shiny::observe({
       if (input$points_input != "none") {
