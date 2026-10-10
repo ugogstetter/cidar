@@ -642,6 +642,9 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
                         line_polygon_features$geometry[[i]] <- sf::st_point_on_surface(line_polygon_features$geometry[[i]])
                       }
                       
+                      # reclassing geometry column so leaflet doesn't get confused
+                      class(line_polygon_features$geometry) <- c("sfc_POINT", "sfc")
+                      
                       leaflet::leafletProxy("map", data = line_polygon_features) |>
                         leaflet::addAwesomeMarkers(group = "collected points", label = ~lapply(comment, htmltools::HTML), icon = leaflet::awesomeIcons(icon = "map-marker", markerColor = community_data_color, iconColor = "black"))
                     }
