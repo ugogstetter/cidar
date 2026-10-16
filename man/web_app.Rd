@@ -15,7 +15,8 @@ web_app(
   community_data_color = "cadetblue",
   select_on_click = rep(FALSE, length(response_questions)),
   allow_multiple_responses = FALSE,
-  allow_skips = FALSE
+  allow_skips = FALSE,
+  creator_info = NULL
 )
 }
 \arguments{
@@ -82,6 +83,9 @@ to each question from a single person.}
 
 \item{allow_skips}{By default, this is set to \code{FALSE}. Set to \code{TRUE} to allow
 respondents to skip questions.}
+
+\item{creator_info}{Optionally, provide a description of yourself/your organization
+or department/your contact info to display on the web app.}
 }
 \description{
 Creates web app using the \link[shiny:shiny-package]{shiny} package,

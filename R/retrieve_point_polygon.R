@@ -35,20 +35,14 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
   }
 
   if ("transit stops" %in% features) {
-    transit_stops <- arcgislayers::arc_select(arcgislayers::arc_open("https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0"), fields = c("stop_name", "stop_type_text"), where = if (!(is.null(types$`transit stops`))) {
-      # filtering out observations where the value is equal to types not selected or is empty. looks like with the where clause limitations that I can't filter out multi-transit stops not including the user-provided types, so I do that later in my code
-      filter_out <- c("bus", "tram, streetcar, light rail", "rail", "ferry", "subway, metro", "trolleybus", "funicular", "aerial lift, suspended cable car", "cable tram", "monorail")
-      filter_out <- filter_out[!(filter_out %in% types$`transit stops`)]
-      for (i in 1:length(filter_out)) {
-        filter_out[i] <- paste0("\"", filter_out[i], "\"")
-      }
-      paste0("LOWER(stop_type_text) NOT IN ('", paste(filter_out, collapse = "', '"), "', '')")
-    } else {
-      # filtering out observations where the value is empty
-      paste0("stop_type_text NOT IN ('')")
-    }) |>
+    transit_stops <- arcgislayers::arc_select(arcgislayers::arc_open("https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0"), fields = c("stop_name", "stop_type_text")) |>
       dplyr::rename(name = stop_name, type = stop_type_text) |>
-      dplyr::mutate(type = tolower(gsub("\"", "", gsub(";", "; ", type))), features = "transit stops", year = NA, address = NA, name = ifelse(name == "-", NA, name))
+      dplyr::mutate(type = dplyr::case_when(type == "" ~ "unknown",
+                                            .default = tolower(gsub("\"", "", gsub(";", "; ", type)))),
+                    features = "transit stops",
+                    year = NA,
+                    address = NA,
+                    name = ifelse(name == "-", NA, name))
 
     if (!is.null(types$`transit stops`)) {
       transit_stops_1 <- sf::st_sf(features = character(), year = numeric(), name = character(), type = character(), address = character(), geometry = list(), crs = 4326)
@@ -1397,9 +1391,18 @@ retrieve_point_polygon.list <- function(features, yrs = 1999:2024, geog = NULL, 
       }
     }
   }
+  
+  if (is.null(geog)) {no_zip_code <- TRUE}
+  
+  if (!is.null(geog)) {
+    no_zip_code <- FALSE
+    if (geog != "zip code") {
+      no_zip_code <- TRUE
+    }
+  }
 
 
-  if (("parks" %in% features | "transit stops" %in% features) & is.null(yrs) & (geog != "zip code")) {
+  if (("parks" %in% features | "transit stops" %in% features) & is.null(yrs) & (no_zip_code == TRUE)) {
     sf_1 <- retrieve_sf_1(features, yrs, geog, geoselect, state = NULL, types) |>
       # filtering out the GEOID and land area columns that were added for use with retrieve_aggregated
       dplyr::select(!c(GEOID, land_sq_mi)) |>

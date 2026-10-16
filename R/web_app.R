@@ -60,9 +60,11 @@
 #' to each question from a single person.
 #' @param allow_skips By default, this is set to `FALSE`. Set to `TRUE` to allow 
 #' respondents to skip questions.
+#' @param creator_info Optionally, provide a description of yourself/your organization 
+#' or department/your contact info to display on the web app.
 #' @export
 
-web_app <- function(project_name, title, response_questions, shapefile_vars = NULL, shapefile_features = NULL, vars_pal = "BuPu", features_pal = "RdGy", community_data_color = "cadetblue", select_on_click = rep(FALSE, length(response_questions)), allow_multiple_responses = FALSE, allow_skips = FALSE) {
+web_app <- function(project_name, title, response_questions, shapefile_vars = NULL, shapefile_features = NULL, vars_pal = "BuPu", features_pal = "RdGy", community_data_color = "cadetblue", select_on_click = rep(FALSE, length(response_questions)), allow_multiple_responses = FALSE, allow_skips = FALSE, creator_info = NULL) {
   
   # if any select_on_click values are `TRUE`, creating unique IDs for each row of each provided dataset so that it can be used to identify selected features
   if (TRUE %in% select_on_click) {
@@ -198,6 +200,19 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
             shiny::conditionalPanel(condition = "((input.submit_button > 0) && (output.submit_text != 'Submit final response')", shiny::actionButton("skip", "Skip this question"))
           )
         )
+      ),
+      shiny::wellPanel(
+        style = "border-width: 2px; border-color: black; background-color: white",
+        shiny::p(""),
+        "This Shiny app was created using the R package",
+        tags$em("cidar"),
+        "'s web_app function. ",
+        tags$em("cidar"),
+        "is developed and maintained by Úna Gogstetter (Smith College '27J, B.A. Statistical and Data Sciences) and can be accessed on GitHub",
+        tags$a(href = "https://github.com/ugogstetter/cidar", 
+               "here."),
+        shiny::p(""),
+        creator_info
       )
     )
   }
@@ -225,7 +240,20 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
             shiny::conditionalPanel(condition = "(input.submit_button > 0) && (output.submit_text != 'Submit final response')", shiny::actionButton("skip", "Skip this question"))
           )
         )
-      )
+      ),
+      shiny::wellPanel(
+        style = "border-width: 2px; border-color: black; background-color: white",
+        shiny::p(""),
+        "This Shiny app was created using the R package",
+        tags$em("cidar"),
+        "'s web_app function. ",
+        tags$em("cidar"),
+        "is developed and maintained by Úna Gogstetter (Smith College '27J, B.A. Statistical and Data Sciences) and can be accessed on GitHub",
+        tags$a(href = "https://github.com/ugogstetter/cidar", 
+               "here."),
+        shiny::p(""),
+        shiny::p(creator_info)
+    )
     )
   }
   
@@ -252,6 +280,19 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
             shiny::conditionalPanel(condition = "((input.submit_button > 0) && (output.submit_text != 'Submit final response')", shiny::actionButton("skip", "Skip this question"))
           )
         )
+      ),
+      shiny::wellPanel(
+        style = "border-width: 2px; border-color: black; background-color: white",
+        shiny::p(""),
+        "This Shiny app was created using the R package",
+        tags$em("cidar"),
+        "'s web_app function. ",
+        tags$em("cidar"),
+        "is developed and maintained by Úna Gogstetter (Smith College '27J, B.A. Statistical and Data Sciences) and can be accessed on GitHub",
+        tags$a(href = "https://github.com/ugogstetter/cidar", 
+               "here."),
+        shiny::p(""),
+        shiny::p(creator_info)
       )
     )
   }
