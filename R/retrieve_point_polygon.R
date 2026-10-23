@@ -29,13 +29,17 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
       dplyr::mutate(type = tolower(type), features = "parks", year = NA, address = NA, name = ifelse(name == " ", NA, name))
 
 
-    sf_1 <- rbind(sf_1, parks) |>
-      # creating a placeholder GEOID column and land area column for if geog is NULL or state
-      dplyr::mutate(GEOID = NA, land_sq_mi = NA)
+    sf_1 <- rbind(sf_1, parks)
   }
 
   if ("transit stops" %in% features) {
-    transit_stops <- arcgislayers::arc_select(arcgislayers::arc_open("https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0"), fields = c("stop_name", "stop_type_text")) |>
+    # I must retrieve the 2 variables separately or the code doesn't work because of a bug in the arcgislayers package
+    transit_stops <- arcgislayers::arc_select(arcgislayers::arc_open("https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0"), fields = c("stop_name"))
+    transit_stops_2 <- as.data.frame(arcgislayers::arc_select(arcgislayers::arc_open("https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0"), fields = c("stop_type_text")))[c("stop_type_text")]
+    
+    transit_stops <- cbind(transit_stops, transit_stops_2)
+    
+    transit_stops <- transit_stops |>
       dplyr::rename(name = stop_name, type = stop_type_text) |>
       dplyr::mutate(type = dplyr::case_when(type == "" ~ "unknown",
                                             .default = tolower(gsub("\"", "", gsub(";", "; ", type)))),
@@ -72,10 +76,12 @@ retrieve_sf_1 <- function(features, yrs, geog, geoselect, state, types) {
       row.names(transit_stops) <- 1:nrow(transit_stops)
     }
 
-    sf_1 <- rbind(sf_1, transit_stops) |>
-      # creating a placeholder GEOID column and land area column for if geog is NULL or state
-      dplyr::mutate(GEOID = NA, land_sq_mi = NA)
+    sf_1 <- rbind(sf_1, transit_stops)
   }
+  
+  sf_1 <- sf_1 |>
+    # creating a placeholder GEOID column and land area column for if geog is NULL or state
+    dplyr::mutate(GEOID = NA, land_sq_mi = NA)
 
   if (!is.null(state)) {
     geog_state <- tigris::states(year = 2023) |>

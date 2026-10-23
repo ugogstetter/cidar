@@ -159,22 +159,33 @@ Before using `cidar`'s `web_app` function, we must authenticate with `cidar`'s `
 Finally, we will run the `web_app` function, which allows the two shapefile datasets we have just created to be displayed on a web app map. Inside the function parentheses, we will supply six questions for the web app to display to viewers; viewers would click through these questions, each prompting them to select a particular location on the map and submit a corresponding comment. They and other web app viewers would then be able to see those viewer-provided points and comments by selecting the corresponding question in the `Community data to display` dropdown on the web app.
 
 ```{r}
-# # code is commented out because it will only run after `google_sheets_auth` is run successfully, as outlined in the previous code chunk
+# # code is commented out because it will only run after `google_sheets_auth` is run #successfully, as outlined in the previous code chunk
 # web_app(
-#   # because this project name is being used for the first time, a new Google Sheet will be created. afterwards, the same Google Sheet will be accessed and modified anytime web_app is called with this project name ("land use boston")
+#   # because this project name is being used for the first time, a new Google Sheet will #be created. afterwards, the same Google Sheet will be accessed and modified anytime #web_app is called with this project name ("land use boston")
 #   project_name = "land use boston",
 #   # providing title to display on web app
 #   title = "Land Use in Boston, MA",
 #   # providing questions for viewers to click through and respond to in web app
 #   response_questions = c(
-#     "When the 'libraries' box is checked in 'Features to display', you'll see libraries displayed as points on the map. On the map, please select either a library near where you live, or a location near where you live which you think should house a library. Enter a comment below describing how access to a nearby library has impacted, or could impact, your everyday life.",
-#     "When the 'parks' box is checked in 'Features to display', you'll see parks displayed as polygons on the map. Parks are one feature that can support residents' health and well-being. On the map, please select a location near where you live that you see as especially vital to residents' health and well-being (this could be a park or something else), and enter a comment below describing how this location benefits residents.",
-#     "When the 'transit stops' box is checked in 'Features to display', you'll see transit stops displayed as points on the map. On the map, please select a location near where you live which you think would be a good location for a new transit stop, and explain why in the comment box below.",
-#     "If you select 'commercial' from the 'Data variable to display' dropdown, you'll see the Boston zip codes color-coded by percentage of commercial properties. On the map, please select a location near where you live which you see as a good spot for a new business, and enter a comment below describing the type of business you'd like to see.",
-#     "If you select 'industrial' from the 'Data variable to display' dropdown, you'll see the Boston zip codes color-coded by percentage of industrial properties. Industrial uses, such as manufacturing, can pose health risks. On the map, please select a location near where you live that you see as posing potential health risks to nearby residents, and enter a comment below describing the health risks you percieve.",
-#     "The 'Data variable to display' dropdown allows you to display the Boston zip codes color-coded by percentages of various property types where people might live (single-family, two-family, three-family, condominium, apartments, mixed-use, other residential). On the map, please select a location near where you live which houses residents in a way unconventional to the surrounding area (e.g. two-family home in a largely single-family area, single-family home surrounded by apartments). Enter a comment below describing your reaction to this (e.g. does it provide needed housing? disrupt the neighborhood flow?)."
+#     "When the 'libraries' box is checked in 'Features to display', you'll see libraries #displayed as points on the map. On the map, please select either a library near where you #live, or a location near where you live which you think should house a library. Enter a #comment below describing how access to a nearby library has impacted, or could impact, #your everyday life.",
+#     "When the 'parks' box is checked in 'Features to display', you'll see parks #displayed as polygons on the map. Parks are one feature that can support residents' #health and well-being. On the map, please select a location near where you live that you #see as especially vital to residents' health and well-being (this could be a park or #something else), and enter a comment below describing how this location benefits #residents.",
+#     "When the 'transit stops' box is checked in 'Features to display', you'll see #transit stops displayed as points on the map. On the map, please select a location near #where you live which you think would be a good location for a new transit stop, and #explain why in the comment box below.",
+#     "If you select 'commercial' from the 'Data variable to display' dropdown, you'll see #the Boston zip codes color-coded by percentage of commercial properties. On the map, #please select a location near where you live which you see as a good spot for a new #business, and enter a comment below describing the type of business you'd like to see.",
+#     "If you select 'industrial' from the 'Data variable to display' dropdown, you'll see #the Boston zip codes color-coded by percentage of industrial properties. Industrial uses, #such as manufacturing, can pose health risks. On the map, please select a location near #where you live that you see as posing potential health risks to nearby residents, and #enter a comment below describing the health risks you percieve.",
+#     "The 'Data variable to display' dropdown allows you to display the Boston zip codes #color-coded by percentages of various property types where people might live #(single-family, two-family, three-family, condominium, apartments, mixed-use, other #residential). On the map, please select a property near where you live which houses #residents in a way unconventional to the surrounding area (e.g. two-family home in a #largely single-family area, single-family home surrounded by apartments). Enter a comment #below describing your reaction to this (e.g. does it provide needed housing? disrupt the #neighborhood flow?)."
 #  ),
 #  # providing the shapefiles we produced earlier
 #  shapefile_vars = properties_sf,
-#  shapefile_features = boston_features)
+#  shapefile_features = boston_features,
+#  # setting color palette for displaying features
+#  features_pal = c("#800026", "#31a354", "#feb24c"),
+#  # setting response options so that the first five questions must be answered through #selecting any point on the map, whereas the sixth question must be answered through #selecting a specific feature on the map
+#  select_on_click = c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE),
+#  # allowing multiple responses for each question
+#  allow_multiple_responses = TRUE,
+#  # allowing respondents to skip questions
+#  allow_skips = TRUE,
+#  # providing more information about the web app to display at the bottom of the web app
+#  creator_info = "This web app comes from `cidar`'s vignette 'Creating a Web App About #Boston Land Use with `cidar`'."
+# )
 ```
