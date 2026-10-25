@@ -62,9 +62,16 @@
 #' respondents to skip questions.
 #' @param creator_info Optionally, provide a description of yourself/your organization 
 #' or department/your contact info to display on the web app.
+#' @param sheet_id If you are running the web app locally, this parameter is optional, 
+#' as the function will reliably create a new Google Sheet if you need one, or find a Google Sheet 
+#' ID in your R environment if a sheet has already been created for this `project_name`. 
+#' However, if you are running the web app on a server such as Posit Connect Cloud, 
+#' supplying a `sheet_id` is required since the server may not reliably fetch IDs 
+#' from the environment for sheets already created. To obtain the sheet ID corresponding
+#'  to your supplied `project_name`, run `get_sheet_id()`.
 #' @export
 
-web_app <- function(project_name, title, response_questions, shapefile_vars = NULL, shapefile_features = NULL, vars_pal = "BuPu", features_pal = "RdGy", community_data_color = "cadetblue", select_on_click = rep(FALSE, length(response_questions)), allow_multiple_responses = FALSE, allow_skips = FALSE, creator_info = NULL) {
+web_app <- function(project_name, title, response_questions, shapefile_vars = NULL, shapefile_features = NULL, vars_pal = "BuPu", features_pal = "RdGy", community_data_color = "cadetblue", select_on_click = rep(FALSE, length(response_questions)), allow_multiple_responses = FALSE, allow_skips = FALSE, creator_info = NULL, sheet_id = NULL) {
   
   # if any select_on_click values are `TRUE`, creating unique IDs for each row of each provided dataset so that it can be used to identify selected features
   if (TRUE %in% select_on_click) {
@@ -90,6 +97,8 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
   googlesheets4::gs4_auth(token = gargle::secret_read_rds(".secrets/gs4-token.rds", key = "google_sheet_key"))
 
   num_questions <- length(response_questions)
+  
+  if (is.null(sheet_id)) {
 
   renv <- file.path(Sys.getenv("HOME"), ".Renviron")
   if (!file.exists(renv)) {
@@ -121,6 +130,7 @@ web_app <- function(project_name, title, response_questions, shapefile_vars = NU
       }
     }
     write(paste0(project_name, "=\"", sheet_id, "\""), renv, sep = "\n", append = TRUE)
+  }
   }
 
 
